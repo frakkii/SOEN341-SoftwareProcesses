@@ -19,7 +19,7 @@ can post and manage job listings.
 | Name | Student ID | GitHub Username |
 |------|-----------|-----------------|
 | Maria-Francesca Staicu | 40324837 | @frakkii |
-| Audrey Prevost | [ID] | [@username] |
+| Audrey Prevost | 40027535 | @MothMother |
 | Donald Champ | 40270957 | @dchamp214 |
 | Shanza Riasat | [ID] | [@username] |
 | Mario Habib | [ID] | [@username] |
