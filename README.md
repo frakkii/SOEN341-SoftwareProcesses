@@ -21,7 +21,7 @@ can post and manage job listings.
 | Maria-Francesca Staicu | 40324837 | @frakkii |
 | Audrey Prevost | 40027535 | @MothMother |
 | Donald Champ | 40270957 | @dchamp214 |
-| Shanza Riasat | [ID] | [@username] |
+| Shanza Riasat | [ID] | Shanza678 |
 | Mario Habib | [ID] | [@username] |
 |  Hinu ... |   [ID]   |   [@username]   | 
 | Dani Tannir  |   [ID]   |   [@username]   |
