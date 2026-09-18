@@ -20,7 +20,7 @@ can post and manage job listings.
 |------|-----------|-----------------|
 | Maria-Francesca Staicu | 40324837 | @frakkii |
 | Audrey Prevost | [ID] | [@username] |
-| Donald Champ | [ID] | [@username] |
+| Donald Champ | 40270957 | @dchamp214 |
 | Shanza Riasat | [ID] | [@username] |
 | Mario Habib | [ID] | [@username] |
 |  Hinu ... |   [ID]   |   [@username]   | 
