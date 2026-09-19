@@ -22,7 +22,7 @@ can post and manage job listings.
 | Audrey Prevost | 40027535 | @MothMother |
 | Donald Champ | 40270957 | @dchamp214 |
 | Shanza Riasat | 40337845 | @Shanza687 |
-| Mario Habib | [ID] | [@username] |
+| Mario Habib | 40283335 | @MarioHabib33 |
 |  Hinu ... |   [ID]   |   [@username]   | 
 | Dani Tannir  |  40298707  |  @datannir-bit  |
 
