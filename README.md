@@ -24,7 +24,7 @@ can post and manage job listings.
 | Shanza Riasat | 40337845 | @Shanza687 |
 | Mario Habib | [ID] | [@username] |
 |  Hinu ... |   [ID]   |   [@username]   | 
-| Dani Tannir  |   [ID]   |   [@username]   |
+| Dani Tannir  |  40298707  |  @datannir-bit  |
 
 ## Technologies Used
 - Frontend: tbd
