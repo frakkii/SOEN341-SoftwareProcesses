@@ -23,7 +23,7 @@ can post and manage job listings.
 | Donald Champ | 40270957 | @dchamp214 |
 | Shanza Riasat | 40337845 | @Shanza687 |
 | Mario Habib | 40283335 | @MarioHabib33 |
-|  Hinu ... |   [ID]   |   [@username]   | 
+|  Hirushi Rathnayaka | 40237379 | @hirurathnayaka77 | 
 | Dani Tannir  |  40298707  |  @datannir-bit  |
 
 ## Technologies Used
