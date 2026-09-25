@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final Set<String> ALLOWED_ROLES = Set.of("Job Seeker", "Recruiter");
 
     private final Map<String, User> users = new HashMap<>();
     private final PasswordEncoder passwordEncoder;
@@ -31,6 +34,14 @@ public class AuthController {
             );
         }
 
+        String role = user.getRole() == null ? "Job Seeker" : user.getRole();
+
+        if (!ALLOWED_ROLES.contains(role)) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", "Role must be Job Seeker or Recruiter")
+            );
+        }
+
         String email = user.getEmail().toLowerCase().trim();
 
         if (users.containsKey(email)) {
@@ -45,7 +56,8 @@ public class AuthController {
         User storedUser = new User(
                 user.getName(),
                 email,
-                hashedPassword
+                hashedPassword,
+                role
         );
 
         users.put(email, storedUser);
@@ -95,7 +107,8 @@ public class AuthController {
                 Map.of(
                         "message", "Login successful",
                         "name", existingUser.getName(),
-                        "email", existingUser.getEmail()
+                        "email", existingUser.getEmail(),
+                        "role", existingUser.getRole()
                 )
         );
     }
