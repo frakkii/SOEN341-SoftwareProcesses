@@ -37,10 +37,10 @@ can post and manage job listings.
 ## Setup Instructions
 ```bash
 git clone git@github.com:frakkii/SOEN341-SoftwareProcesses.git
-cd SOEN341-SoftwareProcesses/src/backend
-./mvnw spring-boot:run        # Windows PowerShell: .\mvnw.cmd spring-boot:run
+cd SOEN341-SoftwareProcesses
+./run.sh        # Windows PowerShell: .\run   (cmd: run)
 ```
-Then open http://localhost:8081. The Spring Boot app serves both the frontend and the API (`/api/...`). Frontend files live in `src/webapp/` and are copied into the app's static resources at build time, so restart the app after editing them.
+The launcher starts the app from `src/backend` for you (same as running `./mvnw spring-boot:run` there). Stop it with Ctrl+C. Then open http://localhost:8081. The Spring Boot app serves both the frontend and the API (`/api/...`). Frontend files live in `src/webapp/` and are copied into the app's static resources at build time, so restart the app after editing them.
 
 Requires Java 17+. The app runs on port 8081 (set in `src/backend/src/main/resources/application.properties`) so it doesn't clash with XAMPP/Apache on 8080. Users are stored in memory until the MySQL database is set up.
 
