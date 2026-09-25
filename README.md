@@ -29,7 +29,7 @@ can post and manage job listings.
 ## Technologies Used
 - Frontend: tbd
 - Backend: tbd
-- Database: tbd
+- Database: Mysql (sql)
 - AI Integration: tbd
 - Testing tools: tbd
 - Hosting/Deployment: tbd
