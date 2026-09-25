@@ -63,7 +63,7 @@
             font-weight: 500;
         }
 
-        input[type="text"], input[type="password"], select {
+        input[type="text"], input[type="email"], input[type="password"], select {
             width: 100%;
             padding: 10px;
             border: 1px solid #d1d5db;
@@ -86,6 +86,24 @@
         }
 
         button:hover { background-color: var(--primary-hover); }
+        button:disabled { opacity: 0.6; cursor: wait; }
+
+        .error {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .toggle {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .toggle a { color: var(--primary); font-weight: 600; text-decoration: none; }
         .hidden { display: none !important; }
 
         .user-badge {
@@ -108,24 +126,33 @@
         <h2>CareerConnect</h2>
         <div class="subtitle">Job Search & Application Tracking</div>
 
-        <form onsubmit="handleLogin(event)">
+        <form id="auth-form" onsubmit="handleSubmit(event)">
+            <div class="form-group register-only hidden">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="Jane Doe">
+            </div>
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" required placeholder="For Example: seeker">
+                <label for="email">Email</label>
+                <input type="email" id="email" required placeholder="you@example.com">
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" required placeholder="••••••••">
             </div>
-            <div class="form-group">
+            <div class="form-group register-only hidden">
                 <label for="role">Account Type</label>
                 <select id="role">
                     <option value="Job Seeker">Job Seeker</option>
                     <option value="Recruiter">Recruiter</option>
                 </select>
             </div>
-            <button type="submit">Sign In / Register</button>
+            <div id="error" class="error hidden"></div>
+            <button type="submit" id="submit-btn">Sign In</button>
         </form>
+        <div class="toggle">
+            <span id="toggle-text">Don't have an account?</span>
+            <a href="#" onclick="toggleMode(event)" id="toggle-link">Register</a>
+        </div>
     </div>
 
     <!-- PROTECTED DASHBOARD VIEW (Simulated State Swap) -->
@@ -146,24 +173,73 @@
 </div>
 
 <script>
-    function handleLogin(event) {
+    let isRegisterMode = false;
+
+    function toggleMode(event) {
         event.preventDefault();
-        const username = document.getElementById('username').value;
-        const role = document.getElementById('role').value;
+        isRegisterMode = !isRegisterMode;
+        document.querySelectorAll('.register-only').forEach(el => el.classList.toggle('hidden', !isRegisterMode));
+        document.getElementById('name').required = isRegisterMode;
+        document.getElementById('submit-btn').textContent = isRegisterMode ? 'Create Account' : 'Sign In';
+        document.getElementById('toggle-text').textContent = isRegisterMode ? 'Already have an account?' : "Don't have an account?";
+        document.getElementById('toggle-link').textContent = isRegisterMode ? 'Sign In' : 'Register';
+        showError('');
+    }
 
-        // ELEC 366 Connection Rejection Logic Concept Remnant
-        if(username.toLowerCase() === "jack") {
-            alert("Connection rejected: Username 'Jack' is locked by an active session thread.");
-            return;
+    function showError(message) {
+        const el = document.getElementById('error');
+        el.textContent = message;
+        el.classList.toggle('hidden', !message);
+    }
+
+    async function postJson(url, body) {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(data.message || 'Request failed (' + res.status + ')');
         }
+        return data;
+    }
 
+    async function handleSubmit(event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const button = document.getElementById('submit-btn');
+
+        showError('');
+        button.disabled = true;
+        try {
+            if (isRegisterMode) {
+                await postJson('/api/auth/register', {
+                    name: document.getElementById('name').value,
+                    email,
+                    password,
+                    role: document.getElementById('role').value
+                });
+            }
+            const user = await postJson('/api/auth/login', { email, password });
+            showDashboard(user);
+        } catch (err) {
+            showError(err.message);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    function showDashboard(user) {
+        document.getElementById('display-username').textContent = user.name;
+        document.getElementById('display-role').textContent = user.role;
         document.getElementById('login-card').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('display-username').innerText = username;
-        document.getElementById('display-role').innerText = role;
     }
 
     function handleLogout() {
+        document.getElementById('auth-form').reset();
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('login-card').classList.remove('hidden');
     }

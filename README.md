@@ -27,19 +27,22 @@ can post and manage job listings.
 | Dani Tannir  |  40298707  |  @datannir-bit  |
 
 ## Technologies Used
-- Frontend: tbd
-- Backend: tbd
+- Frontend: HTML/CSS/JavaScript (served by Spring Boot)
+- Backend: Spring Boot (Java 17)
 - Database: Mysql (sql)
 - AI Integration: tbd
-- Testing tools: tbd
+- Testing tools: JUnit (Spring Boot Test)
 - Hosting/Deployment: tbd
 
 ## Setup Instructions
 ```bash
 git clone git@github.com:frakkii/SOEN341-SoftwareProcesses.git
-cd SOEN341-SoftwareProcesses
-[install & run commands]
+cd SOEN341-SoftwareProcesses/src/backend
+./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
 ```
+Then open http://localhost:8080. The Spring Boot app serves both the frontend and the API (`/api/...`). Frontend files live in `src/webapp/` and are copied into the app's static resources at build time, so restart the app after editing them.
+
+Requires Java 17+. If port 8080 is already in use (e.g. by XAMPP/Apache), add `-Dspring-boot.run.arguments=--server.port=8081` and open http://localhost:8081. Users are stored in memory until the MySQL database is set up.
 
 ## Proposed Features
 TBD
