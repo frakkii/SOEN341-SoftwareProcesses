@@ -5,9 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -15,7 +17,10 @@ public class AuthController {
 
     private static final Set<String> ALLOWED_ROLES = Set.of("Job Seeker", "Recruiter");
 
-    private final Map<String, User> users = new HashMap<>();
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    private static final int MAX_PASSWORD_BYTES = 72;
+
+    private final Map<String, User> users = new ConcurrentHashMap<>();
     private final PasswordEncoder passwordEncoder;
 
     public AuthController(PasswordEncoder passwordEncoder) {
@@ -25,9 +30,9 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
 
-        if (user.getName() == null ||
-            user.getEmail() == null ||
-            user.getPassword() == null) {
+        if (isBlank(user.getName()) ||
+            isBlank(user.getEmail()) ||
+            isBlank(user.getPassword())) {
 
             return ResponseEntity.badRequest().body(
                     Map.of("message", "Name, email and password are required")
@@ -44,9 +49,15 @@ public class AuthController {
 
         String email = user.getEmail().toLowerCase().trim();
 
-        if (users.containsKey(email)) {
-            return ResponseEntity.status(409).body(
-                    Map.of("message", "User already exists")
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", "Email address is not valid")
+            );
+        }
+
+        if (isTooLong(user.getPassword())) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", "Password is too long")
             );
         }
 
@@ -54,13 +65,17 @@ public class AuthController {
                 passwordEncoder.encode(user.getPassword());
 
         User storedUser = new User(
-                user.getName(),
+                user.getName().trim(),
                 email,
                 hashedPassword,
                 role
         );
 
-        users.put(email, storedUser);
+        if (users.putIfAbsent(email, storedUser) != null) {
+            return ResponseEntity.status(409).body(
+                    Map.of("message", "User already exists")
+            );
+        }
 
         return ResponseEntity.ok(
                 Map.of(
@@ -73,8 +88,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginUser) {
 
-        if (loginUser.getEmail() == null ||
-            loginUser.getPassword() == null) {
+        if (isBlank(loginUser.getEmail()) ||
+            isBlank(loginUser.getPassword())) {
 
             return ResponseEntity.badRequest().body(
                     Map.of("message", "Email and password are required")
@@ -85,7 +100,7 @@ public class AuthController {
 
         User existingUser = users.get(email);
 
-        if (existingUser == null) {
+        if (existingUser == null || isTooLong(loginUser.getPassword())) {
             return ResponseEntity.status(401).body(
                     Map.of("message", "Invalid email or password")
             );
@@ -111,5 +126,14 @@ public class AuthController {
                         "role", existingUser.getRole()
                 )
         );
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    // BCrypt only supports passwords up to 72 bytes and throws beyond that
+    private static boolean isTooLong(String password) {
+        return password.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES;
     }
 }
