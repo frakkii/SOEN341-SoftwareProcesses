@@ -6,3 +6,8 @@
 - Replaced the standalone `MainServer.java` with Spring Boot serving both the page and the API
 - Repo cleanup: removed build output, IDE settings and a broken nested repo link; added root `.gitignore`
 - AI log: `AI_logs/Donald/Sprint1/task-connect-frontend-backend.md`
+- Connected the backend to the team's Supabase (PostgreSQL) database: job seekers and recruiters are saved to the existing `person_user` and `employer_user` tables instead of in memory
+- Set up Flyway migrations to manage the database schema (unique emails, text phone numbers, generated user ids)
+- Expanded the sign-up form and API to collect every field the tables require (name, phone, address, location, and company name for recruiters), with validation
+- Added tests that run against an in-memory database and documented the database setup in the README
+- AI log: `AI_logs/Donald/Sprint1/task-supabase-database.md`
