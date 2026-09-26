@@ -1,80 +1,136 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.User;
+import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.RegisterRequest;
+import com.example.demo.model.EmployerUser;
+import com.example.demo.model.PersonUser;
+import com.example.demo.repository.EmployerUserRepository;
+import com.example.demo.repository.PersonUserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private static final Set<String> ALLOWED_ROLES = Set.of("Job Seeker", "Recruiter");
+    private static final String JOB_SEEKER = "Job Seeker";
+    private static final String RECRUITER = "Recruiter";
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
-    private static final int MAX_PASSWORD_BYTES = 72;
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9 ().-]{7,20}$");
 
-    private final Map<String, User> users = new ConcurrentHashMap<>();
-    private final PasswordEncoder passwordEncoder;
+    private final PersonUserRepository personUsers;
+    private final EmployerUserRepository employerUsers;
 
-    public AuthController(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
+    public AuthController(PersonUserRepository personUsers, EmployerUserRepository employerUsers) {
+        this.personUsers = personUsers;
+        this.employerUsers = employerUsers;
+    }
+
+    // A form field together with the column size it has to fit in
+    private record Field(String label, String value, int maxLength) {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 
-        if (isBlank(user.getName()) ||
-            isBlank(user.getEmail()) ||
-            isBlank(user.getPassword())) {
+        String role = request.role() == null ? JOB_SEEKER : request.role();
 
-            return ResponseEntity.badRequest().body(
-                    Map.of("message", "Name, email and password are required")
-            );
+        if (!role.equals(JOB_SEEKER) && !role.equals(RECRUITER)) {
+            return badRequest("Role must be Job Seeker or Recruiter");
         }
 
-        String role = user.getRole() == null ? "Job Seeker" : user.getRole();
-
-        if (!ALLOWED_ROLES.contains(role)) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("message", "Role must be Job Seeker or Recruiter")
-            );
+        List<Field> fields = new ArrayList<>(List.of(
+                new Field("First name", request.name(), 255),
+                new Field("Last name", request.surname(), 255),
+                new Field("Email", request.email(), 255),
+                new Field("Password", request.password(), 255),
+                new Field("Phone", request.phone(), 20),
+                new Field("Address", request.address(), 50),
+                new Field("City", request.city(), 50),
+                new Field("Province/State", request.provinceState(), 50),
+                new Field("Country", request.country(), 50),
+                new Field("Postal/ZIP code", request.postalCodeZip(), 15)
+        ));
+        if (role.equals(RECRUITER)) {
+            fields.add(new Field("Company name", request.companyName(), 255));
         }
 
-        String email = user.getEmail().toLowerCase().trim();
+        List<String> missing = fields.stream()
+                .filter(field -> isBlank(field.value()))
+                .map(Field::label)
+                .toList();
+
+        if (!missing.isEmpty()) {
+            return badRequest("Missing required fields: " + String.join(", ", missing));
+        }
+
+        String email = request.email().toLowerCase().trim();
 
         if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("message", "Email address is not valid")
-            );
+            return badRequest("Email address is not valid");
         }
 
-        if (isTooLong(user.getPassword())) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("message", "Password is too long")
-            );
+        for (Field field : fields) {
+            if (field.value().length() > field.maxLength()) {
+                return badRequest(field.label() + " must be at most " + field.maxLength() + " characters");
+            }
         }
 
-        String hashedPassword =
-                passwordEncoder.encode(user.getPassword());
+        String phone = request.phone().trim();
 
-        User storedUser = new User(
-                user.getName().trim(),
-                email,
-                hashedPassword,
-                role
-        );
+        if (!PHONE_PATTERN.matcher(phone).matches()) {
+            return badRequest("Phone number is not valid");
+        }
 
-        if (users.putIfAbsent(email, storedUser) != null) {
-            return ResponseEntity.status(409).body(
-                    Map.of("message", "User already exists")
-            );
+        // Job seekers and recruiters live in separate tables, but an email may only
+        // belong to one account so that login knows which one to use
+        if (personUsers.existsByEmailIgnoreCase(email) || employerUsers.existsByEmailIgnoreCase(email)) {
+            return userAlreadyExists();
+        }
+
+        // Passwords are stored as plain text to keep this school project simple
+        String password = request.password();
+
+        // The unique constraint on email also covers concurrent registrations
+        try {
+            if (role.equals(RECRUITER)) {
+                employerUsers.saveAndFlush(new EmployerUser(
+                        email,
+                        request.name().trim(),
+                        request.surname().trim(),
+                        request.companyName().trim(),
+                        request.country().trim(),
+                        request.provinceState().trim(),
+                        request.city().trim(),
+                        request.address().trim(),
+                        request.postalCodeZip().trim(),
+                        phone,
+                        password
+                ));
+            } else {
+                personUsers.saveAndFlush(new PersonUser(
+                        email,
+                        request.name().trim(),
+                        request.surname().trim(),
+                        request.country().trim(),
+                        request.provinceState().trim(),
+                        request.city().trim(),
+                        request.address().trim(),
+                        request.postalCodeZip().trim(),
+                        phone,
+                        password
+                ));
+            }
+        } catch (DataIntegrityViolationException e) {
+            return userAlreadyExists();
         }
 
         return ResponseEntity.ok(
@@ -86,54 +142,60 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User loginUser) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-        if (isBlank(loginUser.getEmail()) ||
-            isBlank(loginUser.getPassword())) {
-
-            return ResponseEntity.badRequest().body(
-                    Map.of("message", "Email and password are required")
-            );
+        if (isBlank(request.email()) || isBlank(request.password())) {
+            return badRequest("Email and password are required");
         }
 
-        String email = loginUser.getEmail().toLowerCase().trim();
+        String email = request.email().toLowerCase().trim();
 
-        User existingUser = users.get(email);
-
-        if (existingUser == null || isTooLong(loginUser.getPassword())) {
-            return ResponseEntity.status(401).body(
-                    Map.of("message", "Invalid email or password")
-            );
+        Optional<PersonUser> person = personUsers.findByEmailIgnoreCase(email);
+        if (person.isPresent()) {
+            PersonUser user = person.get();
+            if (!user.getPassword().equals(request.password())) {
+                return invalidCredentials();
+            }
+            return loginSuccess(user.getName(), user.getSurname(), user.getEmail(), JOB_SEEKER);
         }
 
-        boolean passwordMatches =
-                passwordEncoder.matches(
-                        loginUser.getPassword(),
-                        existingUser.getPassword()
-                );
-
-        if (!passwordMatches) {
-            return ResponseEntity.status(401).body(
-                    Map.of("message", "Invalid email or password")
-            );
+        Optional<EmployerUser> employer = employerUsers.findByEmailIgnoreCase(email);
+        if (employer.isPresent()) {
+            EmployerUser user = employer.get();
+            if (!user.getPassword().equals(request.password())) {
+                return invalidCredentials();
+            }
+            return loginSuccess(user.getRecruiterName(), user.getRecruiterSurname(), user.getEmail(), RECRUITER);
         }
 
+        return invalidCredentials();
+    }
+
+    private static ResponseEntity<?> loginSuccess(String name, String surname, String email, String role) {
         return ResponseEntity.ok(
                 Map.of(
                         "message", "Login successful",
-                        "name", existingUser.getName(),
-                        "email", existingUser.getEmail(),
-                        "role", existingUser.getRole()
+                        "name", name,
+                        "surname", surname,
+                        "email", email,
+                        "role", role
                 )
         );
     }
 
-    private static boolean isBlank(String value) {
-        return value == null || value.isBlank();
+    private static ResponseEntity<?> badRequest(String message) {
+        return ResponseEntity.badRequest().body(Map.of("message", message));
     }
 
-    // BCrypt only supports passwords up to 72 bytes and throws beyond that
-    private static boolean isTooLong(String password) {
-        return password.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES;
+    private static ResponseEntity<?> userAlreadyExists() {
+        return ResponseEntity.status(409).body(Map.of("message", "User already exists"));
+    }
+
+    private static ResponseEntity<?> invalidCredentials() {
+        return ResponseEntity.status(401).body(Map.of("message", "Invalid email or password"));
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

@@ -9,7 +9,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -39,10 +42,47 @@ class AuthControllerTests {
                 .content(json));
     }
 
+    // A complete, valid registration; tests override or remove fields as needed
+    private static Map<String, String> jobSeeker(String email) {
+        Map<String, String> fields = new LinkedHashMap<>();
+        fields.put("name", "Jane");
+        fields.put("surname", "Doe");
+        fields.put("email", email);
+        fields.put("password", "secret123");
+        fields.put("phone", "514-555-1234");
+        fields.put("address", "1455 De Maisonneuve Blvd W");
+        fields.put("city", "Montreal");
+        fields.put("provinceState", "Quebec");
+        fields.put("country", "Canada");
+        fields.put("postalCodeZip", "H3G 1M8");
+        return fields;
+    }
+
+    private static Map<String, String> recruiter(String email) {
+        Map<String, String> fields = jobSeeker(email);
+        fields.put("role", "Recruiter");
+        fields.put("companyName", "Acme Corp");
+        return fields;
+    }
+
+    private static String toJson(Map<String, String> fields) {
+        StringJoiner json = new StringJoiner(",", "{", "}");
+        fields.forEach((key, value) -> json.add("\"" + key + "\":\"" + value + "\""));
+        return json.toString();
+    }
+
+    private ResultActions register(Map<String, String> fields) throws Exception {
+        return postJson("/api/auth/register", toJson(fields));
+    }
+
     private ResultActions register(String name, String email, String password, String role) throws Exception {
-        String roleField = role == null ? "" : ",\"role\":\"" + role + "\"";
-        return postJson("/api/auth/register",
-                "{\"name\":\"" + name + "\",\"email\":\"" + email + "\",\"password\":\"" + password + "\"" + roleField + "}");
+        Map<String, String> fields = "Recruiter".equals(role) ? recruiter(email) : jobSeeker(email);
+        fields.put("name", name);
+        fields.put("password", password);
+        if (role != null) {
+            fields.put("role", role);
+        }
+        return register(fields);
     }
 
     private ResultActions login(String email, String password) throws Exception {
@@ -54,13 +94,14 @@ class AuthControllerTests {
     void registerThenLoginReturnsUserDetails() throws Exception {
         String email = uniqueEmail();
 
-        register("  Jane Doe ", email, "secret123", "Recruiter")
+        register("  Jane ", email, "secret123", "Recruiter")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email));
 
         login(email.toUpperCase(), "secret123")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Jane Doe"))
+                .andExpect(jsonPath("$.name").value("Jane"))
+                .andExpect(jsonPath("$.surname").value("Doe"))
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.role").value("Recruiter"));
     }
@@ -85,10 +126,34 @@ class AuthControllerTests {
     }
 
     @Test
-    void registerRejectsMissingFields() throws Exception {
-        postJson("/api/auth/register", "{\"email\":\"" + uniqueEmail() + "\",\"password\":\"secret123\"}")
+    void registerRejectsEmailAlreadyUsedByOtherAccountType() throws Exception {
+        String email = uniqueEmail();
+
+        register("Jane", email, "secret123", "Job Seeker").andExpect(status().isOk());
+        register("Jane", email, "secret123", "Recruiter")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("User already exists"));
+    }
+
+    @Test
+    void registerListsMissingFields() throws Exception {
+        Map<String, String> fields = jobSeeker(uniqueEmail());
+        fields.remove("surname");
+        fields.remove("city");
+
+        register(fields)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Name, email and password are required"));
+                .andExpect(jsonPath("$.message").value("Missing required fields: Last name, City"));
+    }
+
+    @Test
+    void registerRequiresCompanyNameForRecruiters() throws Exception {
+        Map<String, String> fields = recruiter(uniqueEmail());
+        fields.remove("companyName");
+
+        register(fields)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Missing required fields: Company name"));
     }
 
     @Test
@@ -113,15 +178,38 @@ class AuthControllerTests {
     }
 
     @Test
-    void registerRejectsPasswordLongerThan72Bytes() throws Exception {
-        register("Jane", uniqueEmail(), "a".repeat(73), null)
+    void registerRejectsValuesTooLongForTheirColumn() throws Exception {
+        Map<String, String> fields = jobSeeker(uniqueEmail());
+        fields.put("city", "a".repeat(51));
+
+        register(fields)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Password is too long"));
+                .andExpect(jsonPath("$.message").value("City must be at most 50 characters"));
     }
 
     @Test
-    void registerAcceptsPasswordOfExactly72Bytes() throws Exception {
-        register("Jane", uniqueEmail(), "a".repeat(72), null).andExpect(status().isOk());
+    void registerRejectsInvalidPhone() throws Exception {
+        Map<String, String> fields = jobSeeker(uniqueEmail());
+        fields.put("phone", "call me");
+
+        register(fields)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Phone number is not valid"));
+    }
+
+    @Test
+    void registerRejectsPasswordLongerThanColumn() throws Exception {
+        register("Jane", uniqueEmail(), "a".repeat(256), null)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Password must be at most 255 characters"));
+    }
+
+    @Test
+    void registerAcceptsPasswordOfExactly255Characters() throws Exception {
+        String email = uniqueEmail();
+        register("Jane", email, "a".repeat(255), null).andExpect(status().isOk());
+
+        login(email, "a".repeat(255)).andExpect(status().isOk());
     }
 
     @Test
