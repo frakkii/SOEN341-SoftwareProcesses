@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - Jobs</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --background: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-muted: #4b5563;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- CareerConnect logo + navigation bar -->
+    <header>
+        <h1>CareerConnect</h1>
+        <p>Welcome, <span id="username"></span></p>
+    </header>
+
+    <main>
+
+    </main>
+
+    <!-- Check for username if user connected so that it can appear
+     on dashboard, otherwise send back to login -->
+    <script>
+        const name = localStorage.getItem("userName");        // read the saved name
+        if (name) {
+            document.getElementById("username").textContent = name;
+        } else {
+            window.location.href = "index.html";              // not logged in → back to login
+        }
+    </script>
+</body>
+</html>

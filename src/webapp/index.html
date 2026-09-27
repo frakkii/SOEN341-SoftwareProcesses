@@ -284,7 +284,8 @@
                 });
             }
             const user = await postJson('/api/auth/login', { email, password });
-            showDashboard(user);
+            localStorage.setItem("userName", user.name);
+            window.location.href = "home.html";
         } catch (err) {
             showError(err.message);
         } finally {
