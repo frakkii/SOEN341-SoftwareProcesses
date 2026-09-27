@@ -1,0 +1,42 @@
+Appendix A – Response History
+
+Prompt 1
+Prompt:
+“How should I structure a simple login and registration backend in Spring Boot for Sprint 1?”
+Relevant AI Response:
+A simple Sprint 1 backend can use a Spring Boot controller with separate registration and login endpoints. The registration endpoint should accept user information and store the user, while the login endpoint should check the supplied email and password. For an early prototype, an in-memory data structure can be used before connecting a database.
+Prompt 2
+Prompt:
+“What does @PostMapping do in the login controller?”
+Relevant AI Response:
+@PostMapping tells Spring Boot that a method should handle HTTP POST requests for a specific path. For example, @PostMapping("/login") handles POST requests sent to the login endpoint.
+Prompt 3
+Prompt:
+“How should I handle someone registering with an email that already exists?”
+Relevant AI Response:
+Before creating the user, check whether the email already exists in the current user store. If it does, return a conflict response instead of creating another account.
+Prompt 4
+Prompt:
+“What should happen when someone enters the wrong password?”
+Relevant AI Response:
+The login request should fail and return 401 Unauthorized. A general message such as “Invalid email or password” can be used for both an unknown email and an incorrect password.
+Prompt 5
+Prompt:
+“Should I store passwords normally or hash them?”
+Relevant AI Response:
+Passwords should not be stored in plain text. BCrypt can be used to hash the password during registration and compare the entered password against the stored hash during login.
+Prompt 6
+Prompt:
+“How can I test the registration and login endpoints?”
+Relevant AI Response:
+Start the Spring Boot server and send POST requests to the registration and login endpoints. Test successful registration and login, then test cases such as duplicate registration and an incorrect password.
+Prompt 7
+Prompt:
+“Why am I getting a 401 error when I test the wrong password?”
+Relevant AI Response:
+A 401 Unauthorized response is expected when the credentials are incorrect. The frontend can later catch that response and display a normal message such as “Invalid email or password.”
+Prompt 8
+Prompt:
+“Why does Spring Boot say port 8080 is already in use?”
+Relevant AI Response:
+Another process is already using port 8080, often because a previous Spring Boot instance is still running. Stop the existing process or close the old terminal before starting the server again.
