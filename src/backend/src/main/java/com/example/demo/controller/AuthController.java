@@ -6,6 +6,8 @@ import com.example.demo.model.EmployerUser;
 import com.example.demo.model.PersonUser;
 import com.example.demo.repository.EmployerUserRepository;
 import com.example.demo.repository.PersonUserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,10 @@ public class AuthController {
 
     private static final String JOB_SEEKER = "Job Seeker";
     private static final String RECRUITER = "Recruiter";
+
+    // Session attributes that identify the logged-in user to the other controllers
+    public static final String SESSION_USER_ID = "userId";
+    public static final String SESSION_ROLE = "role";
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9 ().-]{7,20}$");
@@ -142,7 +148,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
 
         if (isBlank(request.email()) || isBlank(request.password())) {
             return badRequest("Email and password are required");
@@ -156,7 +162,7 @@ public class AuthController {
             if (!user.getPassword().equals(request.password())) {
                 return invalidCredentials();
             }
-            return loginSuccess(user.getName(), user.getSurname(), user.getEmail(), JOB_SEEKER);
+            return loginSuccess(httpRequest, user.getId(), user.getName(), user.getSurname(), user.getEmail(), JOB_SEEKER);
         }
 
         Optional<EmployerUser> employer = employerUsers.findByEmailIgnoreCase(email);
@@ -165,13 +171,23 @@ public class AuthController {
             if (!user.getPassword().equals(request.password())) {
                 return invalidCredentials();
             }
-            return loginSuccess(user.getRecruiterName(), user.getRecruiterSurname(), user.getEmail(), RECRUITER);
+            return loginSuccess(httpRequest, user.getId(), user.getRecruiterName(), user.getRecruiterSurname(), user.getEmail(), RECRUITER);
         }
 
         return invalidCredentials();
     }
 
-    private static ResponseEntity<?> loginSuccess(String name, String surname, String email, String role) {
+    private static ResponseEntity<?> loginSuccess(HttpServletRequest httpRequest, Integer id, String name,
+                                                  String surname, String email, String role) {
+        // Start a fresh session so an earlier user's session id can't be reused
+        HttpSession oldSession = httpRequest.getSession(false);
+        if (oldSession != null) {
+            oldSession.invalidate();
+        }
+        HttpSession session = httpRequest.getSession(true);
+        session.setAttribute(SESSION_USER_ID, id);
+        session.setAttribute(SESSION_ROLE, role);
+
         return ResponseEntity.ok(
                 Map.of(
                         "message", "Login successful",

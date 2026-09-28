@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - My Resume</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --background: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-muted: #4b5563;
+        }
+
+        body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+}
+
+/* Header: brand on the left, nav on the right (same as home.html) */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    background-color: var(--card-bg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.brand h1 { margin: 0; font-size: 24px; color: var(--primary); }
+.brand p  { margin: 4px 0 0; font-size: 14px; color: var(--text-muted); }
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+nav a {
+    padding: 8px 16px;
+    border: 1px solid var(--primary);
+    border-radius: 6px;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+nav a:hover,
+nav a.active {
+    background-color: var(--primary);
+    color: white;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 220px;
+    padding-top: 6px;
+    z-index: 10;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dropdown-menu a {
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Resume card */
+main {
+    max-width: 560px;
+    margin: 32px auto;
+    padding: 0 16px;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 { margin-top: 0; }
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.current {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.current .file-name { font-weight: 600; word-break: break-all; }
+.current .details { color: var(--text-muted); margin-top: 4px; }
+.current a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.hint { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+}
+
+button:hover { background-color: var(--primary-hover); }
+button:disabled { opacity: 0.6; cursor: wait; }
+
+.message {
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 16px;
+}
+
+.message.error   { background: #fee2e2; color: #b91c1c; }
+.message.success { background: #dcfce7; color: #15803d; }
+.hidden { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="brand">
+            <h1>CareerConnect</h1>
+            <p>Welcome, <span id="username"></span></p>
+        </div>
+
+        <nav>
+            <a href="home.html">Home</a>
+            <a href="#">Postings</a>
+
+            <div class="dropdown">
+                <a href="#" class="active">My Tools ▾</a>
+                <div class="dropdown-menu">
+                    <a href="resume.html">My CVs &amp; Cover Letters</a>
+                    <a href="#">Favourited Postings</a>
+                    <a href="#">My Applications</a>
+                </div>
+            </div>
+
+            <a href="#">Messages</a>
+            <a href="#">Settings</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="card">
+            <h2>My Resume</h2>
+            <p class="subtitle">Employers see this resume when you apply. Uploading a new one replaces the current one.</p>
+
+            <div id="current" class="current hidden">
+                <div class="file-name" id="current-name"></div>
+                <div class="details"><span id="current-details"></span> · <a href="/api/resume/file">Download</a></div>
+            </div>
+            <p id="no-resume" class="subtitle hidden">You haven't uploaded a resume yet.</p>
+
+            <form id="upload-form" class="hidden" onsubmit="handleUpload(event)">
+                <input type="file" id="resume-file" accept=".pdf,.doc,.docx" required>
+                <div class="hint">PDF, DOC or DOCX, up to 5 MB.</div>
+                <button type="submit" id="upload-btn">Upload Resume</button>
+            </form>
+
+            <div id="message" class="message hidden"></div>
+        </div>
+    </main>
+
+    <script>
+        const MAX_SIZE = 5 * 1024 * 1024;   // matches spring.servlet.multipart.max-file-size
+
+        const name = localStorage.getItem("userName");
+        if (name) {
+            document.getElementById("username").textContent = name;
+        } else {
+            window.location.href = "index.html";              // not logged in → back to login
+        }
+
+        function showMessage(text, type) {
+            const el = document.getElementById("message");
+            el.textContent = text;
+            el.className = "message " + type;
+            el.classList.toggle("hidden", !text);
+        }
+
+        function formatSize(bytes) {
+            return bytes < 1024 * 1024
+                ? Math.max(1, Math.round(bytes / 1024)) + " KB"
+                : (bytes / (1024 * 1024)).toFixed(1) + " MB";
+        }
+
+        // Shows the current resume, or explains why this user can't have one
+        async function loadResume() {
+            const res = await fetch("/api/resume");
+            const data = await res.json().catch(() => ({}));
+
+            if (res.status === 401) {
+                // The server restarted or the session expired: log in again
+                localStorage.removeItem("userName");
+                window.location.href = "index.html";
+                return;
+            }
+            if (res.status === 403) {
+                showMessage(data.message || "Only job seekers can upload a resume.", "error");
+                return;
+            }
+
+            document.getElementById("upload-form").classList.remove("hidden");
+            const hasResume = res.ok;
+            document.getElementById("current").classList.toggle("hidden", !hasResume);
+            document.getElementById("no-resume").classList.toggle("hidden", hasResume);
+            document.getElementById("upload-btn").textContent = hasResume ? "Replace Resume" : "Upload Resume";
+
+            if (hasResume) {
+                document.getElementById("current-name").textContent = data.fileName;
+                document.getElementById("current-details").textContent =
+                    formatSize(data.fileSize) + " · uploaded " + new Date(data.uploadedAt).toLocaleString();
+            }
+        }
+
+        async function handleUpload(event) {
+            event.preventDefault();
+            const file = document.getElementById("resume-file").files[0];
+            const button = document.getElementById("upload-btn");
+
+            if (!file) {
+                return;
+            }
+            if (file.size > MAX_SIZE) {
+                showMessage("Resume must be 5 MB or smaller.", "error");
+                return;
+            }
+
+            const form = new FormData();
+            form.append("resume", file);
+
+            showMessage("", "");
+            button.disabled = true;
+            try {
+                const res = await fetch("/api/resume", { method: "POST", body: form });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.message || "Upload failed (" + res.status + ")");
+                }
+                document.getElementById("upload-form").reset();
+                await loadResume();
+                showMessage(data.message, "success");
+            } catch (err) {
+                showMessage(err.message, "error");
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        loadResume();
+    </script>
+</body>
+</html>
