@@ -1,19 +1,18 @@
 # CareerConnect
 
 ## Project Description
-CareerConnect is a web-based platform that helps job seekers manage their job search with features such as creating profiles, uploading resumes, searching for jobs, and tracking applications in one 
-place.
+CareerConnect is a web-based platform that brings the entire job search into one place. Job seekers can build a profile, upload and manage multiple versions of their resume, search and apply for jobs, and track every application from submission to final decision. Recruiters can post openings, review applicants, and update candidates on their status, so both sides of the hiring process work from the same up-to-date information.
 
-**Primary Users:** Job Seekers and Recruiters
+## Primary Users
+Job seekers are students, recent graduates, and working professionals who apply to many positions at once and need a reliable way to stay organized. Recruiters are hiring managers and HR staff who need a simple way to publish listings, collect applications, and communicate progress to candidates.
 
 ## Problem
-Job seekers lose track of applications spread across multiple platforms, with no easy way to 
-monitor status, deadlines, or follow-ups.
+Today's job search is fragmented. Applications are scattered across company career pages, job boards, and email, and most job seekers fall back on spreadsheets or memory to keep track. As a result, they miss deadlines, forget to follow up after interviews, lose track of which resume version they sent to which employer, and often never hear back about where they stand. Recruiters face the mirror image of this problem: candidate information arrives through multiple channels, and keeping applicants informed is time-consuming, so many simply go silent.
 
 ## Solution
-A centralized platform where users can search/apply for jobs, track application status 
-(Applied, Interview, Offered, Rejected), manage resumes, and get deadline reminders. Recruiters 
-can post and manage job listings.
+CareerConnect gives job seekers a single dashboard for their search. Users can search and filter job listings by title, location, job type, and keywords, then apply directly with a resume selected from their saved versions. Each application appears on a tracker with a clear status (Applied, Interview, Offered, or Rejected) that the user or the recruiter can update. The platform sends reminders for upcoming application deadlines, scheduled interviews, and follow-ups that are due, so nothing slips through the cracks. Users can also add personal notes to each application, such as interviewer names or questions to prepare.
+
+On the recruiter side, CareerConnect lets employers create, edit, and close job postings, view the list of applicants for each position, access submitted resumes, and move candidates through the hiring stages. Status changes made by the recruiter are reflected immediately in the job seeker's tracker, which reduces uncertainty for candidates and cuts down on repetitive status-update emails for recruiters.
 
 ## Team Members
 | Name | Student ID | GitHub Username |
