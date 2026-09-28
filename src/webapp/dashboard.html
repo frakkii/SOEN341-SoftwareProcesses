@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<main class="shell">
+    <section class="panel dash">
+        <span class="badge" id="badge">Job Seeker</span>
+        <h2>Welcome, <span id="name">friend</span>! 🎉</h2>
+        <p class="sub">You're signed in. Here is what's coming to your account.</p>
+
+        <div class="tiles">
+            <div class="tile"><span>👤</span><div><b>My profile</b><br><small>Sprint 1</small></div></div>
+            <div class="tile"><span>📄</span><div><b>Resume</b><br><small>Sprint 1</small></div></div>
+            <div class="tile"><span id="t3i">🔎</span><div><b id="t3">Find jobs</b><br><small>Next sprint</small></div></div>
+            <div class="tile"><span>📊</span><div><b>Applications</b><br><small>Next sprint</small></div></div>
+        </div>
+
+        <button class="btn ghost" id="logout">Log out</button>
+    </section>
+</main>
+
+<script>
+    const session = JSON.parse(sessionStorage.getItem('cc_session') || 'null');
+    if (!session) location.replace('login.html');       // not signed in: back to the login page
+    else {
+      document.getElementById('name').textContent = session.username;
+      document.getElementById('badge').textContent = session.role;
+      if (session.role === 'Recruiter') {
+        document.getElementById('t3').textContent = 'Post a job';
+        document.getElementById('t3i').textContent = '📢';
+      }
+    }
+    document.getElementById('logout').onclick = () => { sessionStorage.removeItem('cc_session'); location.href = 'login.html'; };
+</script>
+</body>
+</html>
