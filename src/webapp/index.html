@@ -3,218 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerConnect - Sprint 1 Auth Demo</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --background: #f3f4f6;
-            --card-bg: #ffffff;
-            --text: #1f2937;
-            --text-muted: #4b5563;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--background);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 24px;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        button:hover { background-color: var(--primary-hover); }
-        button:disabled { opacity: 0.6; cursor: wait; }
-
-        .error {
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 13px;
-        }
-
-        .toggle {
-            text-align: center;
-            margin-top: 16px;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .toggle a { color: var(--primary); font-weight: 600; text-decoration: none; }
-        .hidden { display: none !important; }
-
-        .user-badge {
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 12px;
-        }
-    </style>
+    <title>CareerConnect - Sign in</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
 
-<div class="container">
-    <!-- AUTHENTICATION VIEW -->
-    <div id="login-card" class="card">
+<main class="shell">
+    <section class="hero">
+        <div class="logo"><b>C</b> CareerConnect</div>
+        <h1>Your job search, organized in one place.</h1>
+        <p>Search jobs, upload your resume and follow each application from Applied to Offered.</p>
+
+        <div aria-hidden="true">
+            <div class="jc"><div class="ic">🎨</div><div><strong>UI Designer</strong><small>Pixel Studio</small></div><span class="chip applied">Applied</span></div>
+            <div class="jc"><div class="ic">💻</div><div><strong>Java Developer</strong><small>Northwind Tech</small></div><span class="chip interview">Interview</span></div>
+            <div class="jc"><div class="ic">🚀</div><div><strong>Product Intern</strong><small>Orbit Labs</small></div><span class="chip offered">Offered</span></div>
+        </div>
+    </section>
+
+    <section class="panel">
         <h2>CareerConnect</h2>
-        <div class="subtitle">Job Search & Application Tracking</div>
+        <div class="sub">Job Search &amp; Application Tracking</div>
 
         <form id="auth-form" onsubmit="handleSubmit(event)">
-            <div class="form-group register-only hidden">
+            <div class="field register-only hidden">
                 <label for="role">Account Type</label>
                 <select id="role" onchange="updateRecruiterFields()">
                     <option value="Job Seeker">Job Seeker</option>
                     <option value="Recruiter">Recruiter</option>
                 </select>
             </div>
-            <div class="form-row register-only hidden">
-                <div class="form-group">
+            <div class="two-col register-only hidden">
+                <div class="field">
                     <label for="name">First Name</label>
-                    <input type="text" id="name" class="register-input" maxlength="255" placeholder="Jane">
+                    <input type="text" id="name" class="register-input" maxlength="255" placeholder="First name">
                 </div>
-                <div class="form-group">
+                <div class="field">
                     <label for="surname">Last Name</label>
-                    <input type="text" id="surname" class="register-input" maxlength="255" placeholder="Doe">
+                    <input type="text" id="surname" class="register-input" maxlength="255" placeholder="Last name">
                 </div>
             </div>
-            <div class="form-group register-only recruiter-only hidden">
+            <div class="field register-only recruiter-only hidden">
                 <label for="companyName">Company Name</label>
                 <input type="text" id="companyName" maxlength="255" placeholder="Acme Corp">
             </div>
-            <div class="form-group">
+            <div class="field">
                 <label for="email">Email</label>
                 <input type="email" id="email" required placeholder="you@example.com">
             </div>
-            <div class="form-group">
+            <div class="field">
                 <label for="password">Password</label>
                 <input type="password" id="password" required placeholder="••••••••">
             </div>
-            <div class="form-group register-only hidden">
+            <div class="field register-only hidden">
                 <label for="phone">Phone</label>
                 <input type="tel" id="phone" class="register-input" maxlength="20" placeholder="514-555-1234">
             </div>
-            <div class="form-group register-only hidden">
+            <div class="field register-only hidden">
                 <label for="address">Address</label>
                 <input type="text" id="address" class="register-input" maxlength="50" placeholder="1455 De Maisonneuve Blvd W">
             </div>
-            <div class="form-row register-only hidden">
-                <div class="form-group">
+            <div class="two-col register-only hidden">
+                <div class="field">
                     <label for="city">City</label>
                     <input type="text" id="city" class="register-input" maxlength="50" placeholder="Montreal">
                 </div>
-                <div class="form-group">
+                <div class="field">
                     <label for="provinceState">Province/State</label>
                     <input type="text" id="provinceState" class="register-input" maxlength="50" placeholder="Quebec">
                 </div>
             </div>
-            <div class="form-row register-only hidden">
-                <div class="form-group">
+            <div class="two-col register-only hidden">
+                <div class="field">
                     <label for="country">Country</label>
                     <input type="text" id="country" class="register-input" maxlength="50" placeholder="Canada">
                 </div>
-                <div class="form-group">
+                <div class="field">
                     <label for="postalCodeZip">Postal/ZIP Code</label>
                     <input type="text" id="postalCodeZip" class="register-input" maxlength="15" placeholder="H3G 1M8">
                 </div>
             </div>
-            <div id="error" class="error hidden"></div>
-            <button type="submit" id="submit-btn">Sign In</button>
+            <div id="error" class="hidden"></div>
+            <button type="submit" id="submit-btn" class="btn">Sign In</button>
         </form>
         <div class="toggle">
             <span id="toggle-text">Don't have an account?</span>
             <a href="#" onclick="toggleMode(event)" id="toggle-link">Register</a>
         </div>
-    </div>
-
-    <!-- PROTECTED DASHBOARD VIEW (Simulated State Swap) -->
-    <div id="dashboard" class="card hidden">
-        <span id="display-role" class="user-badge">Job Seeker</span>
-        <h2>Welcome, <span id="display-username">User</span>!</h2>
-        <p class="subtitle">Session authenticated cleanly.</p>
-
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 12px; font-size: 14px;">
-            <p><strong>Sprint 1 Milestones Met:</strong></p>
-            <ul style="padding-left: 20px; color: var(--text-muted);">
-                <li>User Registration/Login UI functional.</li>
-                <li>Environment and folder architecture configured.</li>
-            </ul>
-        </div>
-        <button onclick="handleLogout()" style="background-color: #ef4444;">Disconnect</button>
-    </div>
-</div>
+    </section>
+</main>
 
 <script>
     let isRegisterMode = false;
@@ -291,20 +172,6 @@
         } finally {
             button.disabled = false;
         }
-    }
-
-    function showDashboard(user) {
-        document.getElementById('display-username').textContent = user.name;
-        document.getElementById('display-role').textContent = user.role;
-        document.getElementById('login-card').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-    }
-
-    function handleLogout() {
-        document.getElementById('auth-form').reset();
-        updateRecruiterFields();
-        document.getElementById('dashboard').classList.add('hidden');
-        document.getElementById('login-card').classList.remove('hidden');
     }
 </script>
 </body>
