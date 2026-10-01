@@ -70,7 +70,15 @@ The first start takes a minute or two while dependencies download. The app is re
 ### 4. Open it
 Go to **http://localhost:8081**. You can register a job seeker or recruiter account there and sign in. Job seekers can upload their resume under **My Tools → My CVs & Cover Letters**.
 
-Stop the app with **Ctrl+C** in its terminal.
+Stop the app with **Ctrl+C** in its terminal. If it's running somewhere you can't reach (another terminal, your IDE, or a copy left behind), run this from the repository root to stop whatever is using port 8081:
+
+| Terminal | Command |
+|---|---|
+| macOS / Linux / Git Bash | `./stop.sh` |
+| Windows PowerShell | `.\stop` |
+| Windows Command Prompt | `stop` |
+
+Add a port number to stop a copy on another port, e.g. `.\stop 8082`.
 
 ### Making changes
 - **Frontend** files (HTML/CSS/JS) are in `src/webapp/`. **Backend** code (Spring Boot) is in `src/backend/`. The one app serves both the pages and the API (`/api/...`).
@@ -80,7 +88,7 @@ Stop the app with **Ctrl+C** in its terminal.
 ### Troubleshooting
 | Problem | Fix |
 |---|---|
-| `Port 8081 was already in use` | Another copy of the app is still running, probably in another terminal or IDE. Stop it, or start this one on another port: `./run.sh -Dspring-boot.run.arguments=--server.port=8082` |
+| `Port 8081 was already in use` | Another copy of the app is still running, probably in another terminal or IDE. Stop it with `.\stop` (`./stop.sh` in Git Bash), or start this one on another port: `./run.sh -Dspring-boot.run.arguments=--server.port=8082` |
 | `password authentication failed` or a missing-password error | The password isn't set in this terminal. Repeat step 2. |
 | `max clients reached` | Supabase allows about 15 connections and each running app holds up to 10. Close any copies of the app you're not using. |
 | `Migration checksum mismatch` or `Detected applied migration not resolved locally` | Your code's database migrations don't match what's in Supabase. Pull the latest `main`; if it still happens, see the Database section below. |
