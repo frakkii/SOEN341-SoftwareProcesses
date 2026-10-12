@@ -11,3 +11,24 @@
 - Expanded the sign-up form and API to collect every field the tables require (name, phone, address, location, and company name for recruiters), with validation
 - Added tests that run against an in-memory database and documented the database setup in the README
 - AI log: `AI_logs/Donald/Sprint1/task-supabase-database.md`
+
+
+## Hirushi Rathnayaka — Sprint 1 Contributions (40237379)
+
+- Reviewed the team's Sprint 1 GitHub Issues and documentation to identify missing information, incomplete descriptions, and overlapping tasks.
+- Updated user story descriptions and acceptance criteria to ensure requirements were clearly defined and consistent across the project.
+- Organized and created sub-issues for frontend, backend, database integration, and testing tasks.
+- Reviewed existing GitHub Issues and refined overlapping tasks to reduce duplication and clarify responsibilities.
+- Improved documentation for user registration, resume management, job application submission and tracking, job posting management, job search, and additional platform features.
+- Updated existing task descriptions to clarify implementation requirements and acceptance criteria.
+- Created the `task` label to improve GitHub Issue organization.
+- Reviewed team meeting minutes to identify agreed-upon responsibilities and coordinate task ownership.
+- Communicated with teammates to ensure they assign themselves to their respective GitHub Issues and update task statuses.
+- Reviewed the Sprint 1 deliverables against the assignment requirements to identify missing documentation and areas requiring improvement.
+
+### Evidence of Contributions
+- GitHub Issues reviewed and updated: #1–#10, #12–#16, #30–#34.
+- Task clarification and overlap resolution: #13, #38, #42, #46, #54.
+- Additional sub-issues created and documented: #36–#65 (as applicable to personally completed work).
+- GitHub Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
+- AI log: `AI_logs/Hiru/Sprint1/task-documentation-review.pdf`
