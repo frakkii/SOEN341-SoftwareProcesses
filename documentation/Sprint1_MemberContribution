@@ -26,6 +26,19 @@
 - Communicated with teammates to ensure they assign themselves to their respective GitHub Issues and update task statuses.
 - Reviewed the Sprint 1 deliverables against the assignment requirements to identify missing documentation and areas requiring improvement.
 
+## Maria-Francesca Staicu - Sprint 1 Contribution (40324837)
+- Set up the GitHub repository with SSH access and created the initial folder structure (AI_logs, documentation, minutes, src, submissions)
+- Wrote the project README (description, problem, solution, team members, technologies, setup instructions, proposed features)
+- Created the “CareerConnect Sprint Board” GitHub Project (Kanban) to track issues and progress
+- Generated the 10 AI user stories (US-01 to US-10) and turned them into GitHub Issues with sub-task checklists, using the ai-generated / team-generated labels
+- Drafted the team process document covering branching strategy, PR process, code review, and Definition of Ready / Done
+- Built the job seeker homepage (src/webapp/home.html) with a header, a welcome message showing the logged-in user’s name, a navigation bar, and a “My Tools” dropdown
+- Updated the login page (index.html) to save the user’s name and redirect to the homepage after a successful login
+- Tested the full login → homepage flow against the Spring Boot backend
+- AI log: AI_logs/Francesca/Sprint1/task-homepage-frontend.md
+- Took meeting minutes and uploaded them to the minutes/ folder
+- Communicated with teammates to coordinate tasks, deadlines, and frontend/backend responsibilities
+
 ### Evidence of Contributions
 - GitHub Issues reviewed and updated: #1–#10, #12–#16, #30–#34.
 - Task clarification and overlap resolution: #13, #38, #42, #46, #54.
