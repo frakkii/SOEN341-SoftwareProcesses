@@ -2,54 +2,38 @@ package com.example.demo.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class ApplicationTest {
 
     @Test
-    void submitThenApproveShouldSetStatusToApproved() {
-        Application application = new Application("Test Application");
+    void newApplicationStartsAsApplied() {
+        Application application = new Application(1, 2);
 
-        application.submit();
-        application.approve();
-
-        assertEquals("Approved", application.getStatus());
+        assertEquals(ApplicationStatus.APPLIED, application.getStatus());
+        assertEquals(1, application.getPersonId().intValue());
+        assertEquals(2, application.getPostId().intValue());
+        assertEquals(application.getAppliedAt(), application.getUpdatedAt());
     }
 
     @Test
-    void submitThenRejectShouldSetStatusToRejected() {
-        Application application = new Application("Test Application");
+    void updateStatusChangesStatusAndUpdatedTime() {
+        Application application = new Application(1, 2);
 
-        application.submit();
-        application.reject();
+        application.updateStatus(ApplicationStatus.INTERVIEW);
 
-        assertEquals("Rejected", application.getStatus());
+        assertEquals(ApplicationStatus.INTERVIEW, application.getStatus());
+        assertFalse(application.getUpdatedAt().isBefore(application.getAppliedAt()));
     }
-    @Test 
-    void approveWithoutSubmit() {
-        Application application = new Application("Test Application");
 
-        application.approve();
-
-        assertEquals("Pending", application.getStatus());
-    }
     @Test
-    void rejectWithoutSubmit() {
-        Application application = new Application("Test Application");
+    void allFiveRequiredStatusesExist() {
+        List<String> labels = Arrays.stream(ApplicationStatus.values()).map(ApplicationStatus::getLabel).toList();
 
-        application.reject();
-
-        assertEquals("Pending", application.getStatus());
+        assertEquals(List.of("Applied", "Under Review", "Interview", "Offered", "Rejected"), labels);
     }
-    @Test 
-    void approveAfterReject() {
-        Application application = new Application("Test Application");
-
-        application.submit();
-        application.reject();
-        application.approve();
-
-        assertEquals("Rejected", application.getStatus());
-    }
-
 }
