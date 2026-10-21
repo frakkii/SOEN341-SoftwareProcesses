@@ -29,9 +29,9 @@ On the recruiter side, CareerConnect lets employers create, edit, and close job 
 - Frontend: HTML/CSS/JavaScript (served by Spring Boot)
 - Backend: Spring Boot (Java 17)
 - Database: PostgreSQL hosted on Supabase (schema managed with Flyway)
-- AI Integration: tbd
+- AI Integration: - Planned Generative AI integration for resume feedback; model/provider not yet selected.
 - Testing tools: JUnit (Spring Boot Test)
-- Hosting/Deployment: tbd
+- Hosting/Deployment: Currently run locally; deployment platform to be confirmed.
 
 ## Running the Web App
 
@@ -101,7 +101,28 @@ Add a port number to stop a copy on another port, e.g. `.\stop 8082`.
 - **Changing the schema:** add a new `V<next number>__description.sql` file (in `common/` unless it needs database-specific SQL). Don't edit a migration that has already run, and don't change tables in the Supabase dashboard. Merge new migrations to `main` promptly: once one runs against Supabase, everyone else's app needs the same file to start.
 
 ## Proposed Features
-TBD
+The following proposed features define the overall scope of CareerConnect.
+
+Features Based on AI-Generated User Stories
+- Account registration: Allow job seekers to create an account to access platform features.
+- Resume upload and updates: Allow job seekers to upload and update their resume so recruiters can review their qualifications.
+- Job search and filtering: Search and filter job postings by location, industry, and job type.
+- Application submission: Apply for jobs directly through the platform.
+- Application status tracking: Track applications through the Applied, Interview, Offered, and Rejected stages.
+- Deadline notifications: Notify job seekers about upcoming application deadlines.
+- Saved jobs and favourites: Save interesting job postings to revisit later.
+- Job posting management: Allow recruiters to create and manage job postings.
+- Applicant review: Allow recruiters to view the applicants for each posting.
+- AI-generated resume feedback: Use Generative AI to provide feedback that helps job seekers improve their resume before applying.
+
+Team-Generated User Stories and Features
+
+- The following features originated from the team and are identified by the human-generated labels in the project backlog.
+- Application withdrawal: Allow job seekers to withdraw applications for positions they are no longer interested in.
+- Application summary dashboard: Display applications summarize applications by status so job seekers can see their progress at a glance.
+- Multiple resume versions: Allow job seekers to store different versions of their resume and select the most suitable version for each application.
+- Password recovery: Allow users to reset a forgotten password through email.
+- Messaging: Allow job seekers to communicate with recruiters and other users about job opportunities.
 
 ## Repository Link
 https://github.com/frakkii/SOEN341-SoftwareProcesses.git
