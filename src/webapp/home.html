@@ -13,28 +13,30 @@
 <body class="app">
 <!-- CareerConnect logo + navigation bar -->
 <header class="topbar">
-    <div class="brand">
-        <h1>CareerConnect</h1>
-        <p>Welcome, <span id="username"></span></p>
-    </div>
-
-    <nav>
-        <a href="home.html" class="active">Home</a>
-        <a href="#">Postings</a>
-
-        <!-- My Tools: dropdown menu -->
-        <div class="dropdown">
-            <a href="#">My Tools ▾</a>
-            <div class="dropdown-menu">
-                <a href="resume.html">My CVs &amp; Cover Letters</a>
-                <a href="#">Favourited Postings</a>
-                <a href="#">My Applications</a>
-            </div>
+    <div class="topbar-inner">
+        <div class="brand">
+            <h1>CareerConnect</h1>
+            <p>Welcome, <span id="username"></span></p>
         </div>
 
-        <a href="#">Messages</a>
-        <a href="#">Settings</a>
-    </nav>
+        <nav>
+            <a href="home.html" class="active">Home</a>
+            <a href="#">Postings</a>
+
+            <!-- My Tools: dropdown menu -->
+            <div class="dropdown">
+                <a href="#">My Tools ▾</a>
+                <div class="dropdown-menu">
+                    <a href="resume.html">My CVs &amp; Cover Letters</a>
+                    <a href="#">Favourited Postings</a>
+                    <a href="applications.html">My Applications</a>
+                </div>
+            </div>
+
+            <a href="#">Messages</a>
+            <a href="#">Settings</a>
+        </nav>
+    </div>
 </header>
 
 <main class="page">
@@ -43,8 +45,8 @@
 
     <div class="tiles">
         <div class="tile"><span>🔎</span><div><b>Find jobs</b><br><small>Coming soon</small></div></div>
-        <div class="tile"><span>📄</span><div><b>My CVs</b><br><small>Manage your resumes</small></div></div>
-        <div class="tile"><span>📊</span><div><b>Applications</b><br><small>Coming soon</small></div></div>
+        <a class="tile" href="resume.html"><span>📄</span><div><b>My CVs</b><br><small>Manage your resumes</small></div></a>
+        <a class="tile" href="applications.html"><span>📊</span><div><b>Applications</b><br><small>Track your status</small></div></a>
         <div class="tile"><span>⭐</span><div><b>Favourites</b><br><small>Coming soon</small></div></div>
     </div>
 </main>
