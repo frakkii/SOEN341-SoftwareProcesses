@@ -7,57 +7,60 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
 </head>
 
-<body class="app">
-<!-- CareerConnect logo + navigation bar (same as home.html) -->
-<header class="topbar">
-    <div class="topbar-inner">
-        <div class="brand">
-            <h1>CareerConnect</h1>
-            <p>Welcome, <span id="username"></span></p>
-        </div>
+<body>
+<!-- Top navigation bar is rendered by js/shell.js -->
 
-        <nav>
-            <a href="home.html">Home</a>
-            <a href="#">Postings</a>
-
-            <div class="dropdown">
-                <a href="#" class="active">My Tools ▾</a>
-                <div class="dropdown-menu">
-                    <a href="resume.html">My CVs &amp; Cover Letters</a>
-                    <a href="#">Favourited Postings</a>
-                    <a href="applications.html">My Applications</a>
-                </div>
-            </div>
-
-            <a href="#">Messages</a>
-            <a href="#">Settings</a>
-        </nav>
+<main class="wrap">
+    <div class="page-title">
+        <h1>My CVs &amp; Cover Letters</h1>
+        <p>Keep your documents ready so you can apply in a click.</p>
     </div>
-</header>
 
-<main class="page">
-    <div class="card">
-        <h2>My Resume</h2>
-        <p class="sub">Employers see this resume when you apply. Uploading a new one replaces the current one.</p>
+    <div class="cv-grid">
+        <!-- Resume upload: element ids and the script below are unchanged -->
+        <div class="card pad">
+            <h2>My Resume</h2>
+            <p class="subtitle">Employers see this resume when you apply. Uploading a new one replaces the current one.</p>
 
-        <div id="current" class="current hidden">
-            <div class="file-name" id="current-name"></div>
-            <div class="details"><span id="current-details"></span> · <a href="/api/resume/file">Download</a></div>
+            <div id="current" class="current hidden">
+                <div class="file-name" id="current-name"></div>
+                <div class="details"><span id="current-details"></span> · <a href="/api/resume/file">Download</a></div>
+            </div>
+            <p id="no-resume" class="subtitle hidden">You haven't uploaded a resume yet.</p>
+
+            <form id="upload-form" class="hidden" onsubmit="handleUpload(event)">
+                <input type="file" id="resume-file" accept=".pdf,.doc,.docx" required>
+                <div class="hint">PDF, DOC or DOCX, up to 5 MB.</div>
+                <button type="submit" id="upload-btn">Upload Resume</button>
+            </form>
+
+            <div id="message" class="message hidden"></div>
         </div>
-        <p id="no-resume" class="sub hidden">You haven't uploaded a resume yet.</p>
 
-        <form id="upload-form" class="hidden" onsubmit="handleUpload(event)">
-            <input type="file" id="resume-file" accept=".pdf,.doc,.docx" required>
-            <div class="hint">PDF, DOC or DOCX, up to 5 MB.</div>
-            <button type="submit" id="upload-btn" class="btn">Upload Resume</button>
-        </form>
-
-        <div id="message" class="message hidden"></div>
+        <div class="cv-side">
+            <section class="card pad">
+                <h2 class="side-title">Before you upload</h2>
+                <ul class="tips" id="tips"></ul>
+            </section>
+            <section class="card pad">
+                <h2 class="side-title">Cover letters</h2>
+                <p class="muted">Write one letter per role and attach it to an application. This is coming soon.</p>
+            </section>
+        </div>
     </div>
 </main>
+
+<script src="js/shell.js"></script>
+<script>
+    if (window.CC) document.getElementById('tips').innerHTML = [
+        'Use a PDF so your layout looks the same for every employer.',
+        'Name the file clearly, like First-Last-CV.pdf.',
+        'Keep it to one or two pages and under 5 MB.'
+    ].map(t => '<li>' + CC.icon('check') + '<span>' + t + '</span></li>').join('');
+</script>
 
 <script>
     const MAX_SIZE = 5 * 1024 * 1024;   // matches spring.servlet.multipart.max-file-size

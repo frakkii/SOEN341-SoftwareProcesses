@@ -7,59 +7,76 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
 </head>
 
-<body class="app">
-<!-- CareerConnect logo + navigation bar -->
-<header class="topbar">
-    <div class="topbar-inner">
-        <div class="brand">
-            <h1>CareerConnect</h1>
-            <p>Welcome, <span id="username"></span></p>
+<body>
+<!-- Top navigation bar is rendered by js/shell.js (also redirects to the login page if not logged in) -->
+
+<main class="wrap feed-grid">
+
+    <!-- Left: mini profile + shortcuts -->
+    <aside class="rail" aria-label="Your account">
+        <section class="card me-card">
+            <div class="me-cover"></div>
+            <span class="ring"><span class="av" data-me></span></span>
+            <h2 id="me-name"></h2>
+            <p id="me-headline"></p>
+            <a class="btn" href="profile.html">View profile</a>
+        </section>
+
+        <section>
+            <h2 class="side-title">Shortcuts</h2>
+            <div class="tiles" id="tiles"></div>
+        </section>
+    </aside>
+
+    <!-- Center: composer + feed -->
+    <section class="feed-col" aria-label="Feed">
+        <form class="card composer" id="composer">
+            <div class="c-row">
+                <span class="av" data-me></span>
+                <textarea id="post-text" rows="1" maxlength="1500" placeholder="Share a job lead, a win, or a question" aria-label="Create a post"></textarea>
+            </div>
+            <div class="preview hidden" id="preview"></div>
+            <div class="c-bar">
+                <input type="file" id="post-photo" accept="image/*" hidden>
+                <button type="button" class="pick" id="pick-photo"></button>
+                <button type="button" class="pick" id="pick-lead" aria-pressed="false"></button>
+                <button type="submit" class="btn primary" id="post-btn" disabled></button>
+            </div>
+        </form>
+
+        <div class="feed-bar">
+            <h2>Latest from your network</h2>
+            <div class="seg" id="filters" role="group" aria-label="Filter feed">
+                <button type="button" class="on" data-f="all">For you</button>
+                <button type="button" data-f="job">Jobs</button>
+                <button type="button" data-f="post">Posts</button>
+            </div>
         </div>
 
-        <nav>
-            <a href="home.html" class="active">Home</a>
-            <a href="#">Postings</a>
+        <div class="feed" id="feed"></div>
+        <p class="card empty hidden" id="feed-empty">Nothing here yet. Be the first to post.</p>
+    </section>
 
-            <!-- My Tools: dropdown menu -->
-            <div class="dropdown">
-                <a href="#">My Tools ▾</a>
-                <div class="dropdown-menu">
-                    <a href="resume.html">My CVs &amp; Cover Letters</a>
-                    <a href="#">Favourited Postings</a>
-                    <a href="applications.html">My Applications</a>
-                </div>
-            </div>
+    <!-- Right: profile strength + companies -->
+    <aside class="rail right" aria-label="Suggestions">
+        <section class="card pad">
+            <h2 class="side-title">Profile strength</h2>
+            <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="strength-bar"><i></i></div>
+            <p class="muted" id="strength-text" style="margin-top:10px;font-size:.88rem"></p>
+            <ul class="todo" id="todo"></ul>
+        </section>
 
-            <a href="#">Messages</a>
-            <a href="#">Settings</a>
-        </nav>
-    </div>
-</header>
-
-<main class="page">
-    <h2>Welcome back! 🎉</h2>
-    <p class="sub">Here's what's coming to your CareerConnect account.</p>
-
-    <div class="tiles">
-        <div class="tile"><span>🔎</span><div><b>Find jobs</b><br><small>Coming soon</small></div></div>
-        <a class="tile" href="resume.html"><span>📄</span><div><b>My CVs</b><br><small>Manage your resumes</small></div></a>
-        <a class="tile" href="applications.html"><span>📊</span><div><b>Applications</b><br><small>Track your status</small></div></a>
-        <div class="tile"><span>⭐</span><div><b>Favourites</b><br><small>Coming soon</small></div></div>
-    </div>
+        <section class="card pad">
+            <h2 class="side-title">Companies hiring</h2>
+            <ul class="list" id="companies"></ul>
+        </section>
+    </aside>
 </main>
 
-<!-- Check for username if user connected so that it can appear
- on dashboard, otherwise send back to login -->
-<script>
-    const name = localStorage.getItem("userName");        // read the saved name
-    if (name) {
-        document.getElementById("username").textContent = name;
-    } else {
-        window.location.href = "index.html";              // not logged in → back to login
-    }
-</script>
+<script src="js/shell.js"></script>
+<script src="js/feed.js"></script>
 </body>
 </html>
