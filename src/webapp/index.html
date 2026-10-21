@@ -165,7 +165,8 @@
             }
             const user = await postJson('/api/auth/login', { email, password });
             localStorage.setItem("userName", user.name);
-            const targetPage = user.role === 'Recruiter' || user.recruiter ? 'recruiterhome.html' : 'home.html';
+            localStorage.setItem("userRole", user.role);
+            const targetPage = user.role === 'Recruiter' ? 'recruiterhome.html' : 'home.html';
             window.location.href = targetPage;
         } catch (err) {
             showError(err.message);
