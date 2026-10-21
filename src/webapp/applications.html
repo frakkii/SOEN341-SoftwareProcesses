@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - My Applications</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="app">
+<!-- CareerConnect logo + navigation bar (same as home.html) -->
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">
+            <h1>CareerConnect</h1>
+            <p>Welcome, <span id="username"></span></p>
+        </div>
+
+        <nav>
+            <a href="home.html">Home</a>
+            <a href="#">Postings</a>
+
+            <div class="dropdown">
+                <a href="#" class="active">My Tools ▾</a>
+                <div class="dropdown-menu">
+                    <a href="resume.html">My CVs &amp; Cover Letters</a>
+                    <a href="#">Favourited Postings</a>
+                    <a href="applications.html">My Applications</a>
+                </div>
+            </div>
+
+            <a href="#">Messages</a>
+            <a href="#">Settings</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page">
+    <div class="card">
+        <h2>Apply to a job</h2>
+        <p class="sub">Enter the job posting number to submit your application. You'll need a resume on file first.</p>
+
+        <form id="apply-form" onsubmit="handleApply(event)">
+            <div class="field">
+                <label for="post-id">Job posting ID</label>
+                <input type="number" id="post-id" min="1" step="1" required placeholder="e.g. 42">
+            </div>
+            <button type="submit" id="apply-btn" class="btn">Submit Application</button>
+        </form>
+
+        <div id="apply-message" class="message hidden"></div>
+    </div>
+
+    <div class="card wide">
+        <h2>My Applications</h2>
+        <p class="sub">Track every application from Applied through to a final decision.</p>
+
+        <div id="list-message" class="message hidden"></div>
+        <div id="app-list" class="app-list hidden"></div>
+        <div id="empty-state" class="empty-state hidden">
+            <span>📭</span>
+            No applications yet. Submit one above to start tracking it here.
+        </div>
+    </div>
+</main>
+
+<script>
+    const STATUS_ICON = {
+        "Applied": "📨",
+        "Under Review": "🔍",
+        "Interview": "🗓️",
+        "Offered": "🎉",
+        "Rejected": "❌"
+    };
+
+    const name = localStorage.getItem("userName");
+    if (name) {
+        document.getElementById("username").textContent = name;
+    } else {
+        window.location.href = "index.html";              // not logged in → back to login
+    }
+
+    function statusClass(label) {
+        return label.toLowerCase().replace(/\s+/g, "-");
+    }
+
+    function showMessage(id, text, type) {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.className = "message " + type;
+        el.classList.toggle("hidden", !text);
+    }
+
+    function renderApplications(apps) {
+        const list = document.getElementById("app-list");
+        const empty = document.getElementById("empty-state");
+
+        if (apps.length === 0) {
+            list.classList.add("hidden");
+            empty.classList.remove("hidden");
+            return;
+        }
+
+        empty.classList.add("hidden");
+        list.classList.remove("hidden");
+        list.innerHTML = apps.map(app => `
+            <div class="app-item">
+                <div class="ic">${STATUS_ICON[app.status] || "📄"}</div>
+                <div class="meta">
+                    <strong>Posting #${app.postId}</strong>
+                    <small>Applied ${new Date(app.appliedAt).toLocaleDateString()} · Updated ${new Date(app.updatedAt).toLocaleDateString()}</small>
+                </div>
+                <span class="chip ${statusClass(app.status)}">${app.status}</span>
+            </div>
+        `).join("");
+    }
+
+    async function loadApplications() {
+        const res = await fetch("/api/applications");
+        const data = await res.json().catch(() => ({}));
+
+        if (res.status === 401) {
+            // The server restarted or the session expired: log in again
+            localStorage.removeItem("userName");
+            window.location.href = "index.html";
+            return;
+        }
+        if (res.status === 403) {
+            showMessage("list-message", data.message || "Only job seekers have applications.", "error");
+            return;
+        }
+        if (!res.ok) {
+            showMessage("list-message", data.message || "Couldn't load your applications.", "error");
+            return;
+        }
+
+        showMessage("list-message", "", "");
+        renderApplications(data);
+    }
+
+    async function handleApply(event) {
+        event.preventDefault();
+        const postId = document.getElementById("post-id").value;
+        const button = document.getElementById("apply-btn");
+
+        showMessage("apply-message", "", "");
+        button.disabled = true;
+        try {
+            const res = await fetch("/api/applications", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ postId: Number(postId) })
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.status === 401) {
+                localStorage.removeItem("userName");
+                window.location.href = "index.html";
+                return;
+            }
+            if (!res.ok) {
+                throw new Error(data.message || "Application failed (" + res.status + ")");
+            }
+
+            document.getElementById("apply-form").reset();
+            showMessage("apply-message", data.message, "success");
+            await loadApplications();
+        } catch (err) {
+            showMessage("apply-message", err.message, "error");
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    loadApplications();
+</script>
+</body>
+</html>
