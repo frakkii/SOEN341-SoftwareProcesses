@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - My Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+<!-- Top navigation bar is rendered by js/shell.js -->
+
+<main class="wrap profile-grid">
+    <div class="p-main">
+
+        <!-- Cover + avatar + intro -->
+        <section class="card hero-card">
+            <div class="cover" id="cover">
+                <button type="button" class="cover-edit" id="cover-btn"></button>
+                <input type="file" id="cover-file" accept="image/*" hidden>
+            </div>
+            <div class="p-head">
+                <div class="avatar-wrap">
+                    <span class="ring"><span class="av" data-me></span></span>
+                    <button type="button" class="av-edit" id="avatar-btn" aria-label="Change profile photo"></button>
+                    <input type="file" id="avatar-file" accept="image/*" hidden>
+                </div>
+                <div class="p-id">
+                    <h1 id="p-name"></h1>
+                    <p class="headline" id="p-headline"></p>
+                    <ul class="facts">
+                        <li id="p-loc"></li>
+                        <li id="p-conn"></li>
+                    </ul>
+                </div>
+                <div class="p-actions">
+                    <span class="open-pill">Open to work</span>
+                    <button type="button" class="btn primary" id="edit-btn"></button>
+                </div>
+            </div>
+        </section>
+
+        <section class="card sec">
+            <div class="sec-h"><h2>About</h2><button type="button" class="icon-btn" id="edit-about" aria-label="Edit about"></button></div>
+            <p class="about" id="p-about"></p>
+        </section>
+
+        <!-- Sample content: replace with the user's real experience once the backend stores it -->
+        <section class="card sec">
+            <div class="sec-h"><h2>Experience</h2><button type="button" class="icon-btn" data-soon="Adding experience" aria-label="Add experience" id="add-exp"></button></div>
+            <div class="row">
+                <span class="logo" style="--c1:#7c3aed;--c2:#a78bfa">L</span>
+                <div><h3>Frontend Developer Intern</h3><p class="co">Lumen Labs</p><p class="when">May 2025 to Aug 2025, Montréal, QC</p>
+                    <p class="d">Rebuilt the job search filters in React, cutting time to first result by a third. Wrote the component tests for the new design system.</p></div>
+            </div>
+            <div class="row">
+                <span class="logo" style="--c1:#0891b2;--c2:#6366f1">M</span>
+                <div><h3>Teaching Assistant</h3><p class="co">Mont-Royal Analytics Academy</p><p class="when">Sep 2024 to Apr 2025, Montréal, QC</p>
+                    <p class="d">Ran weekly lab sessions for 60 students and graded database assignments.</p></div>
+            </div>
+        </section>
+
+        <section class="card sec">
+            <div class="sec-h"><h2>Education</h2><button type="button" class="icon-btn" data-soon="Adding education" aria-label="Add education" id="add-edu"></button></div>
+            <div class="row">
+                <span class="logo" style="--c1:#ea580c;--c2:#f59e0b">U</span>
+                <div><h3>BEng, Software Engineering</h3><p class="co">Your University</p><p class="when">2022 to 2026</p></div>
+            </div>
+        </section>
+
+        <section class="card sec">
+            <div class="sec-h"><h2>Skills</h2></div>
+            <div class="skills">
+                <span class="tag">JavaScript</span><span class="tag">Java</span><span class="tag">Spring Boot</span><span class="tag">React</span>
+                <span class="tag">SQL</span><span class="tag">Git</span><span class="tag">Figma</span><span class="tag">Agile</span>
+            </div>
+        </section>
+    </div>
+
+    <aside class="p-side" aria-label="Profile extras">
+        <section class="card pad">
+            <h2 class="side-title">Your CV</h2>
+            <div class="cv-state" id="cv-state"></div>
+            <a class="btn block" href="resume.html" style="margin-top:14px">Manage CVs</a>
+        </section>
+
+        <section class="card pad">
+            <h2 class="side-title">Profile strength</h2>
+            <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="strength-bar"><i></i></div>
+            <p class="muted" id="strength-text" style="margin-top:10px;font-size:.88rem"></p>
+        </section>
+
+        <section class="card pad">
+            <h2 class="side-title">People you may know</h2>
+            <ul class="list" id="people"></ul>
+        </section>
+    </aside>
+</main>
+
+<dialog id="edit-dialog" aria-labelledby="dlg-title">
+    <form class="dlg" method="dialog" id="edit-form">
+        <h2 id="dlg-title">Edit profile</h2>
+        <div class="field"><label for="f-headline">Headline</label>
+            <input id="f-headline" maxlength="120" placeholder="Software engineering student, open to co-op roles"></div>
+        <div class="field"><label for="f-location">Location</label>
+            <input id="f-location" maxlength="80" placeholder="Montréal, QC"></div>
+        <div class="field"><label for="f-about">About</label>
+            <textarea id="f-about" maxlength="1200" placeholder="Tell employers what you are great at and what you want to do next."></textarea></div>
+        <div class="dlg-bar">
+            <button type="button" class="btn" id="cancel-edit">Cancel</button>
+            <button type="submit" class="btn primary">Save changes</button>
+        </div>
+    </form>
+</dialog>
+
+<script src="js/shell.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>
