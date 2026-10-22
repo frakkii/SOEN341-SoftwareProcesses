@@ -1079,53 +1079,5 @@ I updated the related tests to use valid PDF signatures and check the created/re
 
 Changed files include [ResumeController.java](src/main/java/com/example/demo/controller/ResumeController.java), [Resume.java](src/main/java/com/example/demo/model/Resume.java), [ResumeRepository.java](src/main/java/com/example/demo/repository/ResumeRepository.java), and [V7__add_resume_versions.sql](src/main/resources/db/migration/common/V7__add_resume_versions.sql).
 
-## Exchange 11
 
-**Prompt**
-
-> can you give me a resume of all the changes you did. If i lauched the webapp, what would change
-
-**Response**
-
-## Changes made
-
-The changes are in the **backend**; I didn't change the webapp's HTML, CSS, or JavaScript.
-
-- **Resume uploads now validate more strictly** in [ResumeController.java](src/main/java/com/example/demo/controller/ResumeController.java): filenames with suspicious characters are rejected, and the file contents are checked against the `.pdf`, `.doc`, or `.docx` extension.
-- **Uploading now creates a version instead of overwriting the previous file.** The response indicates whether the upload created a first resume (`201 Created`) or replaced the current version (`200 OK`). Older versions are kept.
-- **Resume history is supported.** [V7__add_resume_versions.sql](src/main/resources/db/migration/common/V7__add_resume_versions.sql) gives resumes their own IDs and adds a `current` flag. The [Resume.java](src/main/java/com/example/demo/model/Resume.java) model and [ResumeRepository.java](src/main/java/com/example/demo/repository/ResumeRepository.java) were updated to support versions.
-- **New backend endpoints** let job seekers list their versions (`GET /api/resume/versions`) and select a version as current (`PUT /api/resume/versions/{resumeId}/current`). Deleting the current resume now selects the newest remaining version, if there is one.
-- **Recruiter resume access** is available through `GET /api/resume/applications/{applicationId}/file`. It checks that the logged-in recruiter owns the job posting associated with that application; it isn't a public download route. The ownership check is in [ApplicationRepository.java](src/main/java/com/example/demo/repository/ApplicationRepository.java).
-- **Applications check for a current resume** before allowing a job seeker to apply, via [ApplicationService.java](src/main/java/com/example/demo/service/ApplicationService.java).
-- Related resume and application tests were updated. I ran the focused tests: **27 passed, 0 failed**.
-
-## What would change when you launch the webapp?
-
-The existing [resume.html](../webapp/resume.html) already shows the current resume, supports uploading or replacing it, and offers a download link. Because the frontend wasn't changed, you **won't see a resume-history list, a “make current” control, or a delete button** on the page. The new history and recruiter access features are backend API behavior for now; the frontend needs changes to expose them. The upload page should still work with the new response statuses because it treats any successful `2xx` response as success and displays the server's message.
-
-The new migration must also run against your database for version history to work.
-
-## Exchange 12
-
-**Prompt**
-
-> why are there build failures
-
-**Response**
-
-I ran the **full backend test build** against the current files. It now succeeds: **49 tests passed, 0 failures, 0 errors**.
-
-The earlier failures were caused by intermediate changes:
-
-- **Resume IDs changed from `Integer` to `Long`** to support multiple resume versions. Some code and tests still treated a person's ID as the resume's ID. They now use person-based repository queries such as `findByPersonIdAndCurrentTrue(...)` instead. See [ResumeRepository.java](src/main/java/com/example/demo/repository/ResumeRepository.java) and [ResumeController.java](src/main/java/com/example/demo/controller/ResumeController.java).
-- **File-signature validation** started rejecting test uploads that were named `.pdf` but contained plain text. The tests now use PDF-like bytes for valid PDF uploads. See [ResumeControllerTests.java](src/test/java/com/example/demo/controller/ResumeControllerTests.java) and [ApplicationControllerTests.java](src/test/java/com/example/demo/controller/ApplicationControllerTests.java).
-- **The upload response now returns `201 Created` for the first upload** and `200 OK` when replacing the current resume, so tests expecting `200` for every upload needed updating.
-
-To verify locally from the backend folder, run:
-
-```powershell
-.\mvnw.cmd test
-```
-
-If that command passes but the IDE still shows build errors, it may be using stale diagnostics; try refreshing/reloading the Java project. If the command fails on your machine, the new error output will identify what's left.
 
