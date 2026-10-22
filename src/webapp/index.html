@@ -31,11 +31,10 @@
 
         <form id="auth-form" onsubmit="handleSubmit(event)">
             <div class="field register-only hidden">
-                <label for="role">Account Type</label>
-                <select id="role" onchange="updateRecruiterFields()">
-                    <option value="Job Seeker">Job Seeker</option>
-                    <option value="Recruiter">Recruiter</option>
-                </select>
+               <label>
+                  <input type="radio" name="accountType" value="jobSeeker" checked>Personal account</label>
+               <label>
+                  <input type="radio" name="accountType" value="recruiter">Employer / Recruiter</label>
             </div>
             <div class="two-col register-only hidden">
                 <div class="field">
@@ -166,7 +165,9 @@
             }
             const user = await postJson('/api/auth/login', { email, password });
             localStorage.setItem("userName", user.name);
-            window.location.href = "home.html";
+            localStorage.setItem("userRole", user.role);
+            const targetPage = user.role === 'Recruiter' ? 'recruiterhome.html' : 'home.html';
+            window.location.href = targetPage;
         } catch (err) {
             showError(err.message);
         } finally {

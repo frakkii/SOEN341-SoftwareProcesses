@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+       <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - Jobs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="app">
+<!-- CareerConnect logo + navigation bar -->
+<header class="topbar">
+    <div class="brand">
+        <h1>CareerConnect</h1>
+        <p>Welcome, <span id="username"></span></p>
+    </div>
+
+ <nav>
+        <a href="home.html" class="active">Home</a>
+        <a href="#">Your Postings</a>
+        <a href="#">Messages</a>
+        <a href="#">Company Profile &amp; Account Settings</a>
+        <a href="#">Logout</a>
+
+        <!-- My Tools: dropdown menu -->
+      <!-- <div class="dropdown">
+            <a href="#">My Tools ▾</a>
+            <div class="dropdown-menu">
+                <a href="resume.html">My CVs &amp; Cover Letters</a>
+                <a href="#">Favourited Postings</a>
+                <a href="#">My Applications</a>
+            </div>
+        </div> -->
+    </nav>
+</header>
+
+
+<main class="page">
+    <h2>Welcome back! 🎉</h2>
+    <p class="sub">Here are your updates:</p>
+
+    <div class="tiles">
+        <div class="tiles"><span>📄</span><div><b>Create Postings</b><br><small>Create a new job posting for your company!</small></div></div>
+        <div class="tiles"><span>📄</span><div><b>View Applicants</b><br><small>Browse a consolidated list of applicants!</small></div></div>
+    </div>
+</main>
+
+<!-- Check for username if user connected so that it can appear
+ on dashboard, otherwise send back to login -->
+<script>
+    const name = localStorage.getItem("userName");        // read the saved name
+    if (name) {
+        document.getElementById("username").textContent = name;
+    } else {
+        window.location.href = "index.html";              // not logged in → back to login
+    }
+</script>
+
+</body>
+
+</html>
