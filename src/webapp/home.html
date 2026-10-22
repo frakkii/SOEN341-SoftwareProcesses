@@ -6,7 +6,7 @@
     <title>CareerConnect - Jobs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -14,14 +14,15 @@
 <!-- CareerConnect logo + navigation bar -->
 <header class="topbar">
     <div class="topbar-inner">
-        <div class="brand">
-            <h1>CareerConnect</h1>
-            <p>Welcome, <span id="username"></span></p>
-        </div>
+        <a class="brand" href="home.html">
+            <div>
+                <h1>CareerConnect</h1>
+                <p>Welcome back, <span id="username"></span></p>
+            </div>
+        </a>
 
         <nav>
             <a href="home.html" class="active">Home</a>
-            <a href="#">Postings</a>
 
             <!-- My Tools: dropdown menu -->
             <div class="dropdown">
@@ -35,19 +36,23 @@
 
             <a href="#">Messages</a>
             <a href="#">Settings</a>
+            <a class="avatar" href="profile.html" id="nav-avatar" aria-label="View profile">👤</a>
         </nav>
     </div>
 </header>
 
 <main class="page">
-    <h2>Welcome back! 🎉</h2>
-    <p class="sub">Here's what's coming to your CareerConnect account.</p>
+    <form class="search-bar" id="search-form" onsubmit="return false">
+        <input type="text" id="job-search" placeholder="Search by job title, company or location">
+        <button type="submit">🔍 Search</button>
+    </form>
 
-    <div class="tiles">
-        <div class="tile"><span>🔎</span><div><b>Find jobs</b><br><small>Coming soon</small></div></div>
-        <a class="tile" href="resume.html"><span>📄</span><div><b>My CVs</b><br><small>Manage your resumes</small></div></a>
-        <a class="tile" href="applications.html"><span>📊</span><div><b>Applications</b><br><small>Track your status</small></div></a>
-        <div class="tile"><span>⭐</span><div><b>Favourites</b><br><small>Coming soon</small></div></div>
+    <div class="job-layout">
+        <div>
+            <div class="job-list" id="job-list"></div>
+            <div id="pagination"></div>
+        </div>
+        <aside class="job-detail" id="job-detail"></aside>
     </div>
 </main>
 
@@ -60,6 +65,258 @@
     } else {
         window.location.href = "index.html";              // not logged in → back to login
     }
+
+    // Profile photos have no backend support yet, so they're kept per-browser
+    // in localStorage (set on profile.html) and mirrored into the nav avatar here.
+    const savedPhoto = localStorage.getItem("cc_profile_photo");
+    if (savedPhoto) {
+        document.getElementById("nav-avatar").innerHTML = `<img src="${savedPhoto}" alt="Profile photo">`;
+    }
+</script>
+
+<!-- Mock postings: there's no postings-browse API yet, so this is placeholder
+ data. "Apply now" links into the real /api/applications flow on applications.html. -->
+<script>
+    const JOBS = [
+        {
+            id: 1, title: "Frontend Developer", company: "TechNova Inc.",
+            location: "Montreal, QC", mode: "Hybrid", salary: "$65K – $80K / yr",
+            type: "Full-time", posted: "2 days ago", match: 92,
+            description: "TechNova is looking for a Frontend Developer to help build the next generation of our customer dashboard. You will work closely with designers and backend engineers to ship fast, accessible interfaces.",
+            responsibilities: ["Build responsive UI components in React", "Collaborate with design on new features", "Write unit and integration tests", "Participate in code review"],
+            requirements: ["2+ years of frontend experience", "Strong HTML, CSS and JS fundamentals", "Experience with React or a similar framework", "Comfortable working in an agile team"]
+        },
+        {
+            id: 2, title: "UI/UX Designer", company: "Pixel Studio",
+            location: "Remote", mode: "Remote", salary: "$40 – $55 / hr",
+            type: "Contract", posted: "5 days ago", match: 78,
+            description: "Pixel Studio is a boutique design agency seeking a contract UI/UX Designer to support a 3-month engagement redesigning a checkout flow for a retail client.",
+            responsibilities: ["Design wireframes and high-fidelity mockups", "Run quick usability tests", "Maintain the design system in Figma", "Present concepts to stakeholders"],
+            requirements: ["Portfolio demonstrating UX process", "Proficiency in Figma", "Experience working with design systems", "Strong written and verbal communication"]
+        },
+        {
+            id: 3, title: "Backend Engineer (Java)", company: "Northwind Tech",
+            location: "Toronto, ON", mode: "In person", salary: "$70K – $90K / yr",
+            type: "Full-time", posted: "1 week ago", match: 85,
+            description: "Northwind Tech is hiring a Backend Engineer to join our platform team, building and scaling the services behind our logistics product.",
+            responsibilities: ["Design and build REST APIs in Java and Spring", "Own services from design through deployment", "Optimize database queries and schema", "Mentor junior engineers"],
+            requirements: ["3+ years of backend development", "Experience with Java and Spring Boot", "Familiarity with relational databases", "Degree in Computer Science or equivalent experience"]
+        },
+        {
+            id: 4, title: "Data Analyst", company: "Clearwater Analytics",
+            location: "Ottawa, ON", mode: "Hybrid", salary: "$60K – $75K / yr",
+            type: "Full-time", posted: "3 days ago", match: 81,
+            description: "Clearwater Analytics is looking for a Data Analyst to turn raw operational data into dashboards and reports the whole company relies on.",
+            responsibilities: ["Build and maintain reporting dashboards", "Clean and validate incoming data sets", "Partner with teams to define key metrics", "Automate recurring reports"],
+            requirements: ["Experience with SQL and spreadsheet tools", "Familiarity with a BI tool such as Power BI or Tableau", "Strong attention to detail", "Comfortable presenting findings to non-technical teams"]
+        },
+        {
+            id: 5, title: "DevOps Engineer", company: "CloudPeak Systems",
+            location: "Remote", mode: "Remote", salary: "$85K – $100K / yr",
+            type: "Full-time", posted: "4 days ago", match: 88,
+            description: "CloudPeak Systems needs a DevOps Engineer to harden our deployment pipelines and keep production infrastructure reliable as we scale.",
+            responsibilities: ["Maintain CI/CD pipelines", "Manage cloud infrastructure as code", "Monitor system health and respond to incidents", "Improve deployment speed and reliability"],
+            requirements: ["Experience with AWS or similar cloud platform", "Familiarity with Docker and Kubernetes", "Scripting experience (Bash, Python)", "On-call availability on a rotating basis"]
+        },
+        {
+            id: 6, title: "Marketing Coordinator", company: "BrightWave Media",
+            location: "Vancouver, BC", mode: "In person", salary: "$45K – $55K / yr",
+            type: "Full-time", posted: "6 days ago", match: 65,
+            description: "BrightWave Media is hiring a Marketing Coordinator to help plan and execute campaigns across social, email and events.",
+            responsibilities: ["Coordinate social media content calendars", "Assist with email campaign production", "Track campaign performance metrics", "Support event planning and logistics"],
+            requirements: ["1+ years in a marketing or communications role", "Comfortable with social media scheduling tools", "Strong writing skills", "Good organizational skills"]
+        },
+        {
+            id: 7, title: "QA Tester", company: "Northwind Tech",
+            location: "Toronto, ON", mode: "Hybrid", salary: "$50K – $60K / yr",
+            type: "Contract", posted: "1 week ago", match: 70,
+            description: "Northwind Tech needs a QA Tester to write and run test plans for our logistics platform ahead of upcoming releases.",
+            responsibilities: ["Write and execute manual test cases", "Log and track defects", "Verify bug fixes before release", "Collaborate with developers on edge cases"],
+            requirements: ["Experience testing web applications", "Familiarity with a bug tracker such as Jira", "Methodical, detail-oriented approach", "Basic SQL for data verification"]
+        },
+        {
+            id: 8, title: "Product Manager", company: "Orbit Labs",
+            location: "Remote", mode: "Remote", salary: "$90K – $110K / yr",
+            type: "Full-time", posted: "2 weeks ago", match: 83,
+            description: "Orbit Labs is looking for a Product Manager to own the roadmap for our customer-facing mobile app.",
+            responsibilities: ["Define and prioritize the product roadmap", "Write specs and user stories", "Work closely with design and engineering", "Analyze usage data to inform decisions"],
+            requirements: ["2+ years of product management experience", "Comfortable working directly with engineers", "Strong written communication", "Experience with analytics tools"]
+        },
+        {
+            id: 9, title: "Mobile Developer (iOS)", company: "AppForge",
+            location: "Montreal, QC", mode: "Hybrid", salary: "$70K – $85K / yr",
+            type: "Full-time", posted: "5 days ago", match: 77,
+            description: "AppForge is hiring an iOS Developer to help build and maintain our flagship consumer app used by millions of people.",
+            responsibilities: ["Build features in Swift and SwiftUI", "Fix bugs reported through crash analytics", "Write unit tests for new features", "Participate in App Store release cycles"],
+            requirements: ["2+ years building iOS apps", "Strong knowledge of Swift and SwiftUI", "Experience with REST APIs", "Familiarity with App Store submission process"]
+        },
+        {
+            id: 10, title: "Customer Support Specialist", company: "HelpDesk Co.",
+            location: "Remote", mode: "Remote", salary: "$38K – $45K / yr",
+            type: "Part-time", posted: "3 days ago", match: 60,
+            description: "HelpDesk Co. is looking for a Customer Support Specialist to help our clients get the most out of our software through chat and email.",
+            responsibilities: ["Respond to customer tickets via chat and email", "Troubleshoot common account issues", "Escalate bugs to the engineering team", "Maintain the internal help center"],
+            requirements: ["Strong written communication", "Patient, customer-first attitude", "Comfortable learning new software quickly", "Previous support experience is a plus"]
+        },
+        {
+            id: 11, title: "Data Scientist", company: "Clearwater Analytics",
+            location: "Ottawa, ON", mode: "Remote", salary: "$95K – $115K / yr",
+            type: "Full-time", posted: "1 day ago", match: 90,
+            description: "Clearwater Analytics is hiring a Data Scientist to build predictive models that power our clients' forecasting tools.",
+            responsibilities: ["Build and validate predictive models", "Clean and prepare large data sets", "Communicate findings to stakeholders", "Collaborate with engineering on model deployment"],
+            requirements: ["Experience with Python and pandas/scikit-learn", "Strong statistics fundamentals", "Experience deploying models to production", "Master's degree or equivalent experience preferred"]
+        },
+        {
+            id: 12, title: "Graphic Designer", company: "Pixel Studio",
+            location: "Remote", mode: "Remote", salary: "$35 – $48 / hr",
+            type: "Contract", posted: "4 days ago", match: 72,
+            description: "Pixel Studio is looking for a Graphic Designer to produce marketing assets for a handful of ongoing client campaigns.",
+            responsibilities: ["Design social and web marketing assets", "Maintain brand consistency across campaigns", "Iterate quickly based on client feedback", "Prepare final files for production"],
+            requirements: ["Portfolio of marketing or brand design work", "Proficiency in Figma or Adobe Creative Suite", "Comfortable managing multiple projects at once", "Strong eye for typography and layout"]
+        },
+        {
+            id: 13, title: "Security Engineer", company: "SecureNet Inc.",
+            location: "Toronto, ON", mode: "In person", salary: "$90K – $105K / yr",
+            type: "Full-time", posted: "6 days ago", match: 86,
+            description: "SecureNet Inc. is hiring a Security Engineer to help protect our infrastructure and lead internal security reviews.",
+            responsibilities: ["Run vulnerability assessments and penetration tests", "Review code and infrastructure for security issues", "Respond to security incidents", "Maintain security policies and documentation"],
+            requirements: ["Experience in application or infrastructure security", "Familiarity with common security tooling", "Relevant certification (e.g. Security+, CEH) is a plus", "Clear written documentation skills"]
+        }
+    ];
+
+    let selectedId = JOBS[0].id;
+    let currentPage = 1;
+    const PAGE_SIZE = 5;
+
+    function getFilteredJobs() {
+        const q = document.getElementById("job-search").value.trim().toLowerCase();
+        if (!q) return JOBS;
+        return JOBS.filter(j =>
+            j.title.toLowerCase().includes(q) ||
+            j.company.toLowerCase().includes(q) ||
+            j.location.toLowerCase().includes(q)
+        );
+    }
+
+    function renderPagination(totalPages, totalCount) {
+        const el = document.getElementById("pagination");
+        if (totalPages <= 1) {
+            el.innerHTML = "";
+            return;
+        }
+        let buttons = "";
+        for (let p = 1; p <= totalPages; p++) {
+            buttons += `<button class="page-btn ${p === currentPage ? "active" : ""}" data-page="${p}">${p}</button>`;
+        }
+        el.innerHTML = `
+            <div class="page-info">Page ${currentPage} of ${totalPages} &middot; ${totalCount} postings</div>
+            <div class="pagination">${buttons}</div>
+        `;
+        el.querySelectorAll(".page-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                currentPage = Number(btn.dataset.page);
+                renderJobList();
+                renderJobDetail();
+            });
+        });
+    }
+
+    function renderJobList() {
+        const list = document.getElementById("job-list");
+        const filtered = getFilteredJobs();
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<p class="no-results">No postings match your search.</p>`;
+            document.getElementById("pagination").innerHTML = "";
+            document.getElementById("job-detail").innerHTML = "";
+            return;
+        }
+
+        const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+        currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const pageItems = filtered.slice(start, start + PAGE_SIZE);
+
+        if (!pageItems.some(j => j.id === selectedId)) {
+            selectedId = pageItems[0].id;
+        }
+
+        list.innerHTML = pageItems.map(j => `
+            <article class="job-card ${j.id === selectedId ? "selected" : ""}" data-id="${j.id}">
+                <div class="job-card-top">
+                    <div>
+                        <h3>${j.title}</h3>
+                        <span class="job-company">${j.company}</span>
+                    </div>
+                    <div class="job-actions">
+                        <button class="icon-btn fav" type="button" aria-label="Favourite this posting">🤍</button>
+                        <button class="icon-btn save" type="button" aria-label="Save this posting">🔖</button>
+                    </div>
+                </div>
+                <div class="job-meta">
+                    <span>📍 ${j.location}</span>
+                    <span>🏢 ${j.mode}</span>
+                    <span>💰 ${j.salary}</span>
+                    <span>🕒 ${j.type}</span>
+                </div>
+                <div class="job-footer">
+                    <span>Posted ${j.posted}</span>
+                    <span class="match-badge">${j.match}% match</span>
+                </div>
+            </article>
+        `).join("");
+
+        list.querySelectorAll(".job-card").forEach(card => {
+            card.addEventListener("click", () => {
+                selectedId = Number(card.dataset.id);
+                renderJobList();
+                renderJobDetail();
+            });
+        });
+        list.querySelectorAll(".icon-btn").forEach(btn => {
+            btn.addEventListener("click", event => {
+                event.stopPropagation();
+                btn.classList.toggle("active");
+                if (btn.classList.contains("fav")) {
+                    btn.textContent = btn.classList.contains("active") ? "❤️" : "🤍";
+                }
+            });
+        });
+
+        renderPagination(totalPages, filtered.length);
+    }
+
+    function renderJobDetail() {
+        if (getFilteredJobs().length === 0) {
+            return;
+        }
+        const j = JOBS.find(x => x.id === selectedId);
+        document.getElementById("job-detail").innerHTML = `
+            <h3>${j.title}</h3>
+            <span class="job-company">${j.company}</span>
+            <div class="job-meta">
+                <span>📍 ${j.location}</span>
+                <span>🏢 ${j.mode}</span>
+                <span>💰 ${j.salary}</span>
+                <span>🕒 ${j.type}</span>
+            </div>
+            <p>${j.description}</p>
+            <strong>What you'll do</strong>
+            <ul>${j.responsibilities.map(r => `<li>${r}</li>`).join("")}</ul>
+            <strong>What we're looking for</strong>
+            <ul>${j.requirements.map(r => `<li>${r}</li>`).join("")}</ul>
+            <a class="btn inline" href="applications.html?postId=${j.id}">Apply now</a>
+        `;
+    }
+
+    document.getElementById("job-search").addEventListener("input", () => {
+        currentPage = 1;
+        renderJobList();
+        renderJobDetail();
+    });
+
+    renderJobList();
+    renderJobDetail();
 </script>
 </body>
 </html>

@@ -6,7 +6,7 @@
     <title>CareerConnect - My Resume</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -14,14 +14,15 @@
 <!-- CareerConnect logo + navigation bar (same as home.html) -->
 <header class="topbar">
     <div class="topbar-inner">
-        <div class="brand">
-            <h1>CareerConnect</h1>
-            <p>Welcome, <span id="username"></span></p>
-        </div>
+        <a class="brand" href="home.html">
+            <div>
+                <h1>CareerConnect</h1>
+                <p>Welcome back, <span id="username"></span></p>
+            </div>
+        </a>
 
         <nav>
             <a href="home.html">Home</a>
-            <a href="#">Postings</a>
 
             <div class="dropdown">
                 <a href="#" class="active">My Tools ▾</a>
@@ -34,6 +35,7 @@
 
             <a href="#">Messages</a>
             <a href="#">Settings</a>
+            <a class="avatar" href="profile.html" id="nav-avatar" aria-label="View profile">👤</a>
         </nav>
     </div>
 </header>
@@ -67,6 +69,13 @@
         document.getElementById("username").textContent = name;
     } else {
         window.location.href = "index.html";              // not logged in → back to login
+    }
+
+    // Profile photos have no backend support yet, so they're kept per-browser
+    // in localStorage (set on profile.html) and mirrored into the nav avatar here.
+    const savedPhoto = localStorage.getItem("cc_profile_photo");
+    if (savedPhoto) {
+        document.getElementById("nav-avatar").innerHTML = `<img src="${savedPhoto}" alt="Profile photo">`;
     }
 
     function showMessage(text, type) {

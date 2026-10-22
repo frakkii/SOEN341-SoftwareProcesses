@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - My Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="app">
+<!-- CareerConnect logo + navigation bar (same as home.html) -->
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="home.html">
+            <div>
+                <h1>CareerConnect</h1>
+                <p>Welcome back, <span id="username"></span></p>
+            </div>
+        </a>
+
+        <nav>
+            <a href="home.html">Home</a>
+
+            <div class="dropdown">
+                <a href="#">My Tools ▾</a>
+                <div class="dropdown-menu">
+                    <a href="resume.html">My CVs &amp; Cover Letters</a>
+                    <a href="#">Favourited Postings</a>
+                    <a href="applications.html">My Applications</a>
+                </div>
+            </div>
+
+            <a href="#">Messages</a>
+            <a href="#">Settings</a>
+            <a class="avatar active" href="profile.html" id="nav-avatar" aria-label="View profile">👤</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page">
+    <div class="card">
+        <h2>My Profile</h2>
+        <p class="sub">Your personal details on file with CareerConnect.</p>
+
+        <div class="profile-avatar-wrap">
+            <div class="profile-avatar" id="profile-avatar">👤</div>
+            <label class="btn ghost inline" for="avatar-input">Upload photo</label>
+            <input type="file" id="avatar-input" accept="image/*">
+        </div>
+
+        <div id="profile-message" class="message hidden"></div>
+
+        <div class="profile-fields hidden" id="profile-fields">
+            <div class="profile-field">
+                <label>Full name</label>
+                <div class="value" id="field-name"></div>
+            </div>
+            <div class="profile-field">
+                <label>Email</label>
+                <div class="value" id="field-email"></div>
+            </div>
+            <div class="profile-field">
+                <label>Phone number</label>
+                <div class="value" id="field-phone"></div>
+            </div>
+            <div class="profile-field">
+                <label>Location</label>
+                <div class="value" id="field-location"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const name = localStorage.getItem("userName");
+    if (name) {
+        document.getElementById("username").textContent = name;
+    } else {
+        window.location.href = "index.html";              // not logged in → back to login
+    }
+
+    function showMessage(text, type) {
+        const el = document.getElementById("profile-message");
+        el.textContent = text;
+        el.className = "message " + type;
+        el.classList.toggle("hidden", !text);
+    }
+
+    // The photo itself has no backend support yet, so it's kept locally in this
+    // browser only (not synced to the account or visible to anyone else).
+    const AVATAR_KEY = "cc_profile_photo";
+
+    function setAvatarImage(dataUrl) {
+        document.getElementById("profile-avatar").innerHTML = `<img src="${dataUrl}" alt="Profile photo">`;
+        document.getElementById("nav-avatar").innerHTML = `<img src="${dataUrl}" alt="Profile photo">`;
+    }
+
+    function loadSavedAvatar() {
+        const dataUrl = localStorage.getItem(AVATAR_KEY);
+        if (dataUrl) {
+            setAvatarImage(dataUrl);
+        }
+    }
+
+    document.getElementById("avatar-input").addEventListener("change", event => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+        if (!file.type.startsWith("image/")) {
+            showMessage("Please choose an image file.", "error");
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            showMessage("Photo must be 2 MB or smaller.", "error");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            localStorage.setItem(AVATAR_KEY, reader.result);
+            setAvatarImage(reader.result);
+            showMessage("Photo updated (saved to this browser only).", "success");
+        };
+        reader.readAsDataURL(file);
+    });
+
+    async function loadProfile() {
+        const res = await fetch("/api/profile");
+        const data = await res.json().catch(() => ({}));
+
+        if (res.status === 401) {
+            localStorage.removeItem("userName");
+            window.location.href = "index.html";
+            return;
+        }
+        if (!res.ok) {
+            showMessage(data.message || "Couldn't load your profile.", "error");
+            return;
+        }
+
+        document.getElementById("field-name").textContent = `${data.name} ${data.surname}`;
+        document.getElementById("field-email").textContent = data.email;
+        document.getElementById("field-phone").textContent = data.phone;
+        document.getElementById("field-location").textContent = [data.city, data.provinceState, data.country]
+            .filter(Boolean).join(", ");
+        document.getElementById("profile-fields").classList.remove("hidden");
+    }
+
+    loadSavedAvatar();
+    loadProfile();
+</script>
+</body>
+</html>
