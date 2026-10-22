@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Job Posting</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>CareerConnect</h1>
+      <p>Recruiter dashboard</p>
+    </div>
+    <nav>
+      <a href="recruiterhome.html">Home</a>
+      <a href="#" class="active">Your Postings</a>
+      <a href="#">Messages</a>
+      <a href="#">Company Profile &amp; Account Settings</a>
+      <a href="#">Logout</a>
+>
+    </nav>
+  </header>
+
+  <main class="page">
+    <h2>Create a Job Listing</h2>
+
+    <form id="jobPostingForm">
+      <div class="field">
+        <label for="title">Job Position Title</label>
+        <input type="text" id="title" name="title" placeholder="e.g. Software Engineer" required />
+      </div>
+
+      <div class="field">
+        <label for="department">Department</label>
+        <input type="text" id="department" name="department" placeholder="e.g. Engineering" required />
+      </div>
+
+      <div class="field">
+        <label for="salary">Salary</label>
+        <input type="text" id="salary" name="salary" placeholder="$90,000 - $120,000" required />
+      </div>
+
+      <div class="field">
+        <label for="skills">Required Skills & Competencies</label>
+        <textarea id="skills" name="skills" rows="4" placeholder="List key skills, tools, experience, certifications..." required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="description">Job Description</label>
+        <textarea id="description" name="description" rows="6" placeholder="Describe duties, responsibilities, expectations..." required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="deadline">Application Deadline</label>
+        <input type="date" id="deadline" name="deadline" required />
+      </div>
+
+      <button type="submit" class="btn">Create Listing</button>
+    </form>
+
+    <p id="message" class="hidden"></p>
+  </main>
+
+  <script>
+    const form = document.getElementById("jobPostingForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const payload = {
+        title: document.getElementById("title").value.trim(),
+        department: document.getElementById("department").value.trim(),
+        salary: document.getElementById("salary").value.trim(),
+        requiredSkills: document.getElementById("skills").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        applicationDeadline: document.getElementById("deadline").value
+      };
+
+      try {
+        const response = await fetch("/api/postings/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to create job posting");
+        }
+
+        message.textContent = "Job listing created successfully.";
+        message.classList.remove("hidden");
+        form.reset();
+      } catch (error) {
+        message.textContent = error.message;
+        message.classList.remove("hidden");
+      }
+    });
+  </script>
+</body>
+</html>
