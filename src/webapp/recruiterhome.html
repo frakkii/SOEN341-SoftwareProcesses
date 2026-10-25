@@ -1,64 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-       <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerConnect - Jobs</title>
+    <title>CareerConnect - Recruiter Home</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
 </head>
 
-<body class="app">
-<!-- CareerConnect logo + navigation bar -->
-<header class="topbar">
-    <div class="brand">
-        <h1>CareerConnect</h1>
-        <p>Welcome, <span id="username"></span></p>
-    </div>
-
- <nav>
-        <a href="home.html" class="active">Home</a>
-        <a href="#">Your Postings</a>
-        <a href="#">Messages</a>
-        <a href="#">Company Profile &amp; Account Settings</a>
-        <a href="#">Logout</a>
-
-        <!-- My Tools: dropdown menu -->
-      <!-- <div class="dropdown">
-            <a href="#">My Tools ▾</a>
-            <div class="dropdown-menu">
-                <a href="resume.html">My CVs &amp; Cover Letters</a>
-                <a href="#">Favourited Postings</a>
-                <a href="#">My Applications</a>
+<body>
+    <header class="topbar">
+        <a class="brand" href="recruiterhome.html" aria-label="CareerConnect home">
+            <span class="mark">C</span>
+            <div>
+                <b>CareerConnect</b>
+                <small>Recruiter dashboard</small>
             </div>
-        </div> -->
-    </nav>
-</header>
+        </a>
 
+        <nav class="nav" aria-label="Primary navigation">
+            <a href="recruiterhome.html" class="active">Home</a>
+            <a href="createposting.html">Your Postings</a>
+            <a href="#">Messages</a>
+            <a href="#">Company Profile &amp; Account Settings</a>
+            <a href="#" id="logout">Logout</a>
+        </nav>
 
-<main class="page">
-    <h2>Welcome back! 🎉</h2>
-    <p class="sub">Here are your updates:</p>
+        <a class="me" href="recruiterhome.html" aria-label="Recruiter profile">
+            <span class="av sm" id="profile-badge">R</span>
+        </a>
+    </header>
 
-    <div class="tiles">
-        <div class="tiles"><span>📄</span><div><b>Create Postings</b><br><small>Create a new job posting for your company!</small></div></div>
-        <div class="tiles"><span>📄</span><div><b>View Applicants</b><br><small>Browse a consolidated list of applicants!</small></div></div>
-    </div>
-</main>
+    <main class="wrap">
+        <div class="page-title">
+            <h1>Welcome back, <span id="username">Recruiter</span>!</h1>
+            <p>Here are your hiring updates at a glance.</p>
+        </div>
 
-<!-- Check for username if user connected so that it can appear
- on dashboard, otherwise send back to login -->
-<script>
-    const name = localStorage.getItem("userName");        // read the saved name
-    if (name) {
-        document.getElementById("username").textContent = name;
-    } else {
-        window.location.href = "index.html";              // not logged in → back to login
-    }
-</script>
+        <div class="tiles" aria-label="Recruiter shortcuts">
+            <a href="createposting.html" class="tile t1">
+                <span>✍️</span>
+                <div>
+                    <b>Create a posting</b>
+                    <small>Draft a new opportunity for your team.</small>
+                </div>
+            </a>
 
+            <a href="#" class="tile t2">
+                <span>👥</span>
+                <div>
+                    <b>Review applicants</b>
+                    <small>Track candidates and shortlist strong fits.</small>
+                </div>
+            </a>
+
+            <a href="#" class="tile t3">
+                <span>💬</span>
+                <div>
+                    <b>Messages</b>
+                    <small>Reply quickly and keep candidates moving.</small>
+                </div>
+            </a>
+
+            <a href="#" class="tile t4">
+                <span>📊</span>
+                <div>
+                    <b>Insights</b>
+                    <small>Monitor hiring momentum and team activity.</small>
+                </div>
+            </a>
+        </div>
+
+        <section class="card pad" style="margin-top: 28px;">
+            <h2 class="side-title">Recruiter snapshot</h2>
+
+            <div class="stats" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-top:16px;">
+                <div class="card pad" style="padding:18px; background:#f8f5ff; border-color:#e6e1fb;">
+                    <small class="muted">Open listings</small>
+                    <h3 style="margin-top:8px; font-size:1.8rem;">12</h3>
+                </div>
+                <div class="card pad" style="padding:18px; background:#f0fdf4; border-color:#dcfce7;">
+                    <small class="muted">New applicants</small>
+                    <h3 style="margin-top:8px; font-size:1.8rem;">24</h3>
+                </div>
+                <div class="card pad" style="padding:18px; background:#eff6ff; border-color:#dbeafe;">
+                    <small class="muted">Interviews booked</small>
+                    <h3 style="margin-top:8px; font-size:1.8rem;">8</h3>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const name = localStorage.getItem("userName");
+        const usernameEl = document.getElementById("username");
+        const profileBadge = document.getElementById("profile-badge");
+
+        if (name && name.trim()) {
+            usernameEl.textContent = name;
+            profileBadge.textContent = name.trim().charAt(0).toUpperCase();
+        } else {
+            window.location.href = "index.html";
+        }
+
+        document.getElementById("logout").addEventListener("click", function (event) {
+            event.preventDefault();
+            localStorage.removeItem("userName");
+            window.location.href = "index.html";
+        });
+    </script>
 </body>
-
 </html>
