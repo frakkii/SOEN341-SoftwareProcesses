@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "job_posting")
+@Table(name = "job_postings")
 public class JobPosting {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Integer id;
 
     @Column(name = "employer_id", nullable = false)
