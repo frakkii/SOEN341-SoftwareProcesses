@@ -1,64 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-       <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerConnect - Jobs</title>
+    <title>CareerConnect - Recruiter Home</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
 </head>
 
-<body class="app">
-<!-- CareerConnect logo + navigation bar -->
-<header class="topbar">
-    <div class="brand">
-        <h1>CareerConnect</h1>
-        <p>Welcome, <span id="username"></span></p>
-    </div>
-
- <nav>
-        <a href="home.html" class="active">Home</a>
-        <a href="#">Your Postings</a>
-        <a href="#">Messages</a>
-        <a href="#">Company Profile &amp; Account Settings</a>
-        <a href="#">Logout</a>
-
-        <!-- My Tools: dropdown menu -->
-      <!-- <div class="dropdown">
-            <a href="#">My Tools ▾</a>
-            <div class="dropdown-menu">
-                <a href="resume.html">My CVs &amp; Cover Letters</a>
-                <a href="#">Favourited Postings</a>
-                <a href="#">My Applications</a>
+<body>
+    <header class="topbar">
+        <a class="brand" href="recruiterhome.html" aria-label="CareerConnect home">
+            <span class="mark">C</span>
+            <div>
+                <b>CareerConnect</b>
+                <small>Recruiter dashboard</small>
             </div>
-        </div> -->
-    </nav>
-</header>
+        </a>
 
+        <nav class="nav" aria-label="Primary navigation">
+            <a href="recruiterhome.html" class="active">Home</a>
+            <a href="createposting.html">Your Postings</a>
+            <a href="#">Messages</a>
+            <a href="#">Company Profile &amp; Account Settings</a>
+            <a href="#" id="logout">Logout</a>
+        </nav>
 
-<main class="page">
-    <h2>Welcome back! 🎉</h2>
-    <p class="sub">Here are your updates:</p>
+        <a class="me" href="recruiterhome.html" aria-label="Recruiter profile">
+            <span class="av sm" id="profile-badge">R</span>
+        </a>
+    </header>
 
-    <div class="tiles">
-        <div class="tiles"><span>📄</span><div><b>Create Postings</b><br><small>Create a new job posting for your company!</small></div></div>
-        <div class="tiles"><span>📄</span><div><b>View Applicants</b><br><small>Browse a consolidated list of applicants!</small></div></div>
-    </div>
-</main>
+    <main class="wrap dashboard">
+        <div class="page-title">
+            <h1>Welcome back, <span id="username">Recruiter</span>!</h1>
+            <p>Here are your hiring updates at a glance.</p>
+        </div>
 
-<!-- Check for username if user connected so that it can appear
- on dashboard, otherwise send back to login -->
-<script>
-    const name = localStorage.getItem("userName");        // read the saved name
-    if (name) {
-        document.getElementById("username").textContent = name;
-    } else {
-        window.location.href = "index.html";              // not logged in → back to login
-    }
-</script>
+        <div class="dashboard-grid">
+            <section class="stack">
+                <div class="tiles" aria-label="Recruiter shortcuts">
+                    <a href="createposting.html" class="tile t1">
+                        <span>✍️</span>
+                        <div>
+                            <b>Create a posting</b>
+                            <small>Draft a new opportunity for your team.</small>
+                        </div>
+                    </a>
 
+                    <a href="#" class="tile t2">
+                        <span>👥</span>
+                        <div>
+                            <b>Review applicants</b>
+                            <small>Track candidates and shortlist strong fits.</small>
+                        </div>
+                    </a>
+
+                    <a href="#" class="tile t3">
+                        <span>💬</span>
+                        <div>
+                            <b>Messages</b>
+                            <small>Reply quickly and keep candidates moving.</small>
+                        </div>
+                    </a>
+
+                    <a href="#" class="tile t4">
+                        <span>📊</span>
+                        <div>
+                            <b>Insights</b>
+                            <small>Monitor hiring momentum and team activity.</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="stats-grid" aria-label="Recruiter summary metrics">
+                    <article class="card stat-card success">
+                        <small>Open listings</small>
+                        <h3>12</h3>
+                    </article>
+
+                    <article class="card stat-card info">
+                        <small>New applicants</small>
+                        <h3>24</h3>
+                    </article>
+
+                    <article class="card stat-card warning">
+                        <small>Interviews booked</small>
+                        <h3>8</h3>
+                    </article>
+                </div>
+
+                <section class="card pad panel">
+                    <div class="panel-head">
+                        <h2>Hiring pipeline</h2>
+                        <a href="createposting.html" class="text-link">View all</a>
+                    </div>
+
+                    <ul class="pipeline-list">
+                        <li>
+                            <span class="dot violet"></span>
+                            <div>
+                                <strong>Senior Frontend Engineer</strong>
+                                <small>8 applicants • 3 interviews scheduled</small>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="dot cyan"></span>
+                            <div>
+                                <strong>Product Analyst</strong>
+                                <small>12 applicants • 2 new this week</small>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="dot orange"></span>
+                            <div>
+                                <strong>QA Automation Tester</strong>
+                                <small>5 applicants • 1 offer extended</small>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </section>
+
+            <aside class="stack side-panel">
+                <section class="card pad profile-card">
+                    <div class="profile-mini">
+                        <span class="av c1" id="profile-badge-side">R</span>
+                        <div>
+                            <h2>Acme Labs</h2>
+                            <small>Hiring team</small>
+                        </div>
+                    </div>
+
+                    <div class="mini-metrics">
+                        <div>
+                            <strong>6</strong>
+                            <span>Active roles</span>
+                        </div>
+                        <div>
+                            <strong>31</strong>
+                            <span>Shortlisted</span>
+                        </div>
+                    </div>
+
+                    <a href="#" class="btn block primary">Manage team</a>
+                </section>
+
+                <section class="card pad activity-card">
+                    <div class="panel-head compact">
+                        <h2>Recent activity</h2>
+                    </div>
+
+                    <ul class="activity-list">
+                        <li>
+                            <span class="activity-icon success">✓</span>
+                            <div>
+                                <strong>Frontend posting published</strong>
+                                <small>2 hours ago</small>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="activity-icon info">✦</span>
+                            <div>
+                                <strong>4 new applicants received</strong>
+                                <small>Today</small>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="activity-icon warning">↗</span>
+                            <div>
+                                <strong>Interview schedule updated</strong>
+                                <small>Yesterday</small>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        const name = localStorage.getItem("userName");
+        const usernameEl = document.getElementById("username");
+        const profileBadge = document.getElementById("profile-badge");
+        const profileBadgeSide = document.getElementById("profile-badge-side");
+
+        if (name && name.trim()) {
+            const safeName = name.trim();
+            usernameEl.textContent = safeName;
+            profileBadge.textContent = safeName.charAt(0).toUpperCase();
+            profileBadgeSide.textContent = safeName.charAt(0).toUpperCase();
+        } else {
+            window.location.href = "index.html";
+        }
+
+        document.getElementById("logout").addEventListener("click", function (event) {
+            event.preventDefault();
+            localStorage.removeItem("userName");
+            window.location.href = "index.html";
+        });
+    </script>
 </body>
-
 </html>
