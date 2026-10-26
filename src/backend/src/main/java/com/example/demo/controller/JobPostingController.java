@@ -1,4 +1,8 @@
 package com.example.demo.controller;
+import com.example.demo.repository.EmployerUserRepository;
+import com.example.demo.repository.JobPostingRepository;
+import com.example.demo.model.EmployerUser;
+import com.example.demo.model.JobPosting;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +15,12 @@ import java.util.Map;
 @RequestMapping("/api/postings")
 public class JobPostingController {
 
+private final JobPostingRepository jobPostingRepository;
+
+    public JobPostingController(JobPostingRepository jobPostingRepository) {
+        this.jobPostingRepository = jobPostingRepository;
+    }
+    
     @PostMapping("/create")
     public ResponseEntity<?> createPosting(@RequestBody JobPostingRequest request, HttpSession session) {
         Integer userId = (Integer) session.getAttribute(AuthController.SESSION_USER_ID);
@@ -30,10 +40,17 @@ public class JobPostingController {
         }
 
         // Save to database here
-        // Example:
-        // JobPosting posting = new JobPosting(...);
-        // jobPostingRepository.save(posting);
+        JobPosting posting = new JobPosting(
+                userId,
+                request.title().trim(),
+                request.department() == null ? "" : request.department().trim(),
+                request.salary() == null ? "" : request.salary().trim(),
+                request.requiredSkills() == null ? "" : request.requiredSkills().trim(),
+                request.description() == null ? "" : request.description().trim(),
+                request.applicationDeadline()
+        );
 
+        JobPosting saved = jobPostingRepository.save(posting);
         return ResponseEntity.ok(Map.of("message", "Job listing created", "userId", userId));
     }
 
