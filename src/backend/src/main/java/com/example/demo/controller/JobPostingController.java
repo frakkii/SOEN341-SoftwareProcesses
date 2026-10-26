@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 import com.example.demo.repository.EmployerUserRepository;
+import com.example.demo.repository.JobPostingRepository;
 import com.example.demo.model.EmployerUser;
+import com.example.demo.model.JobPosting;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
