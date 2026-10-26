@@ -23,8 +23,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     @Query(value = "SELECT COUNT(*) FROM job_postings WHERE post_id = :postId", nativeQuery = true)
     long countPostings(@Param("postId") Integer postId);
 
-    // Open (status = true) and the deadline hasn't passed
-    @Query(value = "SELECT COUNT(*) FROM job_postings WHERE post_id = :postId AND status = TRUE "
-            + "AND deadline >= CURRENT_DATE", nativeQuery = true)
+    // Still accepting applications: the deadline hasn't passed (applying on the deadline day is allowed)
+    @Query(value = "SELECT COUNT(*) FROM job_postings WHERE post_id = :postId "
+            + "AND application_deadline >= CURRENT_DATE", nativeQuery = true)
     long countOpenPostings(@Param("postId") Integer postId);
 }
