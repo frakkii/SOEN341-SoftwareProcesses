@@ -51,10 +51,50 @@ private final JobPostingRepository jobPostingRepository;
         );
 
         JobPosting saved = jobPostingRepository.save(posting);
-        return ResponseEntity.ok(Map.of("message", "Job listing created", "userId", userId));
+        return ResponseEntity.ok(Map.of("message", "Job listing created", "userId", userId, "postId", saved.getId()));
     }
 
+     @GetMapping
+    public ResponseEntity<List<JobPostingResponse>> getMyPostings(HttpSession session) {
+        Integer userId = (Integer) session.getAttribute(AuthController.SESSION_USER_ID);
+        String role = (String) session.getAttribute(AuthController.SESSION_ROLE);
+
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        if (!"Recruiter".equals(role)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<JobPostingResponse> postings = jobPostingRepository
+                .findByEmployerId(userId)
+                .stream()
+                .map(posting -> new JobPostingResponse(
+                        posting.getId(),
+                        posting.getTitle(),
+                        posting.getDepartment(),
+                        posting.getSalary(),
+                        posting.getRequiredSkills(),
+                        posting.getDescription(),
+                        posting.getApplicationDeadline()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(postings);
+    }
+    
     public record JobPostingRequest(
+            String title,
+            String department,
+            String salary,
+            String requiredSkills,
+            String description,
+            LocalDate applicationDeadline
+    ) {}
+
+    public record JobPostingResponse(
+            Integer id,
             String title,
             String department,
             String salary,
