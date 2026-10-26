@@ -8,6 +8,7 @@ import java.time.LocalDate;
 public class JobPosting {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private Integer id;
 
