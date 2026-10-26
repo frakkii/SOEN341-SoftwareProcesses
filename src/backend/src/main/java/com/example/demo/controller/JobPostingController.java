@@ -1,9 +1,10 @@
 package com.example.demo.controller;
-
+import com.example.demo.repository.EmployerUserRepository;
+import com.example.demo.model.EmployerUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.demo.AuthController;
 import java.time.LocalDate;
 import java.util.Map;
 
