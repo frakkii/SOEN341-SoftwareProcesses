@@ -92,20 +92,21 @@ class ApplicationControllerTests {
     }
 
     // Inserts a job posting owned by a new recruiter and returns its id
-    private Integer posting(boolean open, LocalDate deadline) throws Exception {
+    private Integer posting(LocalDate deadline) throws Exception {
         String recruiterEmail = uniqueEmail();
         loggedIn("Recruiter", recruiterEmail);
         Integer employerId = employerUsers.findByEmailIgnoreCase(recruiterEmail).orElseThrow().getId();
 
         int postId = NEXT_POST_ID.getAndIncrement();
-        jdbc.update("INSERT INTO job_postings (employer_id, post_id, title, description, posted_date, deadline, status) "
-                        + "VALUES (?, ?, 'Junior Developer', 'Write and test Java code', CURRENT_TIMESTAMP, ?, ?)",
-                employerId, postId, Date.valueOf(deadline), open);
+        jdbc.update("INSERT INTO job_postings (employer_id, post_id, title, description, department, "
+                        + "application_deadline, salary, required_skills) "
+                        + "VALUES (?, ?, 'Junior Developer', 'Write and test Java code', 'Engineering', ?, '60000', 'Java')",
+                employerId, postId, Date.valueOf(deadline));
         return postId;
     }
 
     private Integer openPosting() throws Exception {
-        return posting(true, LocalDate.now().plusDays(30));
+        return posting(LocalDate.now().plusDays(30));
     }
 
     private ResultActions apply(MockHttpSession session, Object postId) throws Exception {
@@ -197,17 +198,17 @@ class ApplicationControllerTests {
     }
 
     @Test
-    void applyRejectsClosedPosting() throws Exception {
-        Integer closed = posting(false, LocalDate.now().plusDays(30));
+    void canStillApplyOnTheDeadlineDay() throws Exception {
+        Integer closesToday = posting(LocalDate.now());
 
-        apply(jobSeekerWithResume(), closed)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("This job posting is no longer accepting applications."));
+        apply(jobSeekerWithResume(), closesToday)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.application.status").value("Applied"));
     }
 
     @Test
     void applyRejectsPostingPastItsDeadline() throws Exception {
-        Integer expired = posting(true, LocalDate.now().minusDays(1));
+        Integer expired = posting(LocalDate.now().minusDays(1));
 
         apply(jobSeekerWithResume(), expired)
                 .andExpect(status().isBadRequest())
