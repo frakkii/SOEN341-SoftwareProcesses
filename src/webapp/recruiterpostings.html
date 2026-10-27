@@ -122,7 +122,7 @@
       deadline: posting.applicationDeadline
     }));
 
-    loadPostings();
+    renderTable();
   } 
   catch (error) {
     console.error(error);
@@ -206,7 +206,7 @@
       window.location.href = "index.html";
     });
 
-    renderTable();
+    loadPostings();
   </script>
 </body>
 </html>
