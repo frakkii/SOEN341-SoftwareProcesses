@@ -97,12 +97,38 @@
   </main>
 
   <script>
-    const jobs = [
-      { title: "Senior Frontend Engineer", department: "Engineering", location: "Montreal, QC", applicants: 18, status: "Open" },
-      { title: "Product Analyst", department: "Product", location: "Remote", applicants: 12, status: "Open" },
-      { title: "QA Automation Tester", department: "Engineering", location: "Toronto, ON", applicants: 7, status: "Draft" },
-      { title: "Recruitment Coordinator", department: "People", location: "Hybrid", applicants: 5, status: "Closed" }
-    ];
+    let jobs = [];
+
+    async function loadPostings() {
+  try {
+    const response = await fetch("/api/postings", {
+      method: "GET",
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      throw new Error("Unable to load postings");
+    }
+
+    const postings = await response.json();
+
+    jobs = postings.map(posting => ({
+      id: posting.id,
+      title: posting.title || "Untitled",
+      department: posting.department || "Not specified",
+      location: "Not specified",
+      applicants: 0,
+      status: "Open",
+      deadline: posting.applicationDeadline
+    }));
+
+    renderTable();
+  } 
+  catch (error) {
+    console.error(error);
+    rowsEl.innerHTML = `<tr><td colspan="6">Unable to load postings.</td></tr>`;
+  }
+}
 
     const rowsEl = document.getElementById("jobRows");
     const searchInput = document.getElementById("searchInput");
@@ -180,7 +206,7 @@
       window.location.href = "index.html";
     });
 
-    renderTable();
+    loadPostings();
   </script>
 </body>
 </html>
