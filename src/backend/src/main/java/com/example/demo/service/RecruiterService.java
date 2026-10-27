@@ -48,7 +48,7 @@ public class RecruiterService {
                 .collect(Collectors.toMap(PersonUser::getId, Function.identity()));
 
         return received.stream()
-                .map(a -> ApplicantResponse.from(a, people.get(a.getPersonId()), resumes.existsById(a.getPersonId())))
+                .map(a -> ApplicantResponse.from(a, people.get(a.getPersonId()), resumes.existsByPersonIdAndCurrentTrue(a.getPersonId())))
                 .toList();
     }
 
@@ -70,12 +70,12 @@ public class RecruiterService {
         application.updateStatus(next);
         Application saved = applications.save(application);
         PersonUser person = personUsers.findById(saved.getPersonId()).orElseThrow();
-        return ApplicantResponse.from(saved, person, resumes.existsById(saved.getPersonId()));
+        return ApplicantResponse.from(saved, person, resumes.existsByPersonIdAndCurrentTrue(saved.getPersonId()));
     }
 
     public Resume getApplicantResume(Integer employerId, Long applicationId) {
         Application application = ownApplication(employerId, applicationId);
-        return resumes.findById(application.getPersonId()).orElseThrow(() ->
+        return resumes.findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(application.getPersonId()).orElseThrow(() ->
                 new ApplicationException(HttpStatus.NOT_FOUND, "This applicant has no resume on file."));
     }
 

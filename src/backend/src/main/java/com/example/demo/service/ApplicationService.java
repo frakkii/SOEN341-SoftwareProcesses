@@ -49,7 +49,7 @@ public class ApplicationService {
         if (applications.countOpenPostings(postId) == 0) {
             throw new ApplicationException("This job posting is no longer accepting applications.");
         }
-        if (!resumes.existsById(personId)) {
+        if (!resumes.existsByPersonIdAndCurrentTrue(personId)) {
             throw new ApplicationException("Please upload your resume before applying.");
         }
 

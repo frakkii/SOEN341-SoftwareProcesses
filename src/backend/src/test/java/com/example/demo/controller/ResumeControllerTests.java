@@ -89,7 +89,7 @@ class ResumeControllerTests {
     }
 
     @Test
-    void uploadingAgainReplacesTheOldResume() throws Exception {
+    void uploadingAgainReplacesTheCurrentResumeAndKeepsTheOldVersion() throws Exception {
         String email = uniqueEmail();
         MockHttpSession session = loggedIn("Job Seeker", email);
         Integer personId = personUsers.findByEmailIgnoreCase(email).orElseThrow().getId();
@@ -97,11 +97,19 @@ class ResumeControllerTests {
         upload(session, file("old.pdf", "old resume")).andExpect(status().isOk());
         upload(session, file("new.docx", "new resume")).andExpect(status().isOk());
 
-        assertThat(resumes.findById(personId)).hasValueSatisfying(resume -> {
+        assertThat(resumes.findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(personId)).hasValueSatisfying(resume -> {
             assertThat(resume.getFileName()).isEqualTo("new.docx");
             assertThat(resume.getData()).isEqualTo("new resume".getBytes());
         });
-        assertThat(resumes.findAll()).filteredOn(resume -> resume.getPersonId().equals(personId)).hasSize(1);
+        // Both versions are stored, and only the newest is current
+        assertThat(resumes.findAll()).filteredOn(resume -> resume.getPersonId().equals(personId))
+                .extracting(resume -> resume.getFileName() + ":" + resume.isCurrent())
+                .containsExactlyInAnyOrder("old.pdf:false", "new.docx:true");
+
+        mockMvc.perform(get("/api/resume").session(session))
+                .andExpect(jsonPath("$.fileName").value("new.docx"));
+        mockMvc.perform(get("/api/resume/file").session(session))
+                .andExpect(content().bytes("new resume".getBytes()));
     }
 
     @Test
