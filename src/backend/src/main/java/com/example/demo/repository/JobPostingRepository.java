@@ -22,20 +22,21 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Integer>
     Optional<JobPosting> findWithEmployerById(@Param("id") Integer id);
 
     // Job search: open postings whose deadline hasn't passed, newest first. Each filter is
-    // optional (null) and matches part of the text, ignoring case. Postings without an
-    // industry are matched on their department instead.
+    // optional ('' means no filter) and matches part of the text, ignoring case. Postings
+    // without an industry are matched on their department instead. Filters are never null:
+    // Postgres can't tell the type of a null parameter and fails with "lower(bytea)".
     @EntityGraph(attributePaths = "employer")
     @Query("""
             SELECT j FROM JobPosting j
             WHERE (j.status IS NULL OR j.status = 'Open')
               AND j.applicationDeadline >= :today
-              AND (:keyword IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                   OR LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                   OR LOWER(j.requiredSkills) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                   OR LOWER(j.employer.companyName) LIKE LOWER(CONCAT('%', :keyword, '%')))
-              AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
-              AND (:industry IS NULL OR LOWER(COALESCE(j.industry, j.department)) LIKE LOWER(CONCAT('%', :industry, '%')))
-              AND (:jobType IS NULL OR LOWER(j.jobType) LIKE LOWER(CONCAT('%', :jobType, '%')))
+              AND (:keyword = '' OR LOWER(j.title) LIKE CONCAT('%', LOWER(:keyword), '%')
+                   OR LOWER(j.description) LIKE CONCAT('%', LOWER(:keyword), '%')
+                   OR LOWER(j.requiredSkills) LIKE CONCAT('%', LOWER(:keyword), '%')
+                   OR LOWER(j.employer.companyName) LIKE CONCAT('%', LOWER(:keyword), '%'))
+              AND (:location = '' OR LOWER(j.location) LIKE CONCAT('%', LOWER(:location), '%'))
+              AND (:industry = '' OR LOWER(COALESCE(j.industry, j.department)) LIKE CONCAT('%', LOWER(:industry), '%'))
+              AND (:jobType = '' OR LOWER(j.jobType) LIKE CONCAT('%', LOWER(:jobType), '%'))
             ORDER BY j.id DESC
             """)
     List<JobPosting> findActivePostings(

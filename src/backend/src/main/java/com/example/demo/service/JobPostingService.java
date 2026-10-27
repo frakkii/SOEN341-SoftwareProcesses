@@ -38,9 +38,10 @@ public class JobPostingService {
                 .orElse(null);
     }
 
+    // Blank or missing filters become '' (no filter), never null; see findActivePostings
     private static String normalize(String value) {
         if (value == null || value.isBlank()) {
-            return null;
+            return "";
         }
         String normalized = value.trim();
         if (normalized.length() > 100) {
