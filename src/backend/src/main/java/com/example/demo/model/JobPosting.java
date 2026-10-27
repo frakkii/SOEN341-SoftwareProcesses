@@ -7,6 +7,10 @@ import java.time.LocalDate;
 @Table(name = "job_postings")
 public class JobPosting {
 
+    // Values of the status column. Job seekers can only apply while a posting is open.
+    public static final String OPEN = "Open";
+    public static final String CLOSED = "Closed";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
@@ -33,10 +37,15 @@ public class JobPosting {
     @Column(name = "application_deadline", nullable = false)
     private LocalDate applicationDeadline;
 
+    private String status;
+
+    private String location;
+
     protected JobPosting() {}
 
     public JobPosting(Integer employerId, String title, String department, String salary,
-                      String requiredSkills, String description, LocalDate applicationDeadline) {
+                      String requiredSkills, String description, LocalDate applicationDeadline,
+                      String location) {
         this.employerId = employerId;
         this.title = title;
         this.department = department;
@@ -44,6 +53,8 @@ public class JobPosting {
         this.requiredSkills = requiredSkills;
         this.description = description;
         this.applicationDeadline = applicationDeadline;
+        this.location = location;
+        this.status = OPEN;
     }
 
     public Integer getId() { return id; }
@@ -54,4 +65,10 @@ public class JobPosting {
     public String getRequiredSkills() { return requiredSkills; }
     public String getDescription() { return description; }
     public LocalDate getApplicationDeadline() { return applicationDeadline; }
+    public String getLocation() { return location; }
+
+    // Rows created before the status column existed count as open
+    public String getStatus() { return status == null ? OPEN : status; }
+
+    public void setStatus(String status) { this.status = status; }
 }

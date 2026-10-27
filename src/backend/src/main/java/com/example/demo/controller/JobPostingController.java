@@ -3,6 +3,7 @@ import com.example.demo.repository.EmployerUserRepository;
 import com.example.demo.repository.JobPostingRepository;
 import com.example.demo.model.EmployerUser;
 import com.example.demo.model.JobPosting;
+import com.example.demo.service.RecruiterService;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,11 @@ import java.util.List;
 public class JobPostingController {
 
 private final JobPostingRepository jobPostingRepository;
+    private final RecruiterService recruiterService;
 
-    public JobPostingController(JobPostingRepository jobPostingRepository) {
+    public JobPostingController(JobPostingRepository jobPostingRepository, RecruiterService recruiterService) {
         this.jobPostingRepository = jobPostingRepository;
+        this.recruiterService = recruiterService;
     }
     
     @PostMapping("/create")
@@ -39,6 +42,12 @@ private final JobPostingRepository jobPostingRepository;
         if (request.title() == null || request.title().isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Job title is required"));
         }
+        if (request.applicationDeadline() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Application deadline is required"));
+        }
+        if (request.applicationDeadline().isBefore(LocalDate.now())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Application deadline can't be in the past"));
+        }
 
         // Save to database here
         JobPosting posting = new JobPosting(
@@ -48,7 +57,8 @@ private final JobPostingRepository jobPostingRepository;
                 request.salary() == null ? "" : request.salary().trim(),
                 request.requiredSkills() == null ? "" : request.requiredSkills().trim(),
                 request.description() == null ? "" : request.description().trim(),
-                request.applicationDeadline()
+                request.applicationDeadline(),
+                request.location() == null || request.location().isBlank() ? "Not specified" : request.location().trim()
         );
 
         JobPosting saved = jobPostingRepository.save(posting);
@@ -68,8 +78,10 @@ private final JobPostingRepository jobPostingRepository;
             return ResponseEntity.status(403).build();
         }
 
-        List<JobPostingResponse> postings = jobPostingRepository
-                .findByEmployerId(userId)
+        List<JobPosting> mine = jobPostingRepository.findByEmployerId(userId);
+        Map<Integer, Long> applicants = recruiterService.countApplicants(mine.stream().map(JobPosting::getId).toList());
+
+        List<JobPostingResponse> postings = mine
                 .stream()
                 .map(posting -> new JobPostingResponse(
                         posting.getId(),
@@ -78,7 +90,10 @@ private final JobPostingRepository jobPostingRepository;
                         posting.getSalary(),
                         posting.getRequiredSkills(),
                         posting.getDescription(),
-                        posting.getApplicationDeadline()
+                        posting.getApplicationDeadline(),
+                        posting.getLocation(),
+                        posting.getStatus(),
+                        applicants.getOrDefault(posting.getId(), 0L)
                 ))
                 .toList();
 
@@ -91,7 +106,8 @@ private final JobPostingRepository jobPostingRepository;
             String salary,
             String requiredSkills,
             String description,
-            LocalDate applicationDeadline
+            LocalDate applicationDeadline,
+            String location
     ) {}
 
     public record JobPostingResponse(
@@ -101,6 +117,9 @@ private final JobPostingRepository jobPostingRepository;
             String salary,
             String requiredSkills,
             String description,
-            LocalDate applicationDeadline
+            LocalDate applicationDeadline,
+            String location,
+            String status,
+            long applicants
     ) {}
 }
