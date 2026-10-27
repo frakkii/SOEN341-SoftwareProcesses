@@ -41,11 +41,22 @@ public class JobPosting {
 
     private String location;
 
+    // Job search filters (V10). Null on postings created before they existed.
+    private String industry;
+
+    @Column(name = "job_type")
+    private String jobType;
+
+    // Read-only link so job search can show and search the company name
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employer_id", insertable = false, updatable = false)
+    private EmployerUser employer;
+
     protected JobPosting() {}
 
     public JobPosting(Integer employerId, String title, String department, String salary,
                       String requiredSkills, String description, LocalDate applicationDeadline,
-                      String location) {
+                      String location, String industry, String jobType) {
         this.employerId = employerId;
         this.title = title;
         this.department = department;
@@ -54,6 +65,8 @@ public class JobPosting {
         this.description = description;
         this.applicationDeadline = applicationDeadline;
         this.location = location;
+        this.industry = industry;
+        this.jobType = jobType;
         this.status = OPEN;
     }
 
@@ -66,9 +79,19 @@ public class JobPosting {
     public String getDescription() { return description; }
     public LocalDate getApplicationDeadline() { return applicationDeadline; }
     public String getLocation() { return location; }
+    public String getIndustry() { return industry; }
+    public String getJobType() { return jobType; }
+
+    // Only loaded when the query fetches the employer (see JobPostingRepository)
+    public String getCompanyName() { return employer == null ? null : employer.getCompanyName(); }
 
     // Rows created before the status column existed count as open
     public String getStatus() { return status == null ? OPEN : status; }
 
     public void setStatus(String status) { this.status = status; }
+
+    // Open and the deadline hasn't passed (applying on the deadline day is allowed)
+    public boolean isAcceptingApplications(LocalDate today) {
+        return OPEN.equals(getStatus()) && applicationDeadline != null && !applicationDeadline.isBefore(today);
+    }
 }

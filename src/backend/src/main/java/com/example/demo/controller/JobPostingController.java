@@ -58,7 +58,9 @@ private final JobPostingRepository jobPostingRepository;
                 request.requiredSkills() == null ? "" : request.requiredSkills().trim(),
                 request.description() == null ? "" : request.description().trim(),
                 request.applicationDeadline(),
-                request.location() == null || request.location().isBlank() ? "Not specified" : request.location().trim()
+                request.location() == null || request.location().isBlank() ? "Not specified" : request.location().trim(),
+                blankToNull(request.industry()),
+                blankToNull(request.jobType())
         );
 
         JobPosting saved = jobPostingRepository.save(posting);
@@ -107,8 +109,14 @@ private final JobPostingRepository jobPostingRepository;
             String requiredSkills,
             String description,
             LocalDate applicationDeadline,
-            String location
+            String location,
+            String industry,
+            String jobType
     ) {}
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
 
     public record JobPostingResponse(
             Integer id,
