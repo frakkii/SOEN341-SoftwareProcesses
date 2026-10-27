@@ -27,4 +27,14 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     @Query(value = "SELECT COUNT(*) FROM job_postings WHERE post_id = :postId AND status = TRUE "
             + "AND deadline >= CURRENT_DATE", nativeQuery = true)
     long countOpenPostings(@Param("postId") Integer postId);
+   @Query(value = """
+            SELECT COUNT(*)
+            FROM application a
+            JOIN job_postings jp ON jp.post_id = a.post_id
+            WHERE a.id = :applicationId
+              AND jp.employer_id = :employerId
+            """, nativeQuery = true)
+    long countApplicationOwnedByEmployer(
+            @Param("applicationId") Long applicationId,
+            @Param("employerId") Integer employerId);
 }

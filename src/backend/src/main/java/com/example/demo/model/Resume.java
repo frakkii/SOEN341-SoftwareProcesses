@@ -2,20 +2,27 @@ package com.example.demo.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-// A job seeker's resume. The job seeker's id is the primary key, so each job
-// seeker has at most one resume and uploading a new one replaces the old row.
+// A job seeker's resume version.
 @Entity
 @Table(name = "resume")
 public class Resume {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(name = "person_id")
     private Integer personId;
+
+    @Column(name = "current", nullable = false)
+    private boolean current;
 
     @Column(name = "file_name")
     private String fileName;
@@ -36,6 +43,7 @@ public class Resume {
 
     public Resume(Integer personId, String fileName, String contentType, byte[] data) {
         this.personId = personId;
+        this.current = true;
         this.fileName = fileName;
         this.contentType = contentType;
         this.fileSize = data.length;
@@ -43,8 +51,20 @@ public class Resume {
         this.uploadedAt = Instant.now();
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Integer getPersonId() {
         return personId;
+    }
+
+    public boolean isCurrent() {
+        return current;
+    }
+
+    public void setCurrent(boolean current) {
+        this.current = current;
     }
 
     public String getFileName() {
