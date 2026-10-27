@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - Job Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+<!-- Top navigation bar is rendered by js/shell.js (also redirects to the login page if not logged in) -->
+
+<main class="wrap">
+    <p style="margin-bottom:16px"><a class="btn" href="jobs.html" id="back">Back to jobs</a></p>
+
+    <p class="card empty hidden" id="missing"></p>
+
+    <div class="job-grid hidden" id="job">
+        <article class="card post job" id="job-card">
+            <div class="p-top">
+                <div class="logo" aria-hidden="true" id="j-logo"></div>
+                <div class="who"><h1 id="j-title"></h1><small id="j-company"></small></div>
+            </div>
+            <div class="chips" id="j-chips"></div>
+
+            <div class="sec-h"><h2>About the role</h2></div>
+            <p class="p-body" id="j-description"></p>
+
+            <div id="j-skills-sec">
+                <div class="sec-h"><h2>Required skills</h2></div>
+                <div class="tags" id="j-skills"></div>
+            </div>
+        </article>
+
+        <aside class="card pad apply-card" aria-label="Apply">
+            <h2 class="side-title" style="margin:0">Apply for this job</h2>
+            <p class="deadline" id="j-deadline"></p>
+            <p class="muted" style="font-size:.9rem">Your CV on file is sent with your application. <a href="resume.html">Manage CVs</a></p>
+            <button type="button" class="btn primary block" id="apply-btn"></button>
+            <div class="message hidden" id="apply-message" role="status"></div>
+        </aside>
+    </div>
+</main>
+
+<script src="js/shell.js"></script>
+<script src="js/job.js"></script>
+</body>
+</html>

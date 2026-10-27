@@ -116,9 +116,9 @@
       id: posting.id,
       title: posting.title || "Untitled",
       department: posting.department || "Not specified",
-      location: "Not specified",
-      applicants: 0,
-      status: "Open",
+      location: posting.location || "Not specified",
+      applicants: posting.applicants || 0,
+      status: posting.status || "Open",
       deadline: posting.applicationDeadline
     }));
 
@@ -136,13 +136,15 @@
 
     let currentSort = { key: "applicants", direction: "desc" };
 
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
     function statusMarkup(status) {
       const map = {
         Open: "status-open",
         Draft: "status-draft",
         Closed: "status-closed"
       };
-      return `<span class="status-pill ${map[status] || ""}">${status}</span>`;
+      return `<span class="status-pill ${map[status] || ""}">${esc(status)}</span>`;
     }
 
     function renderTable() {
@@ -167,16 +169,15 @@
 
       rowsEl.innerHTML = filtered.map(job => `
         <tr>
-          <td><strong>${job.title}</strong></td>
-          <td>${job.department}</td>
-          <td>${job.location}</td>
+          <td><strong>${esc(job.title)}</strong></td>
+          <td>${esc(job.department)}</td>
+          <td>${esc(job.location)}</td>
           <td>${job.applicants}</td>
           <td>${statusMarkup(job.status)}</td>
           <td>
             <div class="row-actions">
-              <button class="btn">View</button>
-              <button class="btn">Edit</button>
-              <button class="btn">Close</button>
+              <a class="btn" href="recruiterapplicants.html?id=${encodeURIComponent(job.id)}">View applicants</a>
+              <button class="btn" data-toggle="${job.id}">${job.status === "Closed" ? "Reopen" : "Close"}</button>
             </div>
           </td>
         </tr>
@@ -199,6 +200,32 @@
     });
 
     searchInput.addEventListener("input", renderTable);
+
+    // Close or reopen a posting. Closed postings are hidden from job search and stop new applications.
+    rowsEl.addEventListener("click", async event => {
+      const button = event.target.closest("[data-toggle]");
+      if (!button) return;
+      const job = jobs.find(j => String(j.id) === button.dataset.toggle);
+      const next = job.status === "Closed" ? "Open" : "Closed";
+      if (next === "Closed" && !confirm(`Close "${job.title}"? Job seekers won't be able to find or apply to it.`)) return;
+
+      button.disabled = true;
+      try {
+        const response = await fetch(`/api/recruiter/postings/${job.id}`, {
+          method: "PATCH",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: next })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || "Couldn't update the posting");
+        job.status = data.status;
+        renderTable();
+      } catch (error) {
+        alert(error.message);
+        button.disabled = false;
+      }
+    });
 
     document.getElementById("logout").addEventListener("click", function (event) {
       event.preventDefault();

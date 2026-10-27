@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerConnect - Applicants</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    .page-actions { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+    .table-wrap { overflow:auto; }
+    .job-table { width:100%; border-collapse:collapse; min-width:900px; }
+    .job-table th, .job-table td {
+      padding:16px 14px; border-bottom:1px solid #eef0ff; text-align:left; vertical-align:middle;
+    }
+    .job-table th {
+      background:#f7f5ff; color:#4a4673; font-size:0.82rem; letter-spacing:0.04em; text-transform:uppercase;
+    }
+    .job-table small { display:block; color:var(--muted); }
+    .row-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .row-actions .btn { padding:7px 10px; font-size:0.78rem; border-radius:10px; }
+    .row-actions select {
+      padding:7px 10px; border:2px solid var(--line); border-radius:10px; background:#fff; font:600 .82rem var(--body); color:var(--ink);
+    }
+    .final { color:var(--muted); font-size:.82rem; font-weight:600; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="recruiterhome.html" aria-label="CareerConnect home">
+      <span class="mark">C</span>
+      <div>
+        <b>CareerConnect</b>
+        <small>Recruiter dashboard</small>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="recruiterhome.html">Home</a>
+      <a href="recruiterpostings.html" class="active">Your Postings</a>
+      <a href="#">Messages</a>
+      <a href="#">Company Profile &amp; Account Settings</a>
+      <a href="#" id="logout">Logout</a>
+    </nav>
+
+    <a class="me" href="recruiterhome.html" aria-label="Recruiter profile">
+      <span class="av sm" id="profile-badge">R</span>
+    </a>
+  </header>
+
+  <main class="wrap dashboard">
+    <div class="page-title">
+      <h1 id="title">Applicants</h1>
+      <p id="subtitle">Review candidates and move them through your hiring stages.</p>
+    </div>
+
+    <section class="card pad">
+      <div class="page-actions">
+        <a href="recruiterpostings.html" class="btn">Back to postings</a>
+        <span class="muted" id="count" aria-live="polite"></span>
+      </div>
+
+      <div class="message hidden" id="message" role="status"></div>
+
+      <div class="table-wrap">
+        <table class="job-table">
+          <thead>
+            <tr>
+              <th>Candidate</th>
+              <th>Contact</th>
+              <th>Applied</th>
+              <th>Status</th>
+              <th>Resume</th>
+              <th>Move to</th>
+            </tr>
+          </thead>
+          <tbody id="rows"><tr><td colspan="6">Loading applicants…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Applications only move forward; Offered and Rejected are final (enforced by the server too)
+    const STAGES = ["Applied", "Under Review", "Interview", "Offered", "Rejected"];
+    const STATUS_CLASS = { "Under Review": "under-review", Interview: "interview", Offered: "offered", Rejected: "rejected" };
+
+    const postId = new URLSearchParams(location.search).get("id");
+    const rowsEl = document.getElementById("rows");
+    const messageEl = document.getElementById("message");
+    let applicants = [];
+
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const day = iso => new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = "message " + type;
+    }
+
+    // Response is JSON; 401 means the session ended, so sign in again
+    async function request(url, options = {}) {
+      const response = await fetch(url, { credentials: "same-origin", ...options });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        localStorage.removeItem("userName");
+        window.location.href = "index.html";
+      }
+      if (!response.ok) throw new Error(data.message || "Request failed (" + response.status + ")");
+      return data;
+    }
+
+    function nextStages(status) {
+      const i = STAGES.indexOf(status);
+      return i >= 3 ? [] : STAGES.slice(i + 1);
+    }
+
+    function render() {
+      document.getElementById("count").textContent =
+        applicants.length === 1 ? "1 applicant" : `${applicants.length} applicants`;
+      if (!applicants.length) {
+        rowsEl.innerHTML = `<tr><td colspan="6">No one has applied to this posting yet.</td></tr>`;
+        return;
+      }
+      rowsEl.innerHTML = applicants.map(a => {
+        const options = nextStages(a.status);
+        const move = options.length
+          ? `<div class="row-actions">
+               <select aria-label="New status for ${esc(a.name)} ${esc(a.surname)}" data-select="${a.applicationId}">
+                 ${options.map(s => `<option>${s}</option>`).join("")}
+               </select>
+               <button class="btn" data-update="${a.applicationId}">Update</button>
+             </div>`
+          : `<span class="final">Decision made</span>`;
+        return `<tr>
+          <td><strong>${esc(a.name)} ${esc(a.surname)}</strong><small>${esc(a.city || "")}</small></td>
+          <td><a href="mailto:${esc(a.email)}">${esc(a.email)}</a><small>${esc(a.phone || "")}</small></td>
+          <td>${day(a.appliedAt)}<small>Updated ${day(a.updatedAt)}</small></td>
+          <td><span class="status ${STATUS_CLASS[a.status] || ""}">${esc(a.status)}</span></td>
+          <td>${a.hasResume
+            ? `<a class="btn" href="/api/recruiter/applications/${a.applicationId}/resume">Download</a>`
+            : `<span class="final">None</span>`}</td>
+          <td>${move}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    rowsEl.addEventListener("click", async event => {
+      const button = event.target.closest("[data-update]");
+      if (!button) return;
+      const id = button.dataset.update;
+      const status = rowsEl.querySelector(`[data-select="${id}"]`).value;
+      const applicant = applicants.find(a => String(a.applicationId) === id);
+      if ((status === "Offered" || status === "Rejected")
+          && !confirm(`Mark ${applicant.name} ${applicant.surname} as ${status}? This decision can't be changed.`)) return;
+
+      button.disabled = true;
+      try {
+        const data = await request(`/api/recruiter/applications/${id}/status`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status })
+        });
+        Object.assign(applicant, data.applicant);
+        render();
+        showMessage(`${applicant.name} ${applicant.surname}: ${data.message}`, "success");
+      } catch (error) {
+        button.disabled = false;
+        showMessage(error.message, "error");
+      }
+    });
+
+    async function load() {
+      if (!postId || !/^\d+$/.test(postId)) {
+        rowsEl.innerHTML = `<tr><td colspan="6">This link is missing its posting number.</td></tr>`;
+        return;
+      }
+      try {
+        const [postings, list] = await Promise.all([
+          request("/api/postings"),
+          request(`/api/recruiter/postings/${postId}/applications`)
+        ]);
+        const posting = postings.find(p => String(p.id) === postId);
+        if (posting) {
+          document.getElementById("title").textContent = `Applicants for ${posting.title}`;
+          document.title = `CareerConnect - ${posting.title} applicants`;
+          document.getElementById("subtitle").textContent =
+            `${posting.location || "Location not specified"} · ${posting.status || "Open"} · Deadline ${posting.applicationDeadline}`;
+        }
+        applicants = list;
+        render();
+      } catch (error) {
+        rowsEl.innerHTML = `<tr><td colspan="6">${esc(error.message)}</td></tr>`;
+      }
+    }
+
+    const name = localStorage.getItem("userName");
+    if (!name) window.location.href = "index.html";
+    else document.getElementById("profile-badge").textContent = name.trim().charAt(0).toUpperCase();
+
+    document.getElementById("logout").addEventListener("click", function (event) {
+      event.preventDefault();
+      localStorage.removeItem("userName");
+      window.location.href = "index.html";
+    });
+
+    load();
+  </script>
+</body>
+</html>

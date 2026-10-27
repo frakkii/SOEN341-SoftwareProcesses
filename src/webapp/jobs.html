@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - Find Jobs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+<!-- Top navigation bar is rendered by js/shell.js (also redirects to the login page if not logged in) -->
+
+<main class="wrap">
+    <div class="page-title">
+        <h1>Find your next role</h1>
+        <p>Search open postings by keyword, location or category.</p>
+    </div>
+
+    <form class="card search" id="search" role="search">
+        <div class="field">
+            <label for="q">Keyword</label>
+            <input id="q" name="keyword" maxlength="100" placeholder="Job title, skill or company">
+        </div>
+        <div class="field">
+            <label for="loc">Location</label>
+            <input id="loc" name="location" maxlength="100" placeholder="Montréal, Remote...">
+        </div>
+        <div class="field">
+            <label for="cat">Category</label>
+            <input id="cat" name="industry" maxlength="100" placeholder="Technology, Finance..." list="categories">
+            <datalist id="categories">
+                <option value="Technology"><option value="Engineering"><option value="Finance">
+                <option value="Healthcare"><option value="Marketing"><option value="Education">
+                <option value="Design"><option value="Sales">
+            </datalist>
+        </div>
+        <button type="submit" class="btn primary" id="search-btn"></button>
+    </form>
+
+    <div class="results-bar">
+        <h2 id="count" aria-live="polite">Loading jobs</h2>
+        <button type="button" class="btn hidden" id="clear">Clear filters</button>
+    </div>
+    <div class="results" id="results"></div>
+    <p class="card empty hidden" id="empty"></p>
+</main>
+
+<script src="js/shell.js"></script>
+<script src="js/jobs.js"></script>
+</body>
+</html>

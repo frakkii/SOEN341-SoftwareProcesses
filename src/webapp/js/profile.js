@@ -1,29 +1,36 @@
-/*  profile page (frontend only).
-   Photo, cover, headline, location and About are kept in localStorage via CC.store until a profile API exists.
+/*  profile page.
+   Headline, About, skills and location are loaded from and saved to /api/profile.
+   Photo and cover are still kept in localStorage via CC.store (no image storage on the server yet).
    The CV card only READS the existing GET /api/resume endpoint; it never changes resume data. */
 (function () {
   if (!window.CC) return;
-  const { user, esc, icon, initials, store, toast, readImage, strength, applyAvatars } = CC;
+  const { user, esc, icon, initials, store, toast, readImage, strength, applyAvatars, api } = CC;
   const $ = s => document.querySelector(s);
 
   $('#cover-btn').innerHTML = `${icon('camera')}Change cover`;
   $('#avatar-btn').innerHTML = icon('camera');
   $('#edit-btn').innerHTML = `${icon('pencil')}Edit profile`;
   $('#edit-about').innerHTML = icon('pencil');
-  $('#add-exp').innerHTML = icon('plus');
-  $('#add-edu').innerHTML = icon('plus');
+  $('#edit-skills').innerHTML = icon('pencil');
+
+  let profile = {};            // GET /api/profile response once loaded
 
   function paint() {
-    const p = store.get(), s = strength();
-    $('#p-name').textContent = user;
+    const p = profile, photos = store.get(), s = strength(profile);
+    $('#p-name').textContent = p.name ? `${p.name} ${p.surname}` : user;
     $('#p-headline').textContent = p.headline || 'Add a headline';
     $('#p-headline').classList.toggle('muted', !p.headline);
-    $('#p-loc').innerHTML = `${icon('pin')}${esc(p.location || 'Add your location')}`;
+    const loc = [p.city, p.provinceState].filter(Boolean).join(', ');
+    $('#p-loc').innerHTML = `${icon('pin')}${esc(loc || 'Add your location')}`;
     $('#p-conn').innerHTML = `${icon('users')}Start building your network`;
     $('#p-about').textContent = p.about || 'Write a short summary of your skills and goals so employers can get to know you.';
     $('#p-about').classList.toggle('muted', !p.about);
+    const skills = p.skills || [];
+    $('#p-skills').innerHTML = skills.length
+      ? skills.map(k => `<span class="tag">${esc(k)}</span>`).join('')
+      : '<p class="muted">Add the skills employers should know about.</p>';
     const cover = $('#cover');
-    cover.style.backgroundImage = p.cover ? 'url("' + p.cover + '")' : '';
+    cover.style.backgroundImage = photos.cover ? 'url("' + photos.cover + '")' : '';
     $('#strength-bar').firstElementChild.style.setProperty('--pct', s.pct + '%');
     $('#strength-bar').setAttribute('aria-valuenow', s.pct);
     $('#strength-text').textContent = s.pct === 100 ? 'Your profile is complete.' : `${s.pct}% complete. Next: ${s.missing[0].toLowerCase()}.`;
@@ -46,21 +53,36 @@
   wireUpload('#cover-btn', '#cover-file', 'cover', 1800);
   wireUpload('#avatar-btn', '#avatar-file', 'avatar', 480);
 
-  // ---- edit dialog ----
-  const dlg = $('#edit-dialog');
+  // ---- edit dialog: saved to the database through PUT /api/profile ----
+  const dlg = $('#edit-dialog'), editError = $('#edit-error');
   function openEdit(focusId) {
-    const p = store.get();
-    $('#f-headline').value = p.headline || ''; $('#f-location').value = p.location || ''; $('#f-about').value = p.about || '';
+    const p = profile;
+    $('#f-headline').value = p.headline || ''; $('#f-about').value = p.about || '';
+    $('#f-city').value = p.city || ''; $('#f-province').value = p.provinceState || '';
+    $('#f-skills').value = (p.skills || []).join(', ');
+    editError.classList.add('hidden');
     dlg.showModal(); $(focusId || '#f-headline').focus();
   }
   $('#edit-btn').onclick = () => openEdit();
   $('#edit-about').onclick = () => openEdit('#f-about');
+  $('#edit-skills').onclick = () => openEdit('#f-skills');
   $('#cancel-edit').onclick = () => dlg.close();
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });   // click on backdrop
-  $('#edit-form').addEventListener('submit', () => {
-    if (!store.set({ headline: $('#f-headline').value.trim(), location: $('#f-location').value.trim(), about: $('#f-about').value.trim() })) toast('Could not save your changes.');
-    else toast('Profile updated.');
-    paint();
+  $('#edit-form').addEventListener('submit', async e => {
+    e.preventDefault();                          // stay open until the server accepts the changes
+    const btn = e.submitter || $('#edit-form [type=submit]');
+    btn.disabled = true;
+    try {
+      const data = await api('/api/profile', { method: 'PUT', body: {
+        headline: $('#f-headline').value, about: $('#f-about').value,
+        city: $('#f-city').value, provinceState: $('#f-province').value,
+        skills: $('#f-skills').value.split(',')
+      } });
+      profile = data.profile;
+      dlg.close(); paint(); toast('Profile updated.');
+    } catch (err) {
+      editError.textContent = err.message; editError.classList.remove('hidden');
+    } finally { btn.disabled = false; }
   });
 
   // ---- CV card: read-only status from the existing resume endpoint ----
@@ -89,4 +111,6 @@
   });
 
   paint();
+  api('/api/profile').then(p => { profile = p; paint(); })
+    .catch(err => toast(err.status === 403 ? 'Profiles are for job seeker accounts.' : 'Could not load your profile. ' + err.message));
 })();
