@@ -37,6 +37,28 @@
       </div>
 
       <div class="field">
+        <label for="location">Location</label>
+        <input type="text" id="location" name="location" placeholder="e.g. Montreal, QC (hybrid) or Remote" required />
+      </div>
+
+      <div class="field">
+        <label for="industry">Category</label>
+        <select id="industry" name="industry" required>
+          <option value="">Choose a category</option>
+          <option>Technology</option><option>Engineering</option><option>Data &amp; Analytics</option>
+          <option>Design</option><option>Finance</option><option>Marketing</option>
+          <option>Healthcare</option><option>Education</option><option>Sales</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="jobType">Job type</label>
+        <select id="jobType" name="jobType" required>
+          <option>Full-time</option><option>Part-time</option><option>Internship</option><option>Contract</option>
+        </select>
+      </div>
+
+      <div class="field">
         <label for="salary">Salary</label>
         <input type="text" id="salary" name="salary" placeholder="$90,000 - $120,000" required />
       </div>
@@ -72,6 +94,9 @@
       const payload = {
         title: document.getElementById("title").value.trim(),
         department: document.getElementById("department").value.trim(),
+        location: document.getElementById("location").value.trim(),
+        industry: document.getElementById("industry").value,
+        jobType: document.getElementById("jobType").value,
         salary: document.getElementById("salary").value.trim(),
         requiredSkills: document.getElementById("skills").value.trim(),
         description: document.getElementById("description").value.trim(),
@@ -93,7 +118,7 @@
           throw new Error(data.message || "Failed to create job posting");
         }
 
-        message.textContent = "Job listing created successfully.";
+        message.innerHTML = 'Job listing created successfully. <a href="recruiterpostings.html">View your postings</a>';
         message.classList.remove("hidden");
         form.reset();
       } catch (error) {

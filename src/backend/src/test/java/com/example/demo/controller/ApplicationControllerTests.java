@@ -92,20 +92,25 @@ class ApplicationControllerTests {
     }
 
     // Inserts a job posting owned by a new recruiter and returns its id
-    private Integer posting(boolean open, LocalDate deadline) throws Exception {
+    private Integer posting(LocalDate deadline) throws Exception {
+        return posting(deadline, "Open");
+    }
+
+    private Integer posting(LocalDate deadline, String status) throws Exception {
         String recruiterEmail = uniqueEmail();
         loggedIn("Recruiter", recruiterEmail);
         Integer employerId = employerUsers.findByEmailIgnoreCase(recruiterEmail).orElseThrow().getId();
 
         int postId = NEXT_POST_ID.getAndIncrement();
-        jdbc.update("INSERT INTO job_postings (employer_id, post_id, title, description, posted_date, deadline, status) "
-                        + "VALUES (?, ?, 'Junior Developer', 'Write and test Java code', CURRENT_TIMESTAMP, ?, ?)",
-                employerId, postId, Date.valueOf(deadline), open);
+        jdbc.update("INSERT INTO job_postings (employer_id, post_id, title, description, department, "
+                        + "application_deadline, salary, required_skills, status) "
+                        + "VALUES (?, ?, 'Junior Developer', 'Write and test Java code', 'Engineering', ?, '60000', 'Java', ?)",
+                employerId, postId, Date.valueOf(deadline), status);
         return postId;
     }
 
     private Integer openPosting() throws Exception {
-        return posting(true, LocalDate.now().plusDays(30));
+        return posting(LocalDate.now().plusDays(30));
     }
 
     private ResultActions apply(MockHttpSession session, Object postId) throws Exception {
@@ -136,6 +141,8 @@ class ApplicationControllerTests {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.message").value("Application submitted successfully."))
                 .andExpect(jsonPath("$.application.postId").value(postId))
+                .andExpect(jsonPath("$.application.jobTitle").value("Junior Developer"))
+                .andExpect(jsonPath("$.application.companyName").value("Acme Corp"))
                 .andExpect(jsonPath("$.application.status").value("Applied"))
                 .andExpect(jsonPath("$.application.appliedAt").isNotEmpty());
 
@@ -197,8 +204,17 @@ class ApplicationControllerTests {
     }
 
     @Test
+    void canStillApplyOnTheDeadlineDay() throws Exception {
+        Integer closesToday = posting(LocalDate.now());
+
+        apply(jobSeekerWithResume(), closesToday)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.application.status").value("Applied"));
+    }
+
+    @Test
     void applyRejectsClosedPosting() throws Exception {
-        Integer closed = posting(false, LocalDate.now().plusDays(30));
+        Integer closed = posting(LocalDate.now().plusDays(30), "Closed");
 
         apply(jobSeekerWithResume(), closed)
                 .andExpect(status().isBadRequest())
@@ -206,8 +222,14 @@ class ApplicationControllerTests {
     }
 
     @Test
+    void postingsWithoutAStatusCountAsOpen() throws Exception {
+        apply(jobSeekerWithResume(), posting(LocalDate.now().plusDays(30), null))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
     void applyRejectsPostingPastItsDeadline() throws Exception {
-        Integer expired = posting(true, LocalDate.now().minusDays(1));
+        Integer expired = posting(LocalDate.now().minusDays(1));
 
         apply(jobSeekerWithResume(), expired)
                 .andExpect(status().isBadRequest())

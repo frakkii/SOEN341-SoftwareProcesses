@@ -7,175 +7,71 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
 </head>
 
-<body class="app">
-<!-- CareerConnect logo + navigation bar (same as home.html) -->
-<header class="topbar">
-    <div class="topbar-inner">
-        <div class="brand">
-            <h1>CareerConnect</h1>
-            <p>Welcome, <span id="username"></span></p>
-        </div>
+<body>
+<!-- Top navigation bar is rendered by js/shell.js (also redirects to the login page if not logged in) -->
 
-        <nav>
-            <a href="home.html">Home</a>
-            <a href="#">Postings</a>
-
-            <div class="dropdown">
-                <a href="#" class="active">My Tools ▾</a>
-                <div class="dropdown-menu">
-                    <a href="resume.html">My CVs &amp; Cover Letters</a>
-                    <a href="#">Favourited Postings</a>
-                    <a href="applications.html">My Applications</a>
-                </div>
-            </div>
-
-            <a href="#">Messages</a>
-            <a href="#">Settings</a>
-        </nav>
-    </div>
-</header>
-
-<main class="page">
-    <div class="card">
-        <h2>Apply to a job</h2>
-        <p class="sub">Enter the job posting number to submit your application. You'll need a resume on file first.</p>
-
-        <form id="apply-form" onsubmit="handleApply(event)">
-            <div class="field">
-                <label for="post-id">Job posting ID</label>
-                <input type="number" id="post-id" min="1" step="1" required placeholder="e.g. 42">
-            </div>
-            <button type="submit" id="apply-btn" class="btn">Submit Application</button>
-        </form>
-
-        <div id="apply-message" class="message hidden"></div>
+<main class="wrap">
+    <div class="page-title">
+        <h1>My applications</h1>
+        <p>Track every application from Applied through to a final decision.</p>
     </div>
 
-    <div class="card wide">
-        <h2>My Applications</h2>
-        <p class="sub">Track every application from Applied through to a final decision.</p>
-
-        <div id="list-message" class="message hidden"></div>
-        <div id="app-list" class="app-list hidden"></div>
-        <div id="empty-state" class="empty-state hidden">
-            <span>📭</span>
-            No applications yet. Submit one above to start tracking it here.
-        </div>
+    <div class="message error hidden" id="list-message"></div>
+    <div class="apps" id="apps"></div>
+    <div class="card empty hidden" id="empty">
+        <p>No applications yet.</p>
+        <p style="margin-top:14px"><a class="btn primary" href="jobs.html">Find jobs to apply to</a></p>
     </div>
 </main>
 
+<script src="js/shell.js"></script>
 <script>
-    const STATUS_ICON = {
-        "Applied": "📨",
-        "Under Review": "🔍",
-        "Interview": "🗓️",
-        "Offered": "🎉",
-        "Rejected": "❌"
-    };
+(function () {
+    if (!window.CC) return;                       // redirecting to login
+    const { esc, api, colorFor } = CC;
+    const STEPS = ["Applied", "Under Review", "Interview", "Offered"];
 
-    const name = localStorage.getItem("userName");
-    if (name) {
-        document.getElementById("username").textContent = name;
-    } else {
-        window.location.href = "index.html";              // not logged in → back to login
+    // One bar per stage. A rejection replaces the last stage and marks the stage it ended at.
+    function steps(status) {
+        const rejected = status === "Rejected";
+        return `<ol class="steps" aria-label="Application progress: ${esc(status)}">${STEPS.map((step, i) => {
+            if (rejected && i === 3) return `<li class="no">Rejected</li>`;
+            const reached = !rejected && i <= STEPS.indexOf(status);
+            const cls = reached ? (step === status ? "done now" : "done") : "";
+            return `<li class="${cls}"${step === status ? ' aria-current="step"' : ""}>${step}</li>`;
+        }).join("")}</ol>`;
     }
 
-    function statusClass(label) {
-        return label.toLowerCase().replace(/\s+/g, "-");
-    }
-
-    function showMessage(id, text, type) {
-        const el = document.getElementById(id);
-        el.textContent = text;
-        el.className = "message " + type;
-        el.classList.toggle("hidden", !text);
-    }
-
-    function renderApplications(apps) {
-        const list = document.getElementById("app-list");
-        const empty = document.getElementById("empty-state");
-
-        if (apps.length === 0) {
-            list.classList.add("hidden");
-            empty.classList.remove("hidden");
-            return;
-        }
-
-        empty.classList.add("hidden");
-        list.classList.remove("hidden");
-        list.innerHTML = apps.map(app => `
-            <div class="app-item">
-                <div class="ic">${STATUS_ICON[app.status] || "📄"}</div>
-                <div class="meta">
-                    <strong>Posting #${app.postId}</strong>
-                    <small>Applied ${new Date(app.appliedAt).toLocaleDateString()} · Updated ${new Date(app.updatedAt).toLocaleDateString()}</small>
+    function card(app) {
+        const title = app.jobTitle || `Posting #${app.postId}`;
+        const company = app.companyName || "";
+        const [c1, c2] = colorFor(company || title);
+        const day = iso => new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+        return `<article class="card app">
+            <div class="app-top">
+                <div class="logo" aria-hidden="true" style="--c1:${c1};--c2:${c2};width:46px;height:46px;font-size:1.1rem">${esc((company || title)[0])}</div>
+                <div class="who">
+                    <h3><a href="job.html?id=${encodeURIComponent(app.postId)}">${esc(title)}</a></h3>
+                    <small>${company ? esc(company) + " · " : ""}Applied ${day(app.appliedAt)} · Updated ${day(app.updatedAt)}</small>
                 </div>
-                <span class="chip ${statusClass(app.status)}">${app.status}</span>
+                <span class="status ${app.status.toLowerCase().replace(/\s+/g, "-")}">${esc(app.status)}</span>
             </div>
-        `).join("");
+            ${steps(app.status)}
+        </article>`;
     }
 
-    async function loadApplications() {
-        const res = await fetch("/api/applications");
-        const data = await res.json().catch(() => ({}));
-
-        if (res.status === 401) {
-            // The server restarted or the session expired: log in again
-            localStorage.removeItem("userName");
-            window.location.href = "index.html";
-            return;
-        }
-        if (res.status === 403) {
-            showMessage("list-message", data.message || "Only job seekers have applications.", "error");
-            return;
-        }
-        if (!res.ok) {
-            showMessage("list-message", data.message || "Couldn't load your applications.", "error");
-            return;
-        }
-
-        showMessage("list-message", "", "");
-        renderApplications(data);
-    }
-
-    async function handleApply(event) {
-        event.preventDefault();
-        const postId = document.getElementById("post-id").value;
-        const button = document.getElementById("apply-btn");
-
-        showMessage("apply-message", "", "");
-        button.disabled = true;
-        try {
-            const res = await fetch("/api/applications", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ postId: Number(postId) })
-            });
-            const data = await res.json().catch(() => ({}));
-
-            if (res.status === 401) {
-                localStorage.removeItem("userName");
-                window.location.href = "index.html";
-                return;
-            }
-            if (!res.ok) {
-                throw new Error(data.message || "Application failed (" + res.status + ")");
-            }
-
-            document.getElementById("apply-form").reset();
-            showMessage("apply-message", data.message, "success");
-            await loadApplications();
-        } catch (err) {
-            showMessage("apply-message", err.message, "error");
-        } finally {
-            button.disabled = false;
-        }
-    }
-
-    loadApplications();
+    api("/api/applications").then(apps => {
+        document.getElementById("apps").innerHTML = apps.map(card).join("");
+        document.getElementById("empty").classList.toggle("hidden", apps.length > 0);
+    }).catch(err => {
+        const el = document.getElementById("list-message");
+        el.textContent = err.status === 403 ? "Only job seekers have applications." : "Couldn't load your applications. " + err.message;
+        el.classList.remove("hidden");
+    });
+})();
 </script>
 </body>
 </html>

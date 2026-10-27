@@ -8,6 +8,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-// The logged-in job seeker's resume. The job seeker comes from the session set up
+// The logged-in job seeker's current resume. The job seeker comes from the session set up
 // at login, never from the request, so users can only see and replace their own.
 @RestController
 @RequestMapping("/api/resume")
@@ -45,7 +46,7 @@ public class ResumeController {
             return notJobSeeker(session);
         }
 
-        Optional<ResumeInfo> info = resumes.findInfoByPersonId(personId);
+        Optional<ResumeInfo> info = resumes.findFirstInfoByPersonIdAndCurrentTrueOrderByUploadedAtDesc(personId);
         if (info.isEmpty()) {
             return noResume();
         }
@@ -63,7 +64,7 @@ public class ResumeController {
             return notJobSeeker(session);
         }
 
-        Optional<Resume> resume = resumes.findById(personId);
+        Optional<Resume> resume = resumes.findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(personId);
         if (resume.isEmpty()) {
             return noResume();
         }
@@ -77,6 +78,7 @@ public class ResumeController {
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<?> uploadResume(@RequestParam(value = "resume", required = false) MultipartFile file,
                                           HttpSession session) {
         Integer personId = jobSeekerId(session);
@@ -104,7 +106,8 @@ public class ResumeController {
             return badRequest("Error reading the uploaded file.");
         }
 
-        // Same id as the job seeker's existing resume (if any), so this replaces it
+        // The new upload becomes the current resume; earlier ones are kept as older versions
+        resumes.retireCurrent(personId);
         resumes.save(new Resume(personId, fileName, contentType, data));
 
         return ResponseEntity.ok(Map.of(

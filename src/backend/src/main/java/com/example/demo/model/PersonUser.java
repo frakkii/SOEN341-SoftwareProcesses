@@ -34,6 +34,13 @@ public class PersonUser {
     private String phone;
     private String password;
 
+    // Written by the job seeker on their profile page; null until they fill them in
+    private String headline;
+    private String about;
+
+    // Comma-separated, e.g. "Java,SQL,Git"
+    private String skills;
+
     protected PersonUser() {
     }
 
@@ -93,5 +100,27 @@ public class PersonUser {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getHeadline() {
+        return headline;
+    }
+
+    public String getAbout() {
+        return about;
+    }
+
+    public String getSkills() {
+        return skills;
+    }
+
+    public void updateProfile(String headline, String about, String skills,
+                              String city, String provinceState, String country) {
+        this.headline = headline;
+        this.about = about;
+        this.skills = skills;
+        this.city = city;
+        this.provinceState = provinceState;
+        this.country = country;
     }
 }

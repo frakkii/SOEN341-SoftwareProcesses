@@ -1,4 +1,6 @@
-/* Profile photo, cover, headline etc. live in localStorage for now (no backend yet). */
+/* Shared by the job seeker pages: top bar, icons, toasts and the CC.api() fetch helper.
+   Headline, About, skills and location are saved through /api/profile; only the
+   profile photo and cover photo still live in localStorage (no image storage yet). */
 (function () {
   const user = localStorage.getItem('userName');
   if (!user) { location.replace('index.html'); return; }
@@ -32,7 +34,7 @@
   const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${PATHS[n]}</svg>`;
   const initials = n => n.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
 
-  // ---- per-user profile data (photo, cover, headline, location, about) ----
+  // ---- per-user photos (avatar, cover); the rest of the profile is in the database ----
   const KEY = 'cc_profile_' + user.toLowerCase();
   const store = {
     get() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } },
@@ -48,12 +50,13 @@
       else { el.style.backgroundImage = ''; el.textContent = initials(user); }
     });
   }
-  // Shared by the home and profile pages so both show the same completion score
-  function strength() {
-    const p = store.get();
+  // Shared by the home and profile pages so both show the same completion score.
+  // profile is the GET /api/profile response (or {} while it hasn't loaded).
+  function strength(profile = {}) {
+    const p = { ...store.get(), ...profile, skills: profile.skills && profile.skills.length };
     const steps = [
       ['avatar', 'Add a profile photo'], ['cover', 'Add a cover photo'],
-      ['headline', 'Write a headline'], ['about', 'Write your About section']
+      ['headline', 'Write a headline'], ['about', 'Write your About section'], ['skills', 'List your skills']
     ];
     const missing = steps.filter(([k]) => !p[k]);
     return { pct: Math.round((steps.length - missing.length) / steps.length * 100), missing: missing.map(m => m[1]) };
@@ -82,6 +85,46 @@
     setTimeout(() => t.remove(), 2800);
   }
 
+  // fetch() for the JSON API: resolves with the parsed body, rejects with an Error carrying
+  // the server's message and .status. A 401 means the session ended, so go back to login.
+  async function api(url, options = {}) {
+    const opts = { credentials: 'same-origin', ...options };
+    if (opts.body && typeof opts.body !== 'string') {
+      opts.headers = { 'Content-Type': 'application/json', ...opts.headers };
+      opts.body = JSON.stringify(opts.body);
+    }
+    const res = await fetch(url, opts);
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      localStorage.removeItem('userName');
+      location.replace('index.html');
+    }
+    if (!res.ok) {
+      const err = new Error(data.message || 'Something went wrong (' + res.status + ').');
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  // The job search API may name a few fields differently; read them in one place
+  const jobView = j => ({
+    id: j.postId ?? j.id,
+    title: j.title || 'Untitled role',
+    company: j.companyName || 'Company',
+    location: j.location || 'Location not specified',
+    category: j.industry || j.category || j.department || '',
+    jobType: j.jobType || '',
+    salary: j.salary || '',
+    skills: (j.requiredSkills || '').split(/[,\n]/).map(s => s.trim()).filter(Boolean),
+    description: j.description || '',
+    deadline: j.applicationDeadline || j.deadline || null
+  });
+  // "2026-11-30" -> "Nov 30, 2026" (parsed as a local date, not UTC midnight)
+  const fmtDate = d => d ? new Date(String(d).slice(0, 10) + 'T00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+  const COLORS = [['#7c3aed', '#a78bfa'], ['#0891b2', '#6366f1'], ['#ea580c', '#f59e0b'], ['#db2777', '#fb7185']];
+  const colorFor = key => COLORS[[...String(key)].reduce((n, c) => n + c.charCodeAt(0), 0) % COLORS.length];
+
   // ---- top bar ----
   const page = location.pathname.split('/').pop() || 'home.html';
   const cur = (...p) => p.includes(page) ? ' active' : '';
@@ -93,13 +136,13 @@
     </a>
     <nav class="nav" aria-label="Main">
       <a href="home.html" class="${cur('home.html').trim()}">Home</a>
-      <a href="#" data-soon="Postings">Postings</a>
-      <div class="dd${cur('resume.html')}">
+      <a href="jobs.html" class="${cur('jobs.html', 'job.html').trim()}">Postings</a>
+      <div class="dd${cur('resume.html', 'applications.html')}">
         <button type="button" class="dd-btn" aria-haspopup="true" aria-expanded="false">My Tools ${icon('chev')}</button>
         <div class="dd-menu"><div class="dd-panel">
           <a href="resume.html"><span class="ic g1">${icon('doc')}</span>My CVs &amp; Cover Letters</a>
           <a href="#" data-soon="Favourited Postings"><span class="ic g3">${icon('star')}</span>Favourited Postings<em>Soon</em></a>
-          <a href="#" data-soon="My Applications"><span class="ic g2">${icon('chart')}</span>My Applications<em>Soon</em></a>
+          <a href="applications.html"><span class="ic g2">${icon('chart')}</span>My Applications</a>
         </div></div>
       </div>
       <a href="#" data-soon="Messages">Messages</a>
@@ -119,6 +162,6 @@
     if (a) { e.preventDefault(); setOpen(false); toast((a.dataset.soon || 'This') + ' is coming soon.'); }
   });
 
-  window.CC = { user, esc, icon, initials, store, toast, applyAvatars, strength, readImage };
+  window.CC = { user, esc, icon, initials, store, toast, applyAvatars, strength, readImage, api, jobView, fmtDate, colorFor };
   applyAvatars();
 })();

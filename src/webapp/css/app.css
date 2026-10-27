@@ -1,4 +1,4 @@
-/* internal pages (home, profile, resume). */
+/* internal pages (home, profile, resume, jobs, applications). */
 
 :root{
   --ink:#1e1b4b; --ink2:#4a4673; --muted:#6b6790; --line:#e6e1fb; --canvas:#f5f3ff;
@@ -276,6 +276,46 @@ input[type="file"]::file-selector-button{margin-right:16px;padding:10px 18px;bor
 .tips li{display:flex;gap:12px;color:var(--ink2);font-size:.92rem}
 .tips .i{margin-top:3px;color:var(--violet)}
 
+/* ---------- Job search + job detail ---------- */
+.search{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto;gap:12px;align-items:end;padding:20px}
+.search .field{margin:0}
+.search .field input,.search .field select{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:14px;background:#faf9ff;color:var(--ink);font:500 .95rem var(--body)}
+.search .field input:focus,.search .field select:focus{outline:none;border-color:var(--violet);background:#fff;box-shadow:0 0 0 4px rgba(124,58,237,.15)}
+.search .btn{height:48px}
+.results-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 14px}
+.results-bar h2{font-size:1.2rem}
+.results{display:grid;gap:16px}
+.results .actions .btn{margin-left:auto}
+.job-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:28px;align-items:start}
+.job-grid h1{font-size:clamp(1.6rem,2.4vw,2.2rem)}
+.job-grid .sec-h{margin-top:22px}
+.apply-card{display:grid;gap:12px}
+.apply-card .deadline{color:var(--muted);font-size:.9rem;font-weight:600}
+.message a{color:inherit;font-weight:800}
+
+/* ---------- Application tracker ---------- */
+.apps{display:grid;gap:16px}
+.app{padding:20px 22px}
+.app-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.app-top .who{flex:1;min-width:200px}
+.app-top h3{font-size:1.1rem}
+.app-top h3 a{text-decoration:none}
+.app-top h3 a:hover{color:var(--violet)}
+.status{padding:6px 12px;border-radius:99px;font:800 .8rem var(--body);background:#f5f3ff;color:var(--violet)}
+.status.under-review{background:#e0f2fe;color:#0369a1}
+.status.interview{background:#fef3c7;color:#b45309}
+.status.offered{background:#d1fae5;color:#047857}
+.status.rejected{background:#fee2e2;color:#b91c1c}
+/* Applied -> Under Review -> Interview -> Offered/Rejected */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:18px 0 0;padding:0;list-style:none;counter-reset:step}
+.steps li{position:relative;padding-top:16px;color:var(--muted);font-size:.8rem;font-weight:700;text-align:center}
+.steps li::before{content:"";position:absolute;top:0;left:0;right:0;height:6px;border-radius:99px;background:var(--line)}
+.steps li.done{color:var(--ink2)}
+.steps li.done::before{background:var(--grad)}
+.steps li.now{color:var(--violet)}
+.steps li.no{color:#b91c1c}
+.steps li.no::before{background:#f87171}
+
 /* ---------- Toast ---------- */
 .toasts{position:fixed;left:50%;bottom:24px;z-index:100;display:grid;gap:8px;transform:translateX(-50%);pointer-events:none}
 .toast{padding:12px 20px;border-radius:14px;background:var(--ink);color:#fff;font-weight:700;font-size:.9rem;box-shadow:0 14px 34px rgba(30,27,75,.4);animation:pop .2s ease-out}
@@ -286,7 +326,7 @@ input[type="file"]::file-selector-button{margin-right:16px;padding:10px 18px;bor
   .feed-grid{grid-template-columns:minmax(240px,290px) minmax(0,1fr)}
   .feed-grid>.rail{position:static}
   .feed-grid>.rail.right{grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start}
-  .profile-grid,.cv-grid{grid-template-columns:1fr}
+  .profile-grid,.cv-grid,.job-grid{grid-template-columns:1fr}
   .p-side{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start}
 }
 @media (max-width:860px){
@@ -297,6 +337,8 @@ input[type="file"]::file-selector-button{margin-right:16px;padding:10px 18px;bor
   .feed-grid{grid-template-columns:1fr}
   .me-card{display:none}
   .c-bar,.preview{margin-left:0}
+  .search{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr;row-gap:12px}
 }
 @media (max-width:520px){
   .p-top .logo{width:46px;height:46px}

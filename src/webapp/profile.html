@@ -48,35 +48,9 @@
             <p class="about" id="p-about"></p>
         </section>
 
-        <!-- Sample content: replace with the user's real experience once the backend stores it -->
         <section class="card sec">
-            <div class="sec-h"><h2>Experience</h2><button type="button" class="icon-btn" data-soon="Adding experience" aria-label="Add experience" id="add-exp"></button></div>
-            <div class="row">
-                <span class="logo" style="--c1:#7c3aed;--c2:#a78bfa">L</span>
-                <div><h3>Frontend Developer Intern</h3><p class="co">Lumen Labs</p><p class="when">May 2025 to Aug 2025, Montréal, QC</p>
-                    <p class="d">Rebuilt the job search filters in React, cutting time to first result by a third. Wrote the component tests for the new design system.</p></div>
-            </div>
-            <div class="row">
-                <span class="logo" style="--c1:#0891b2;--c2:#6366f1">M</span>
-                <div><h3>Teaching Assistant</h3><p class="co">Mont-Royal Analytics Academy</p><p class="when">Sep 2024 to Apr 2025, Montréal, QC</p>
-                    <p class="d">Ran weekly lab sessions for 60 students and graded database assignments.</p></div>
-            </div>
-        </section>
-
-        <section class="card sec">
-            <div class="sec-h"><h2>Education</h2><button type="button" class="icon-btn" data-soon="Adding education" aria-label="Add education" id="add-edu"></button></div>
-            <div class="row">
-                <span class="logo" style="--c1:#ea580c;--c2:#f59e0b">U</span>
-                <div><h3>BEng, Software Engineering</h3><p class="co">Your University</p><p class="when">2022 to 2026</p></div>
-            </div>
-        </section>
-
-        <section class="card sec">
-            <div class="sec-h"><h2>Skills</h2></div>
-            <div class="skills">
-                <span class="tag">JavaScript</span><span class="tag">Java</span><span class="tag">Spring Boot</span><span class="tag">React</span>
-                <span class="tag">SQL</span><span class="tag">Git</span><span class="tag">Figma</span><span class="tag">Agile</span>
-            </div>
+            <div class="sec-h"><h2>Skills</h2><button type="button" class="icon-btn" id="edit-skills" aria-label="Edit skills"></button></div>
+            <div class="skills" id="p-skills"></div>
         </section>
     </div>
 
@@ -105,10 +79,16 @@
         <h2 id="dlg-title">Edit profile</h2>
         <div class="field"><label for="f-headline">Headline</label>
             <input id="f-headline" maxlength="120" placeholder="Software engineering student, open to co-op roles"></div>
-        <div class="field"><label for="f-location">Location</label>
-            <input id="f-location" maxlength="80" placeholder="Montréal, QC"></div>
+        <div class="field"><label for="f-city">City</label>
+            <input id="f-city" maxlength="50" required placeholder="Montréal"></div>
+        <div class="field"><label for="f-province">Province / State</label>
+            <input id="f-province" maxlength="50" required placeholder="Quebec"></div>
         <div class="field"><label for="f-about">About</label>
             <textarea id="f-about" maxlength="1200" placeholder="Tell employers what you are great at and what you want to do next."></textarea></div>
+        <div class="field"><label for="f-skills">Skills</label>
+            <input id="f-skills" maxlength="500" placeholder="Java, SQL, Git">
+            <p class="hint">Separate skills with commas (up to 20).</p></div>
+        <p class="message error hidden" id="edit-error"></p>
         <div class="dlg-bar">
             <button type="button" class="btn" id="cancel-edit">Cancel</button>
             <button type="submit" class="btn primary">Save changes</button>
