@@ -52,6 +52,9 @@ CREATE TABLE job_postings (
     application_deadline    DATE         NOT NULL,
     salary      VARCHAR(255)     NOT NULL,
     required_skills    TEXT,
+    status VARCHAR(255),
+    applicants INTEGER,
+    location VARCHAR(255),
     CONSTRAINT job_postings_pkey PRIMARY KEY (post_id),
     CONSTRAINT job_postings_employer_id_fkey FOREIGN KEY (employer_id) REFERENCES employer_user (employer_id)
 );
