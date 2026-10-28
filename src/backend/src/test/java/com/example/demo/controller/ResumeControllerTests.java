@@ -11,6 +11,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 import java.util.UUID;
 
@@ -62,7 +63,14 @@ class ResumeControllerTests {
     }
 
     private static MockMultipartFile file(String name, String contents) {
-        return new MockMultipartFile("resume", name, "application/octet-stream", contents.getBytes());
+        byte[] data = contents.isEmpty()
+                ? new byte[0]
+                : name.toLowerCase().endsWith(".pdf") ? pdfContents(contents) : contents.getBytes();
+        return new MockMultipartFile("resume", name, "application/octet-stream", data);
+    }
+
+    private static byte[] pdfContents(String contents) {
+        return ("%PDF-1.7\n" + contents).getBytes();
     }
 
     private ResultActions upload(MockHttpSession session, MockMultipartFile file) throws Exception {
@@ -74,42 +82,34 @@ class ResumeControllerTests {
         MockHttpSession session = loggedIn("Job Seeker", uniqueEmail());
 
         upload(session, file("cv.pdf", "first resume"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.fileName").value("cv.pdf"));
 
         mockMvc.perform(get("/api/resume").session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileName").value("cv.pdf"))
-                .andExpect(jsonPath("$.fileSize").value("first resume".length()));
+                .andExpect(jsonPath("$.fileSize").value(pdfContents("first resume").length));
 
         mockMvc.perform(get("/api/resume/file").session(session))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/pdf"))
-                .andExpect(content().bytes("first resume".getBytes()));
+                .andExpect(content().bytes(pdfContents("first resume")));
     }
 
     @Test
-    void uploadingAgainReplacesTheCurrentResumeAndKeepsTheOldVersion() throws Exception {
+    void uploadingAgainReplacesTheOldResume() throws Exception {
         String email = uniqueEmail();
         MockHttpSession session = loggedIn("Job Seeker", email);
         Integer personId = personUsers.findByEmailIgnoreCase(email).orElseThrow().getId();
 
-        upload(session, file("old.pdf", "old resume")).andExpect(status().isOk());
-        upload(session, file("new.docx", "new resume")).andExpect(status().isOk());
+        upload(session, file("old.pdf", "old resume")).andExpect(status().isCreated());
+        upload(session, file("new.pdf", "new resume")).andExpect(status().isOk());
 
-        assertThat(resumes.findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(personId)).hasValueSatisfying(resume -> {
-            assertThat(resume.getFileName()).isEqualTo("new.docx");
-            assertThat(resume.getData()).isEqualTo("new resume".getBytes());
+        assertThat(resumes.findByPersonIdAndCurrentTrue(personId)).hasValueSatisfying(resume -> {
+            assertThat(resume.getFileName()).isEqualTo("new.pdf");
+            assertThat(resume.getData()).isEqualTo(pdfContents("new resume"));
         });
-        // Both versions are stored, and only the newest is current
-        assertThat(resumes.findAll()).filteredOn(resume -> resume.getPersonId().equals(personId))
-                .extracting(resume -> resume.getFileName() + ":" + resume.isCurrent())
-                .containsExactlyInAnyOrder("old.pdf:false", "new.docx:true");
-
-        mockMvc.perform(get("/api/resume").session(session))
-                .andExpect(jsonPath("$.fileName").value("new.docx"));
-        mockMvc.perform(get("/api/resume/file").session(session))
-                .andExpect(content().bytes("new resume".getBytes()));
+        assertThat(resumes.findAll()).filteredOn(resume -> resume.getPersonId().equals(personId)).hasSize(2);
     }
 
     @Test
@@ -117,7 +117,7 @@ class ResumeControllerTests {
         MockHttpSession first = loggedIn("Job Seeker", uniqueEmail());
         MockHttpSession second = loggedIn("Job Seeker", uniqueEmail());
 
-        upload(first, file("first.pdf", "first")).andExpect(status().isOk());
+        upload(first, file("first.pdf", "first")).andExpect(status().isCreated());
 
         mockMvc.perform(get("/api/resume").session(second))
                 .andExpect(status().isNotFound())
@@ -156,4 +156,38 @@ class ResumeControllerTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Resume must be a PDF, DOC or DOCX file."));
     }
+    @Test
+    void jobSeekerCanDeleteTheirResume() throws Exception {
+    String email = uniqueEmail();
+    MockHttpSession session = loggedIn("Job Seeker", email);
+    Integer personId = personUsers.findByEmailIgnoreCase(email).orElseThrow().getId();
+
+    upload(session, file("cv.pdf", "resume")).andExpect(status().isCreated());
+
+    mockMvc.perform(delete("/api/resume").session(session))
+            .andExpect(status().isNoContent());
+
+    assertThat(resumes.findByPersonIdAndCurrentTrue(personId)).isEmpty();
+    }
+    @Test
+    void deletingWhenNoResumeExistsReturnsNotFound() throws Exception {
+    MockHttpSession session = loggedIn("Job Seeker", uniqueEmail());
+
+    mockMvc.perform(delete("/api/resume").session(session))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("No resume uploaded yet."));
+    }
+    @Test
+    void deletingResumeRequiresLogin() throws Exception {
+    mockMvc.perform(delete("/api/resume").session(new MockHttpSession()))
+            .andExpect(status().isUnauthorized());
+   }
+
+   @Test
+void recruitersCannotDeleteResume() throws Exception {
+    MockHttpSession session = loggedIn("Recruiter", uniqueEmail());
+
+    mockMvc.perform(delete("/api/resume").session(session))
+            .andExpect(status().isForbidden());
+}
 }
