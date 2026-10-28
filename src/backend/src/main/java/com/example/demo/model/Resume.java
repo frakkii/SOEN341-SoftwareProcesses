@@ -9,8 +9,7 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-// One version of a job seeker's resume. Uploading a new one keeps the old rows and
-// marks only the newest as current (V7); the current one is sent with applications.
+// A job seeker's resume version.
 @Entity
 @Table(name = "resume")
 public class Resume {
@@ -21,6 +20,9 @@ public class Resume {
 
     @Column(name = "person_id")
     private Integer personId;
+
+    @Column(name = "current", nullable = false)
+    private boolean current;
 
     @Column(name = "file_name")
     private String fileName;
@@ -36,19 +38,17 @@ public class Resume {
     @Column(name = "uploaded_at")
     private Instant uploadedAt;
 
-    private boolean current;
-
     protected Resume() {
     }
 
     public Resume(Integer personId, String fileName, String contentType, byte[] data) {
         this.personId = personId;
+        this.current = true;
         this.fileName = fileName;
         this.contentType = contentType;
         this.fileSize = data.length;
         this.data = data;
         this.uploadedAt = Instant.now();
-        this.current = true;
     }
 
     public Long getId() {
@@ -57,6 +57,14 @@ public class Resume {
 
     public Integer getPersonId() {
         return personId;
+    }
+
+    public boolean isCurrent() {
+        return current;
+    }
+
+    public void setCurrent(boolean current) {
+        this.current = current;
     }
 
     public String getFileName() {
@@ -77,9 +85,5 @@ public class Resume {
 
     public Instant getUploadedAt() {
         return uploadedAt;
-    }
-
-    public boolean isCurrent() {
-        return current;
     }
 }
