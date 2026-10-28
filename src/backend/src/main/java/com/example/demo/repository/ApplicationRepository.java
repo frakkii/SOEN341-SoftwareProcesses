@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,30 +18,23 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     // Only finds the application if it belongs to this job seeker
     Optional<Application> findByIdAndPersonId(Long id, Integer personId);
 
-    // Everyone who applied to one posting, most recent first (for the recruiter)
-    List<Application> findByPostIdOrderByAppliedAtDesc(Integer postId);
-
-    // Number of applications for each of the given postings
-    interface PostingCount {
-        Integer getPostId();
-
-        Long getTotal();
-    }
-
-    @Query("SELECT a.postId AS postId, COUNT(a) AS total FROM Application a "
-            + "WHERE a.postId IN :postIds GROUP BY a.postId")
-    List<PostingCount> countByPostIds(@Param("postIds") Collection<Integer> postIds);
-
     // job_postings is managed by the job posting feature, so applications only
     // read it directly to check the posting before applying
     @Query(value = "SELECT COUNT(*) FROM job_postings WHERE post_id = :postId", nativeQuery = true)
     long countPostings(@Param("postId") Integer postId);
 
-    // Still accepting applications: not closed by the recruiter, and the deadline hasn't
-    // passed (applying on the deadline day is allowed). Rows from before the status
-    // column existed have no status and count as open.
-    @Query(value = "SELECT COUNT(*) FROM job_postings WHERE post_id = :postId "
-            + "AND (status IS NULL OR status = 'Open') "
-            + "AND application_deadline >= CURRENT_DATE", nativeQuery = true)
+    // Open (status = true) and the deadline hasn't passed
+    @Query(value = "SELECT COUNT(*) FROM job_postings WHERE post_id = :postId AND status = TRUE "
+            + "AND deadline >= CURRENT_DATE", nativeQuery = true)
     long countOpenPostings(@Param("postId") Integer postId);
+   @Query(value = """
+            SELECT COUNT(*)
+            FROM application a
+            JOIN job_postings jp ON jp.post_id = a.post_id
+            WHERE a.id = :applicationId
+              AND jp.employer_id = :employerId
+            """, nativeQuery = true)
+    long countApplicationOwnedByEmployer(
+            @Param("applicationId") Long applicationId,
+            @Param("employerId") Integer employerId);
 }
