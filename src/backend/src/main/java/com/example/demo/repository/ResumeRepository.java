@@ -7,25 +7,37 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface ResumeRepository extends JpaRepository<Resume, Long> {
 
     // The resume's details without the file itself, so showing them doesn't load the whole file
     interface ResumeInfo {
+        Long getId();
+
         String getFileName();
 
         Integer getFileSize();
 
         Instant getUploadedAt();
+
+        Boolean getCurrent();
     }
 
-    // The job seeker's current resume (the newest, in case an older row was left current)
+    // From colleague's main branch (stable current resume queries)
     Optional<ResumeInfo> findFirstInfoByPersonIdAndCurrentTrueOrderByUploadedAtDesc(Integer personId);
 
     Optional<Resume> findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(Integer personId);
 
     boolean existsByPersonIdAndCurrentTrue(Integer personId);
+
+    // From your branch (needed for version management, switching current, and deleting)
+    Optional<Resume> findByIdAndPersonId(Long id, Integer personId);
+
+    Optional<Resume> findFirstByPersonIdOrderByUploadedAtDesc(Integer personId);
+
+    List<ResumeInfo> findAllByPersonIdOrderByUploadedAtDesc(Integer personId);
 
     // Keeps the job seeker's earlier resumes but stops them being current, before a new upload
     @Modifying
