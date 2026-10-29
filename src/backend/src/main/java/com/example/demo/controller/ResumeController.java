@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Application;
 import com.example.demo.model.Resume;
-import com.example.demo.repository.ApplicationRepository;
 import com.example.demo.repository.ResumeRepository;
 import com.example.demo.repository.ResumeRepository.ResumeInfo;
 import jakarta.servlet.http.HttpSession;
@@ -23,8 +21,9 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-// The logged-in job seeker's current resume. The job seeker comes from the session set up
-// at login, never from the request, so users can only see and replace their own.
+// The logged-in job seeker's resumes: the current one plus earlier versions. The job seeker
+// comes from the session set up at login, never from the request, so users can only see and
+// change their own.
 @RestController
 @RequestMapping("/api/resume")
 public class ResumeController {
@@ -39,11 +38,9 @@ public class ResumeController {
     );
 
     private final ResumeRepository resumes;
-    private final ApplicationRepository applications;
 
-    public ResumeController(ResumeRepository resumes, ApplicationRepository applications) {
+    public ResumeController(ResumeRepository resumes) {
         this.resumes = resumes;
-        this.applications = applications;
     }
 
     @GetMapping
@@ -53,7 +50,6 @@ public class ResumeController {
             return notJobSeeker(session);
         }
 
-        // Adapted to use main's ordered query instead of findInfoByPersonIdAndCurrentTrue
         Optional<ResumeInfo> info = resumes.findFirstInfoByPersonIdAndCurrentTrueOrderByUploadedAtDesc(personId);
         if (info.isEmpty()) {
             return noResume();
@@ -72,53 +68,10 @@ public class ResumeController {
             return notJobSeeker(session);
         }
 
-        // Adapted to use main's ordered query instead of findByPersonIdAndCurrentTrue
         Optional<Resume> resume = resumes.findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(personId);
         if (resume.isEmpty()) {
             return noResume();
         }
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(resume.get().getContentType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
-                        .filename(resume.get().getFileName(), StandardCharsets.UTF_8)
-                        .build()
-                        .toString())
-                .body(resume.get().getData());
-    }
-
-    @GetMapping("/applications/{applicationId}/file")
-    public ResponseEntity<?> downloadApplicantResume(
-            @PathVariable Long applicationId,
-            HttpSession session) {
-
-        Integer employerId = (Integer) session.getAttribute(AuthController.SESSION_USER_ID);
-
-        if (employerId == null) {
-            return ResponseEntity.status(401)
-                    .body(Map.of("message", "Please sign in first."));
-        }
-
-        if (!"Recruiter".equals(session.getAttribute(AuthController.SESSION_ROLE))) {
-            return ResponseEntity.status(403)
-                    .body(Map.of("message", "Only recruiters can access applicant resumes."));
-        }
-
-        if (applications.countApplicationOwnedByEmployer(applicationId, employerId) == 0) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Optional<Application> application = applications.findById(applicationId);
-        if (application.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Adapted to use main's ordered query
-        Optional<Resume> resume = resumes.findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(application.get().getPersonId());
-
-        if (resume.isEmpty()) {
-            return noResume();
-        }
-
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(resume.get().getContentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
@@ -173,7 +126,7 @@ public class ResumeController {
         Optional<Resume> currentResume = resumes.findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(personId);
         boolean replacing = currentResume.isPresent();
 
-        // Uses main repository's batch retire method instead of manual flag iteration
+        // The new upload becomes the current resume; earlier ones are kept as older versions
         resumes.retireCurrent(personId);
         resumes.save(new Resume(personId, fileName, contentType, data));
 
@@ -185,6 +138,7 @@ public class ResumeController {
         ));
     }
 
+    // Every version the job seeker has uploaded, newest first
     @GetMapping("/versions")
     public ResponseEntity<?> getResumeVersions(HttpSession session) {
         Integer personId = jobSeekerId(session);
@@ -194,6 +148,7 @@ public class ResumeController {
         return ResponseEntity.ok(resumes.findAllByPersonIdOrderByUploadedAtDesc(personId));
     }
 
+    // Makes an earlier version the current resume again (the one sent with new applications)
     @PutMapping("/versions/{resumeId}/current")
     @Transactional
     public ResponseEntity<?> selectCurrentResume(@PathVariable Long resumeId, HttpSession session) {
@@ -213,6 +168,7 @@ public class ResumeController {
         return ResponseEntity.noContent().build();
     }
 
+    // Deletes the current resume; the newest remaining version, if any, becomes current
     @DeleteMapping
     @Transactional
     public ResponseEntity<?> deleteResume(HttpSession session) {
@@ -232,6 +188,7 @@ public class ResumeController {
         return ResponseEntity.noContent().build();
     }
 
+    // Checks the file starts like a real PDF, DOC or DOCX, so a renamed file of another kind is refused
     private static boolean matchesFileType(String fileName, byte[] data) {
         String extension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase(Locale.ROOT);
 

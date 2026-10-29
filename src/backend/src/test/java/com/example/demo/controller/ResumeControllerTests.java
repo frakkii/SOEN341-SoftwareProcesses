@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.repository.PersonUserRepository;
+import com.jayway.jsonpath.JsonPath;
 import com.example.demo.repository.ResumeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +13,22 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -61,8 +72,32 @@ class ResumeControllerTests {
         return "user-" + UUID.randomUUID() + "@example.com";
     }
 
-    private static MockMultipartFile file(String name, String contents) {
-        return new MockMultipartFile("resume", name, "application/octet-stream", contents.getBytes());
+    // Uploads are checked against their extension, so PDFs and DOCXs get real file contents with
+    // the text inside (to tell versions apart). Empty text stays an empty file.
+    static byte[] contents(String name, String text) {
+        if (text.isEmpty()) {
+            return new byte[0];
+        }
+        if (name.endsWith(".pdf")) {
+            return ("%PDF-1.4\n" + text).getBytes(StandardCharsets.UTF_8);
+        }
+        if (name.endsWith(".docx")) {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            try (ZipOutputStream zip = new ZipOutputStream(bytes)) {
+                zip.putNextEntry(new ZipEntry("[Content_Types].xml"));
+                zip.write("<Types/>".getBytes(StandardCharsets.UTF_8));
+                zip.putNextEntry(new ZipEntry("word/document.xml"));
+                zip.write(text.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            return bytes.toByteArray();
+        }
+        return text.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static MockMultipartFile file(String name, String text) {
+        return new MockMultipartFile("resume", name, "application/octet-stream", contents(name, text));
     }
 
     private ResultActions upload(MockHttpSession session, MockMultipartFile file) throws Exception {
@@ -73,19 +108,22 @@ class ResumeControllerTests {
     void jobSeekerCanUploadAndDownloadResume() throws Exception {
         MockHttpSession session = loggedIn("Job Seeker", uniqueEmail());
 
+        byte[] pdf = contents("cv.pdf", "first resume");
+
         upload(session, file("cv.pdf", "first resume"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.message").value("Resume uploaded successfully."))
                 .andExpect(jsonPath("$.fileName").value("cv.pdf"));
 
         mockMvc.perform(get("/api/resume").session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileName").value("cv.pdf"))
-                .andExpect(jsonPath("$.fileSize").value("first resume".length()));
+                .andExpect(jsonPath("$.fileSize").value(pdf.length));
 
         mockMvc.perform(get("/api/resume/file").session(session))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/pdf"))
-                .andExpect(content().bytes("first resume".getBytes()));
+                .andExpect(content().bytes(pdf));
     }
 
     @Test
@@ -94,12 +132,16 @@ class ResumeControllerTests {
         MockHttpSession session = loggedIn("Job Seeker", email);
         Integer personId = personUsers.findByEmailIgnoreCase(email).orElseThrow().getId();
 
-        upload(session, file("old.pdf", "old resume")).andExpect(status().isOk());
-        upload(session, file("new.docx", "new resume")).andExpect(status().isOk());
+        byte[] docx = contents("new.docx", "new resume");
+
+        upload(session, file("old.pdf", "old resume")).andExpect(status().isCreated());
+        upload(session, file("new.docx", "new resume"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Resume replaced successfully."));
 
         assertThat(resumes.findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(personId)).hasValueSatisfying(resume -> {
             assertThat(resume.getFileName()).isEqualTo("new.docx");
-            assertThat(resume.getData()).isEqualTo("new resume".getBytes());
+            assertThat(resume.getData()).isEqualTo(docx);
         });
         // Both versions are stored, and only the newest is current
         assertThat(resumes.findAll()).filteredOn(resume -> resume.getPersonId().equals(personId))
@@ -109,7 +151,7 @@ class ResumeControllerTests {
         mockMvc.perform(get("/api/resume").session(session))
                 .andExpect(jsonPath("$.fileName").value("new.docx"));
         mockMvc.perform(get("/api/resume/file").session(session))
-                .andExpect(content().bytes("new resume".getBytes()));
+                .andExpect(content().bytes(docx));
     }
 
     @Test
@@ -117,7 +159,7 @@ class ResumeControllerTests {
         MockHttpSession first = loggedIn("Job Seeker", uniqueEmail());
         MockHttpSession second = loggedIn("Job Seeker", uniqueEmail());
 
-        upload(first, file("first.pdf", "first")).andExpect(status().isOk());
+        upload(first, file("first.pdf", "first")).andExpect(status().isCreated());
 
         mockMvc.perform(get("/api/resume").session(second))
                 .andExpect(status().isNotFound())
@@ -155,5 +197,96 @@ class ResumeControllerTests {
         upload(session, file("cv.exe", "resume"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Resume must be a PDF, DOC or DOCX file."));
+    }
+
+    @Test
+    void uploadRejectsFilesWhoseContentsDoNotMatchTheExtension() throws Exception {
+        MockHttpSession session = loggedIn("Job Seeker", uniqueEmail());
+
+        upload(session, new MockMultipartFile("resume", "cv.pdf", "application/pdf", "not really a pdf".getBytes()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("File contents do not match the file extension."));
+        upload(session, new MockMultipartFile("resume", "cv.docx", "application/octet-stream", "plain text".getBytes()))
+                .andExpect(status().isBadRequest());
+    }
+
+    // The id of one of the session's resume versions, found by file name
+    private Long versionId(MockHttpSession session, String fileName) throws Exception {
+        String body = mockMvc.perform(get("/api/resume/versions").session(session))
+                .andReturn().getResponse().getContentAsString();
+        List<Number> ids = JsonPath.read(body, "$[?(@.fileName == '" + fileName + "')].id");
+        return ids.get(0).longValue();
+    }
+
+    @Test
+    void listsEveryVersionWithTheCurrentOneMarked() throws Exception {
+        MockHttpSession session = loggedIn("Job Seeker", uniqueEmail());
+        upload(session, file("old.pdf", "old")).andExpect(status().isCreated());
+        upload(session, file("new.pdf", "new")).andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/resume/versions").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[?(@.current == true)].fileName", contains("new.pdf")))
+                .andExpect(jsonPath("$[?(@.current == false)].fileName", contains("old.pdf")));
+    }
+
+    @Test
+    void choosingAnEarlierVersionMakesItCurrent() throws Exception {
+        MockHttpSession session = loggedIn("Job Seeker", uniqueEmail());
+        upload(session, file("old.pdf", "old")).andExpect(status().isCreated());
+        upload(session, file("new.pdf", "new")).andExpect(status().isOk());
+        Long oldId = versionId(session, "old.pdf");
+
+        mockMvc.perform(put("/api/resume/versions/" + oldId + "/current").session(session))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/resume").session(session))
+                .andExpect(jsonPath("$.fileName").value("old.pdf"));
+
+        // Choosing the version that is already current keeps it current
+        mockMvc.perform(put("/api/resume/versions/" + oldId + "/current").session(session))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/resume/versions").session(session))
+                .andExpect(jsonPath("$[?(@.current == true)].fileName", contains("old.pdf")));
+    }
+
+    @Test
+    void jobSeekersCannotChooseAnotherJobSeekersResume() throws Exception {
+        MockHttpSession owner = loggedIn("Job Seeker", uniqueEmail());
+        MockHttpSession other = loggedIn("Job Seeker", uniqueEmail());
+        upload(owner, file("cv.pdf", "mine")).andExpect(status().isCreated());
+        Long ownersId = versionId(owner, "cv.pdf");
+
+        mockMvc.perform(put("/api/resume/versions/" + ownersId + "/current").session(other))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/resume/versions").session(other))
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void deletingTheCurrentResumeFallsBackToTheNextVersion() throws Exception {
+        MockHttpSession session = loggedIn("Job Seeker", uniqueEmail());
+        upload(session, file("old.pdf", "old")).andExpect(status().isCreated());
+        upload(session, file("new.pdf", "new")).andExpect(status().isOk());
+
+        mockMvc.perform(delete("/api/resume").session(session)).andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/resume").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fileName").value("old.pdf"));
+
+        mockMvc.perform(delete("/api/resume").session(session)).andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/resume").session(session)).andExpect(status().isNotFound());
+        mockMvc.perform(delete("/api/resume").session(session)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void versionEndpointsRequireAJobSeeker() throws Exception {
+        MockHttpSession recruiter = loggedIn("Recruiter", uniqueEmail());
+
+        mockMvc.perform(get("/api/resume/versions").session(new MockHttpSession()))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/resume/versions").session(recruiter)).andExpect(status().isForbidden());
+        mockMvc.perform(put("/api/resume/versions/1/current").session(recruiter)).andExpect(status().isForbidden());
+        mockMvc.perform(delete("/api/resume").session(recruiter)).andExpect(status().isForbidden());
     }
 }

@@ -70,9 +70,10 @@ class RecruiterControllerTests {
     private Long applyTo(Integer postId) throws Exception {
         MockHttpSession jobSeeker = loggedIn("Job Seeker");
         mockMvc.perform(multipart("/api/resume")
-                        .file(new MockMultipartFile("resume", "cv.pdf", "application/pdf", "my resume".getBytes()))
+                        .file(new MockMultipartFile("resume", "cv.pdf", "application/pdf",
+                                ResumeControllerTests.contents("cv.pdf", "my resume")))
                         .session(jobSeeker))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
         String body = mockMvc.perform(post("/api/applications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"postId\":" + postId + "}")
@@ -141,9 +142,10 @@ class RecruiterControllerTests {
 
         MockHttpSession jobSeeker = loggedIn("Job Seeker");
         mockMvc.perform(multipart("/api/resume")
-                        .file(new MockMultipartFile("resume", "cv.pdf", "application/pdf", "cv".getBytes()))
+                        .file(new MockMultipartFile("resume", "cv.pdf", "application/pdf",
+                                ResumeControllerTests.contents("cv.pdf", "cv")))
                         .session(jobSeeker))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
         mockMvc.perform(post("/api/applications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"postId\":" + postId + "}")
@@ -227,7 +229,7 @@ class RecruiterControllerTests {
         mockMvc.perform(get("/api/recruiter/applications/" + applicationId + "/resume").session(recruiter))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/pdf"))
-                .andExpect(content().bytes("my resume".getBytes()));
+                .andExpect(content().bytes(ResumeControllerTests.contents("cv.pdf", "my resume")));
 
         mockMvc.perform(get("/api/recruiter/applications/" + applicationId + "/resume").session(loggedIn("Recruiter")))
                 .andExpect(status().isNotFound());

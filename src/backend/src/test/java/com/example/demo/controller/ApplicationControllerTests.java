@@ -81,9 +81,10 @@ class ApplicationControllerTests {
     private MockHttpSession jobSeekerWithResume(String email) throws Exception {
         MockHttpSession session = loggedIn("Job Seeker", email);
         mockMvc.perform(multipart("/api/resume")
-                        .file(new MockMultipartFile("resume", "cv.pdf", "application/pdf", "resume".getBytes()))
+                        .file(new MockMultipartFile("resume", "cv.pdf", "application/pdf",
+                                ResumeControllerTests.contents("cv.pdf", "resume")))
                         .session(session))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
         return session;
     }
 

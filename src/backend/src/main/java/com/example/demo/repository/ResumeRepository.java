@@ -25,22 +25,24 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
         Boolean getCurrent();
     }
 
-    // From colleague's main branch (stable current resume queries)
+    // The job seeker's current resume (the newest, in case an older row was left current)
     Optional<ResumeInfo> findFirstInfoByPersonIdAndCurrentTrueOrderByUploadedAtDesc(Integer personId);
 
     Optional<Resume> findFirstByPersonIdAndCurrentTrueOrderByUploadedAtDesc(Integer personId);
 
     boolean existsByPersonIdAndCurrentTrue(Integer personId);
 
-    // From your branch (needed for version management, switching current, and deleting)
+    // One of the job seeker's versions, so a resume id from another user is never found
     Optional<Resume> findByIdAndPersonId(Long id, Integer personId);
 
     Optional<Resume> findFirstByPersonIdOrderByUploadedAtDesc(Integer personId);
 
+    // Every version, newest first, without the files
     List<ResumeInfo> findAllByPersonIdOrderByUploadedAtDesc(Integer personId);
 
-    // Keeps the job seeker's earlier resumes but stops them being current, before a new upload
-    @Modifying
+    // Keeps the job seeker's earlier resumes but stops them being current, before a new upload or
+    // when another version is chosen. Clearing makes resumes loaded earlier re-read the new value.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Resume r SET r.current = false WHERE r.personId = :personId AND r.current = true")
     int retireCurrent(@Param("personId") Integer personId);
 }

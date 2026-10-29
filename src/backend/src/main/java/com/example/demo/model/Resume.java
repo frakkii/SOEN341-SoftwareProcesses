@@ -82,4 +82,8 @@ public class Resume {
     public boolean isCurrent() {
         return current;
     }
+
+    public void setCurrent(boolean current) {
+        this.current = current;
+    }
 }
