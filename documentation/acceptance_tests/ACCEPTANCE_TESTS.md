@@ -427,3 +427,41 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 
+## #139 Log out of my account (Sprint 2)
+
+### AT-23: Job seeker logs out and the session ends
+
+- **User story:** #139 (Log out of my account)
+- **Related tasks:** #140, #141
+- **Sprint:** 2
+
+**Given** I am logged in as a job seeker on the home page
+
+**Steps**
+1. Click Log out in the top bar
+2. Use the browser Back button, or open applications.html directly
+
+**Then** I am taken to the login page, and going back does not show my applications: I am sent to the login page again
+
+**Automated coverage:** `AuthControllerTests.logoutEndsTheSession`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+### AT-24: Recruiter logs out from any recruiter page
+
+- **User story:** #139 (Log out of my account)
+- **Related tasks:** #140, #141
+- **Sprint:** 2
+
+**Given** I am logged in as a recruiter
+
+**Steps**
+1. Open Your Postings and click Logout
+2. Log in again, open Create Posting and click Logout
+
+**Then** Each time I am taken to the login page and my recruiter pages need a new login
+
+**Automated coverage:** `AuthControllerTests.logoutEndsTheSession, logoutWithoutASessionStillSucceeds`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
