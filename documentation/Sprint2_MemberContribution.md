@@ -15,7 +15,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Sprint 2 plan, this contribution log, Meeting 3 minutes: branch `docs/sprint2-deliverables`
 - Tasks: #40 Job application submission frontend, #44 Application status tracking frontend, #64 Job search and filtering frontend, #66 Job details page frontend, #70 Profile frontend, #140 Logout backend, #141 Logout frontend
 - AI logs: `AI_logs/Francesca/Sprint2/`
-- **Time spent:** _[to fill in]_
+- **Time spent:** 10 hours
 
 ## Audrey Prevost (40027535)
 **Planned:** database maintenance, frontend recruiter dashboard and posting creation, posting management, user story
