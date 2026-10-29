@@ -200,6 +200,12 @@
     if (!name) window.location.href = "index.html";
     else document.getElementById("profile-badge").textContent = name.trim().charAt(0).toUpperCase();
 
+    document.getElementById("logout").addEventListener("click", function (event) {
+      event.preventDefault();
+      localStorage.removeItem("userName");
+      window.location.href = "index.html";
+    });
+
     load();
   </script>
   <script src="js/logout.js"></script>
