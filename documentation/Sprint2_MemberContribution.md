@@ -60,12 +60,17 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - **Time spent:** 10h (Meeting 3 estimate)
 
 ## Hirushi Rathnayaka (40237379)
-**Planned:** Sprint 1 bugs, job search and job listing backend, acceptance tests (done by Francesca instead), user story
+**Planned:** Sprint 1 bug fixes, job search and job listing backend, acceptance tests for sprint 1 and 2 (sprint 1 completed by Francesca instead), user story
 
-- Job search and job listing backend, brought into `main` through PR [#101](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/101)
+- Implemented the job search and job listing backend for Sprint 2, including the job posting model, repository, service, and REST API endpoints.
+- Added functionality to retrieve active job postings, search using keywords, filter by location, industry, and job type, combine multiple filters, and retrieve individual job details.
+- Added automated backend tests. All 49 project tests passed locally, including 4 job-search controller tests.
+- Job search backend was integrated into main through PR #101, with the database migration updated for compatibility.
+- Contributed to User Story #3 (Job Search and Filtering).
+- Acceptance tests were completed by Francesca.
 - Tasks: #65 Job search and filtering backend
-- AI logs: _[to add]_
-- **Time spent:** _[to fill in]_
+- AI logs: AI_logs/Hiru/Sprint2/AI_LOG_Sprint2.md
+- Time spent: 2 days
 
 ## Dani Tannir (40298707)
 **Planned:** backend job application submission and tracking, user story
