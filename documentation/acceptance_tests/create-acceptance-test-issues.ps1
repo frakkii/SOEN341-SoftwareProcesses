@@ -22,6 +22,7 @@ $Stories = @{
     5  = @{ Sprint = 2; Title = 'Track the status of my applications';    Tasks = 44, 45, 46, 47 }
     8  = @{ Sprint = 2; Title = 'Create and manage job postings';         Tasks = 48, 49, 50, 51 }
     9  = @{ Sprint = 2; Title = 'View applicants for each posting';       Tasks = 61 }
+    139 = @{ Sprint = 2; Title = 'Log out of my account';                 Tasks = 140, 141 }
 }
 
 $Tests = @(
@@ -152,6 +153,18 @@ $Tests = @(
        Steps = 'Log in as recruiter A', 'Try to open the applicants for B''s posting'
        Then  = 'Access is denied and no applicant information is shown'
        Auto  = 'RecruiterControllerTests.recruitersCannotSeeApplicantsForAnotherRecruitersPosting, recruitersCannotChangeApplicationsToAnotherRecruitersPosting' }
+
+    # ---- #139 Logout ----
+    @{ Id = 'AT-23'; Story = 139; Title = 'Job seeker logs out and the session ends'
+       Given = 'I am logged in as a job seeker on the home page'
+       Steps = 'Click Log out in the top bar', 'Use the browser Back button, or open applications.html directly'
+       Then  = 'I am taken to the login page, and going back does not show my applications: I am sent to the login page again'
+       Auto  = 'AuthControllerTests.logoutEndsTheSession' }
+    @{ Id = 'AT-24'; Story = 139; Title = 'Recruiter logs out from any recruiter page'
+       Given = 'I am logged in as a recruiter'
+       Steps = 'Open Your Postings and click Logout', 'Log in again, open Create Posting and click Logout'
+       Then  = 'Each time I am taken to the login page and my recruiter pages need a new login'
+       Auto  = 'AuthControllerTests.logoutEndsTheSession, logoutWithoutASessionStillSucceeds' }
 )
 
 function Get-Body($t) {
@@ -179,7 +192,7 @@ $($steps -join "`n")
 $md = @('# Acceptance Tests (Sprints 1 and 2)', '',
         'Each test is also a GitHub issue labeled `acceptance-test` and linked to its user story as a sub-issue.',
         'Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.', '')
-foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9) {
+foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139) {
     $md += "## #$n $($Stories[$n].Title) (Sprint $($Stories[$n].Sprint))", ''
     foreach ($t in $Tests | Where-Object { $_.Story -eq $n }) {
         $md += "### $($t.Id): $($t.Title)", '', (Get-Body $t), ''

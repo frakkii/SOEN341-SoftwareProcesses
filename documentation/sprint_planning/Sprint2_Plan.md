@@ -92,6 +92,17 @@ Status as of 2026-10-29. "Issue" is the GitHub issue state. "Delivered in" is th
 | #51 Job posting management testing | dchamp214 | Closed | #101 |
 | #61 Recruiter applicant listing and management | _unassigned_ | Closed | #101 |
 
+### 5. Logout (added during the sprint)
+
+**#139** As a user, I want to log out of my account so that my account remains secure.
+
+From the Sprint 1 planning sheet; added to Sprint 2 because the recruiter Logout links only cleared the browser and job seekers had no logout.
+
+| Task | Assignee | Issue | Delivered in |
+|---|---|---|---|
+| #140 Logout backend | frakkii | Open | #138 |
+| #141 Logout frontend | frakkii | Open | #138 |
+
 ### Supporting work
 
 | Work | Owner | Delivered in |
@@ -100,7 +111,7 @@ Status as of 2026-10-29. "Issue" is the GitHub issue state. "Delivered in" is th
 | Application checks updated for new `job_postings` columns | datannir-bit | #98 |
 | Job search fix on Postgres, smaller DB connection pool | dchamp214 | #102, #103 |
 | Continuous Integration pipeline (GitHub Actions) | frakkii | #112 |
-| Acceptance tests for Sprint 1 and 2 stories | frakkii | this PR |
+| Acceptance tests for Sprint 1 and 2 stories (#113–#134, #142, #143) | frakkii | #135, #138 |
 
 ## Carried over to Sprint 3
 
