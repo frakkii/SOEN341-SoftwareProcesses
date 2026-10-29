@@ -10,6 +10,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Job application tracking frontend and theme consistency fixes: PR [#74](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/74)
 - Continuous Integration pipeline (GitHub Actions builds the backend and runs all tests on every push and PR to `main`): PR [#112](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/112). Originally assigned to Shanza at Meeting 3
 - Logout for job seekers and recruiters (server session ends, not just the browser): PR [#138](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/138), user story #139
+- Fixed Shanza's resume features PR so it compiles and passes tests (fixed a bug choosing the current version, added 6 tests): commit `f90769c` in PR [#148](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/148)
 - Acceptance tests for every Sprint 1 and Sprint 2 user story (24 tests, `documentation/acceptance_tests/`) and the script that creates them as labeled GitHub issues linked to each story. Originally assigned to Hiru at Meeting 3
 - Sprint 2 plan, this contribution log, Meeting 3 minutes: branch `docs/sprint2-deliverables`
 - Tasks: #40 Job application submission frontend, #44 Application status tracking frontend, #64 Job search and filtering frontend, #66 Job details page frontend, #70 Profile frontend, #140 Logout backend, #141 Logout frontend
@@ -42,9 +43,10 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 ## Shanza Riasat (40337845)
 **Planned:** resume upload feature backend, set up and demonstrate a CI pipeline (done by Francesca instead, PR #112), Sprint 2 report submission, user story
 
-- Resume versioning backend: PR [#104](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/104) and follow-up uploads #105–#111. All closed without merging because they replaced files that #101 had changed; her new list, select and delete resume endpoints are kept on her branches to bring in through one PR
+- Resume version features (list versions, choose the current one, delete) and checking that a file's contents match its extension: PR [#148](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/148). Francesca added a fix commit so it compiles and the tests pass
+- Earlier resume versioning attempts: PR [#104](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/104) and follow-up uploads #105–#111, closed without merging because they replaced files that #101 had changed
 - Sprint 2 report submission
-- Tasks: #37 Resume upload backend, #38 Resume update functionality, #39 Resume upload testing
+- Tasks: #37 Resume upload backend, #38 Resume update functionality, #39 Resume upload testing, #57 Multiple resume storage and selection
 - AI logs: `AI_logs/Shanza/AI_LOG_sprint2.md`
 - **Time spent:** _[to fill in]_
 

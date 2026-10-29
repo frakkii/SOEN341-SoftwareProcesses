@@ -51,7 +51,7 @@ Status as of 2026-10-29. "Issue" is the GitHub issue state. "Delivered in" is th
 | #37 Resume upload backend | Shanza687 | Closed | Upload API from 2026-09-28 commit |
 | #38 Resume update functionality | Shanza687 | Closed | #101 |
 | #39 Resume upload testing | Shanza687 | Closed | #101 |
-| #57 Multiple resume storage and selection | _unassigned_ | Open | #101 (versions kept); choosing a version still to do, from Shanza's branch |
+| #57 Multiple resume storage and selection | Shanza687 | Closed | #101 (versions kept), #148 (list, choose current, delete) |
 
 ### 2. Job search
 
@@ -120,8 +120,8 @@ These stories stay in the backlog: #6 deadline notifications, #7 saved jobs, #10
 ## Before the sprint ends
 
 - [x] Close the task issues above that are delivered (move them to Done on the board if it does not do so automatically)
-- [ ] Assign #57
-- [x] Close Shanza's resume PRs #104–#111 (they overwrote newer code); she will bring her new endpoints in through one PR from current `main`
+- [x] Close Shanza's resume PRs #104–#111 (they overwrote newer code) and bring her new endpoints in through one PR from current `main` (#148)
+- [ ] Delete Shanza's old branches (`modified-…`, `added-V7-for-resume-history`) now that #148 is merged
 - [ ] Run the acceptance tests and record each result on its issue
 - [ ] Upload the other Sprint 2 meeting minutes to `minutes/` (Meeting 3 is there)
 - [ ] Each member fills in their time spent in [Sprint2_MemberContribution.md](../Sprint2_MemberContribution.md)
