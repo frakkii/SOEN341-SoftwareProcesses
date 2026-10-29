@@ -6,7 +6,7 @@
 ---
 **AI-Suggested Content:** gave me the new code for ResumeController.java and ResumeRepository.java
 ---
-**Validation:** i put the code in VS and debugged the code there
+**Validation:** I put the code in VS and debugged the code there
 ---
 **Decision:** Accepted the code
 ---
