@@ -38,7 +38,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Kept the database connection pool small so several teammates can run the app at once: PR [#103](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/103)
 - Tasks: #49 Job posting management backend, #51 Job posting management testing
 - AI logs: `AI_logs/Donald/Sprint2/`
-- **Time spent:** _[to fill in]_
+- **Time spent:** 15h
 
 ## Shanza Riasat (40337845)
 **Planned:** resume upload feature backend, set up and demonstrate a CI pipeline (done by Francesca instead, PR #112), Sprint 2 report submission, user story
