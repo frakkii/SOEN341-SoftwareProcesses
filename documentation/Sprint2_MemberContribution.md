@@ -41,7 +41,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 ## Shanza Riasat (40337845)
 **Planned:** resume upload feature backend, set up and demonstrate a CI pipeline (done by Francesca instead, PR #112), Sprint 2 report submission, user story
 
-- Resume versioning backend: PR [#104](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/104) and follow-up uploads #105–#111 (closed without merging)
+- Resume versioning backend: PR [#104](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/104) and follow-up uploads #105–#111. All closed without merging because they replaced files that #101 had changed; her new list, select and delete resume endpoints are kept on her branches to bring in through one PR
 - Sprint 2 report submission
 - Tasks: #37 Resume upload backend, #38 Resume update functionality, #39 Resume upload testing
 - AI logs: `AI_logs/Shanza/AI_LOG_sprint2.md`

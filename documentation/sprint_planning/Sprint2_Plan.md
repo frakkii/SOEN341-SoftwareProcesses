@@ -43,15 +43,15 @@ Status as of 2026-10-29. "Issue" is the GitHub issue state. "Delivered in" is th
 
 | Task | Assignee | Issue | Delivered in |
 |---|---|---|---|
-| #70 Profile frontend | frakkii | Open | #101 |
-| #71 Profile backend | _unassigned_ | Open | #101 |
-| #72 Profile database integration | MothMother | Open | #101 |
-| #73 Profile testing | _unassigned_ | Open | #101 |
-| #36 Resume upload frontend | MarioHabib33 | Open | Upload page from 2026-09-28 commit |
-| #37 Resume upload backend | Shanza687 | Open | Upload API from 2026-09-28 commit |
-| #38 Resume update functionality | Shanza687 | Open | #101 |
-| #39 Resume upload testing | Shanza687 | Open | #101 |
-| #57 Multiple resume storage and selection | _unassigned_ | Open | #101 (versions kept); #104 still open |
+| #70 Profile frontend | frakkii | Closed | #101 |
+| #71 Profile backend | _unassigned_ | Closed | #101 |
+| #72 Profile database integration | MothMother | Closed | #101 |
+| #73 Profile testing | _unassigned_ | Closed | #101 |
+| #36 Resume upload frontend | MarioHabib33 | Closed | Upload page from 2026-09-28 commit |
+| #37 Resume upload backend | Shanza687 | Closed | Upload API from 2026-09-28 commit |
+| #38 Resume update functionality | Shanza687 | Closed | #101 |
+| #39 Resume upload testing | Shanza687 | Closed | #101 |
+| #57 Multiple resume storage and selection | _unassigned_ | Open | #101 (versions kept); choosing a version still to do, from Shanza's branch |
 
 ### 2. Job search
 
@@ -59,9 +59,9 @@ Status as of 2026-10-29. "Issue" is the GitHub issue state. "Delivered in" is th
 
 | Task | Assignee | Issue | Delivered in |
 |---|---|---|---|
-| #64 Job search and filtering frontend | frakkii | Open | #101 |
-| #65 Job search and filtering backend | hirurathnayaka77 | Open | #101 |
-| #66 Job details page frontend | frakkii | Open | #101 |
+| #64 Job search and filtering frontend | frakkii | Closed | #101 |
+| #65 Job search and filtering backend | hirurathnayaka77 | Closed | #101 |
+| #66 Job details page frontend | frakkii | Closed | #101 |
 
 ### 3. Application submission and tracking
 
@@ -70,14 +70,14 @@ Status as of 2026-10-29. "Issue" is the GitHub issue state. "Delivered in" is th
 
 | Task | Assignee | Issue | Delivered in |
 |---|---|---|---|
-| #40 Job application submission frontend | frakkii | Open | #101 |
+| #40 Job application submission frontend | frakkii | Closed | #101 |
 | #41 Job application submission backend | datannir-bit | Closed | #67 |
-| #42 Application database integration | MothMother | Open | #67 |
-| #43 Job application submission testing | datannir-bit | Open | #67 |
-| #44 Application status tracking frontend | frakkii | Open | #74 |
+| #42 Application database integration | MothMother | Closed | #67 |
+| #43 Job application submission testing | datannir-bit | Closed | #67 |
+| #44 Application status tracking frontend | frakkii | Closed | #74 |
 | #45 Application status tracking backend | datannir-bit | Closed | #67 |
-| #46 Application status database integration | MothMother | Open | #67 |
-| #47 Application status tracking testing | datannir-bit | Open | #67 |
+| #46 Application status database integration | MothMother | Closed | #67 |
+| #47 Application status tracking testing | datannir-bit | Closed | #67 |
 
 ### 4. Recruiter dashboard
 
@@ -87,10 +87,10 @@ Status as of 2026-10-29. "Issue" is the GitHub issue state. "Delivered in" is th
 | Task | Assignee | Issue | Delivered in |
 |---|---|---|---|
 | #48 Job posting management frontend | MothMother | Closed | #80, #92, #100 |
-| #49 Job posting management backend | dchamp214 | Open | #101 |
+| #49 Job posting management backend | dchamp214 | Closed | #101 |
 | #50 Job posting database integration | MothMother | Closed | #101 |
-| #51 Job posting management testing | dchamp214 | Open | #101 |
-| #61 Recruiter applicant listing and management | _unassigned_ | Open | #101 |
+| #51 Job posting management testing | dchamp214 | Closed | #101 |
+| #61 Recruiter applicant listing and management | _unassigned_ | Closed | #101 |
 
 ### Supporting work
 
@@ -108,9 +108,9 @@ These stories stay in the backlog: #6 deadline notifications, #7 saved jobs, #10
 
 ## Before the sprint ends
 
-- [ ] Close the task issues above that are delivered, and move them to Done on the board
-- [ ] Assign #57, #61, #71 and #73
-- [ ] Merge or close Shanza's resume versioning PR #104 (and #105–#111)
+- [x] Close the task issues above that are delivered (move them to Done on the board if it does not do so automatically)
+- [ ] Assign #57
+- [x] Close Shanza's resume PRs #104–#111 (they overwrote newer code); she will bring her new endpoints in through one PR from current `main`
 - [ ] Run the acceptance tests and record each result on its issue
 - [ ] Upload the other Sprint 2 meeting minutes to `minutes/` (Meeting 3 is there)
 - [ ] Each member fills in their time spent in [Sprint2_MemberContribution.md](../Sprint2_MemberContribution.md)
