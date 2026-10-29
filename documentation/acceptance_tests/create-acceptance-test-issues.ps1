@@ -5,7 +5,8 @@
 #
 #   .\create-acceptance-test-issues.ps1             create the issues
 #   .\create-acceptance-test-issues.ps1 -Markdown   only rewrite ACCEPTANCE_TESTS.md
-param([switch]$Markdown)
+#   .\create-acceptance-test-issues.ps1 -Only AT-11 create just the listed tests
+param([switch]$Markdown, [string[]]$Only)
 
 $Repo = 'frakkii/SOEN341-SoftwareProcesses'
 $Label = 'acceptance-test'
@@ -188,9 +189,12 @@ $md -join "`n" | Out-File -Encoding utf8 (Join-Path $PSScriptRoot 'ACCEPTANCE_TE
 if ($Markdown) { return }
 
 gh label create $Label --repo $Repo --color 0E8A16 --description 'Acceptance test for a user story' --force
-foreach ($t in $Tests) {
+$bodyFile = New-TemporaryFile
+foreach ($t in $Tests | Where-Object { -not $Only -or $Only -contains $_.Id }) {
     $title = "$($t.Id): $($t.Title)"
-    $url = gh issue create --repo $Repo --title $title --label $Label --body (Get-Body $t)
+    # Pass the body as a file: Windows PowerShell breaks double quotes in native arguments
+    [IO.File]::WriteAllText($bodyFile, (Get-Body $t))
+    $url = gh issue create --repo $Repo --title $title --label $Label --body-file $bodyFile
     if (-not $url) { Write-Error "Failed to create $title"; continue }
     # Sub-issue links take the issue's database id, not its number
     $number = ($url -split '/')[-1]
