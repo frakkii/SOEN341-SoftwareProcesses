@@ -23,12 +23,12 @@ Responsibilities agreed at Meeting 3. Everyone also owns at least one user story
 
 | Name | GitHub | Sprint 2 responsibilities |
 |---|---|---|
-| Maria-Francesca Staicu | frakkii | Sprint 1 bugs, frontend job application submission and tracking, Sprint 2 sprint planning |
+| Maria-Francesca Staicu | frakkii | Sprint 1 bugs, frontend job application submission and tracking, Sprint 2 sprint planning; later took over the CI pipeline and acceptance tests |
 | Audrey Prevost | MothMother | Database maintenance, frontend recruiter dashboard and posting creation, posting management |
 | Donald Champ | dchamp214 | Backend recruiter dashboard and posting management |
-| Shanza Riasat | Shanza687 | Resume upload backend, CI pipeline, Sprint 2 report submission |
+| Shanza Riasat | Shanza687 | Resume upload backend, Sprint 2 report submission (CI moved to Francesca) |
 | Mario Habib | MarioHabib33 | Resume upload and user profile frontend |
-| Hirushi Rathnayaka | hirurathnayaka77 | Sprint 1 bugs, job search and job listing backend, acceptance tests |
+| Hirushi Rathnayaka | hirurathnayaka77 | Sprint 1 bugs, job search and job listing backend (acceptance tests moved to Francesca) |
 | Dani Tannir | datannir-bit | Backend job application submission and tracking |
 
 ## Stories and tasks

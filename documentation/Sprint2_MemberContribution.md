@@ -8,8 +8,9 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 **Planned:** Sprint 1 bugs, frontend job application submission and tracking, Sprint 2 sprint planning, user story
 
 - Job application tracking frontend and theme consistency fixes: PR [#74](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/74)
-- Continuous Integration pipeline (GitHub Actions builds the backend and runs all tests on every push and PR to `main`): PR [#112](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/112)
-- Sprint 2 plan, acceptance tests for the Sprint 1 and Sprint 2 stories, this contribution log, Meeting 3 minutes: branch `docs/sprint2-deliverables`
+- Continuous Integration pipeline (GitHub Actions builds the backend and runs all tests on every push and PR to `main`): PR [#112](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/112). Originally assigned to Shanza at Meeting 3
+- Acceptance tests for every Sprint 1 and Sprint 2 user story (22 tests, `documentation/acceptance_tests/`) and the script that creates them as labeled GitHub issues linked to each story. Originally assigned to Hiru at Meeting 3
+- Sprint 2 plan, this contribution log, Meeting 3 minutes: branch `docs/sprint2-deliverables`
 - Tasks: #40 Job application submission frontend, #44 Application status tracking frontend, #64 Job search and filtering frontend, #66 Job details page frontend, #70 Profile frontend
 - AI logs: `AI_logs/Francesca/Sprint2/`
 - **Time spent:** _[to fill in]_
@@ -38,7 +39,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - **Time spent:** _[to fill in]_
 
 ## Shanza Riasat (40337845)
-**Planned:** resume upload feature backend, set up and demonstrate a CI pipeline, Sprint 2 report submission, user story
+**Planned:** resume upload feature backend, set up and demonstrate a CI pipeline (done by Francesca instead, PR #112), Sprint 2 report submission, user story
 
 - Resume versioning backend: PR [#104](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/104) and follow-up uploads #105–#111 (closed without merging)
 - Sprint 2 report submission
@@ -56,7 +57,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - **Time spent:** 10h (Meeting 3 estimate)
 
 ## Hirushi Rathnayaka (40237379)
-**Planned:** Sprint 1 bugs, job search and job listing backend, acceptance tests, user story
+**Planned:** Sprint 1 bugs, job search and job listing backend, acceptance tests (done by Francesca instead), user story
 
 - Job search and job listing backend, brought into `main` through PR [#101](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/101)
 - Tasks: #65 Job search and filtering backend
