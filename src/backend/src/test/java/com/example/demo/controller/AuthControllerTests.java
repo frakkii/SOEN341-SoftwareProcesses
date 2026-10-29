@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -20,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -241,6 +243,28 @@ class AuthControllerTests {
     void loginRejectsBlankFields() throws Exception {
         login("", "secret123").andExpect(status().isBadRequest());
         login(uniqueEmail(), " ").andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void logoutEndsTheSession() throws Exception {
+        String email = uniqueEmail();
+        register(jobSeeker(email)).andExpect(status().isOk());
+        MockHttpSession session = (MockHttpSession) login(email, "secret123")
+                .andExpect(status().isOk())
+                .andReturn().getRequest().getSession(false);
+
+        mockMvc.perform(get("/api/applications").session(session)).andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/auth/logout").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Logged out"));
+
+        mockMvc.perform(get("/api/applications").session(session)).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logoutWithoutASessionStillSucceeds() throws Exception {
+        mockMvc.perform(post("/api/auth/logout")).andExpect(status().isOk());
     }
 
     @Test
