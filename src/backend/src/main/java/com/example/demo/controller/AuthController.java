@@ -177,6 +177,17 @@ public class AuthController {
         return invalidCredentials();
     }
 
+    // Ends the session so the other controllers treat the browser as logged out.
+    // Succeeds even when nobody is logged in, so the logout button always works.
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return ResponseEntity.ok(Map.of("message", "Logged out"));
+    }
+
     private static ResponseEntity<?> loginSuccess(HttpServletRequest httpRequest, Integer id, String name,
                                                   String surname, String email, String role) {
         // Start a fresh session so an earlier user's session id can't be reused

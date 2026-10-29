@@ -147,6 +147,7 @@
       </div>
       <a href="#" data-soon="Messages">Messages</a>
       <a href="#" data-soon="Settings">Settings</a>
+      <a href="#" data-logout>Log out</a>
     </nav>
     <a class="me${cur('profile.html')}" href="profile.html" aria-label="Your profile" title="Your profile"><span class="av" data-me></span></a>
   </header>`);
@@ -161,6 +162,8 @@
     const a = e.target.closest('[data-soon]');
     if (a) { e.preventDefault(); setOpen(false); toast((a.dataset.soon || 'This') + ' is coming soon.'); }
   });
+
+  document.head.appendChild(Object.assign(document.createElement('script'), { src: 'js/logout.js' }));
 
   window.CC = { user, esc, icon, initials, store, toast, applyAvatars, strength, readImage, api, jobView, fmtDate, colorFor };
   applyAvatars();
