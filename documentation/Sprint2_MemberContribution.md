@@ -1,63 +1,73 @@
 # Sprint 2 Member Contributions
 
-Each member: fill in your own section. Replace every `_[...]_`, add your student ID and time spent, and add anything that isn't on GitHub (meetings, reviews, testing, research). The PRs listed were pre-filled from GitHub on 2026-10-29.
+Responsibilities are from Meeting 3 (2026-10-05, [minutes](../minutes/2026-10-05_meeting3_sprint2-planning.md)). Contributions list each member's merged pull requests and their Sprint 2 task issues. Time spent is as reported at Meeting 3 where given; members should add the rest.
 
-Time spent: list hours per activity, e.g. `Coding: 8h, Testing: 2h, Meetings: 3h, Documentation: 1h`.
+Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 
 ## Maria-Francesca Staicu (40324837)
-- Built the job application tracking page and fixed theme consistency: PR #74
-- Job seeker profile page and job search homepage polish: PR #82 (not merged)
-- Set up the Continuous Integration pipeline (GitHub Actions: build and run all backend tests on every push and PR to `main`): PR #112
-- Wrote the acceptance tests for every Sprint 1 and Sprint 2 user story (`documentation/acceptance_tests/`) and the script that creates them as labeled GitHub issues linked to each story
-- Drafted the Sprint 2 plan (`documentation/sprint_planning/Sprint2_Plan.md`)
-- Issues: #40, #44, #64, #66, #70
-- AI log: `AI_logs/Francesca/Sprint2/task1-ci-pipeline-and-sprint2-deliverables.md`
-- _[other work, meetings, reviews]_
-- **Time spent:** _[...]_
+**Planned:** Sprint 1 bugs, frontend job application submission and tracking, Sprint 2 sprint planning, user story
 
-## Audrey Prevost (_[ID]_)
-- Recruiter dashboard and job post management frontend: PRs #80, #86, #87, #92, #97, #100
-- Consolidated branch updates: PRs #84, #85, #88–#91
-- Issues: #42, #46, #48, #50, #72
+- Job application tracking frontend and theme consistency fixes: PR [#74](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/74)
+- Continuous Integration pipeline (GitHub Actions builds the backend and runs all tests on every push and PR to `main`): PR [#112](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/112)
+- Sprint 2 plan, acceptance tests for the Sprint 1 and Sprint 2 stories, this contribution log, Meeting 3 minutes: branch `docs/sprint2-deliverables`
+- Tasks: #40 Job application submission frontend, #44 Application status tracking frontend, #64 Job search and filtering frontend, #66 Job details page frontend, #70 Profile frontend
+- AI logs: `AI_logs/Francesca/Sprint2/`
+- **Time spent:** _[to fill in]_
+
+## Audrey Prevost (40027535)
+**Planned:** database maintenance, frontend recruiter dashboard and posting creation, posting management, user story
+
+- Recruiter dashboard and job post management frontend: PR [#80](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/80)
+- Job creation frontend: PRs [#86](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/86), [#87](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/87)
+- Manage posts frontend: PRs [#92](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/92), [#100](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/100)
+- Recruiter home frontend: PR [#97](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/97)
+- Added and updated recruiter HTML pages: PR [#78](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/78)
+- Consolidated branch and sync merges: PRs #68, #75, #77, #79, #81, #84, #85, #88–#91, #93–#96
+- Tasks: #42 Application database integration, #46 Application status database integration, #48 Job posting management frontend, #50 Job posting database integration, #72 Profile database integration
 - AI logs: `AI_logs/Audrey/`
-- _[...]_
-- **Time spent:** _[...]_
+- **Time spent:** ~20h (Meeting 3 estimate)
 
 ## Donald Champ (40270957)
-- Sprint 2 requirements audit and plan, then the Sprint 2 features (profile, job search, applications, recruiter dashboard): PR #101
-- Fixed job search on Postgres with empty filters: PR #102
-- Kept the database connection pool small so the team can run the app at the same time: PR #103
-- Issues: #49, #51
+**Planned:** backend recruiter dashboard and posting management, user story
+
+- Sprint 2 features: recruiter dashboard and posting management backend, profile, job search integration, application status updates, resume versions, and their tests: PR [#101](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/101)
+- Fixed job search failing on Postgres when a filter is empty: PR [#102](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/102)
+- Kept the database connection pool small so several teammates can run the app at once: PR [#103](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/103)
+- Tasks: #49 Job posting management backend, #51 Job posting management testing
 - AI logs: `AI_logs/Donald/Sprint2/`
-- _[...]_
-- **Time spent:** _[...]_
+- **Time spent:** _[to fill in]_
 
-## Shanza Riasat (_[ID]_)
-- Resume versioning: PR #104 (not merged), plus #105–#111
-- Issues: #37, #38, #39
-- AI log: `AI_logs/Shanza/AI_LOG_sprint2.md`
-- _[...]_
-- **Time spent:** _[...]_
+## Shanza Riasat (40337845)
+**Planned:** resume upload feature backend, set up and demonstrate a CI pipeline, Sprint 2 report submission, user story
 
-## Mario Habib (_[ID]_)
-- UI overhaul (home feed and navigation): PR #76
-- Sprint 2 AI logs: PR #99
-- Issues: #36
+- Resume versioning backend: PR [#104](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/104) and follow-up uploads #105–#111 (closed without merging)
+- Sprint 2 report submission
+- Tasks: #37 Resume upload backend, #38 Resume update functionality, #39 Resume upload testing
+- AI logs: `AI_logs/Shanza/AI_LOG_sprint2.md`
+- **Time spent:** _[to fill in]_
+
+## Mario Habib (40283335)
+**Planned:** resume upload feature and user profile frontend, user story
+
+- UI overhaul (home feed and navigation): PR [#76](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/76)
+- Sprint 2 AI logs: PR [#99](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/99)
+- Tasks: #36 Resume upload frontend
 - AI logs: `AI_logs/Mario/Sprint2/`
-- _[...]_
-- **Time spent:** _[...]_
+- **Time spent:** 10h (Meeting 3 estimate)
 
 ## Hirushi Rathnayaka (40237379)
-- Job search and filtering backend (brought into PR #101)
-- Issues: #65
-- AI log: _[...]_
-- _[...]_
-- **Time spent:** _[...]_
+**Planned:** Sprint 1 bugs, job search and job listing backend, acceptance tests, user story
 
-## Dani Tannir (_[ID]_)
-- Job seekers can submit and track job applications: PR #67
-- Updated application checks for the new `job_postings` columns: PR #98
-- Issues: #41, #43, #45, #47
+- Job search and job listing backend, brought into `main` through PR [#101](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/101)
+- Tasks: #65 Job search and filtering backend
+- AI logs: _[to add]_
+- **Time spent:** _[to fill in]_
+
+## Dani Tannir (40298707)
+**Planned:** backend job application submission and tracking, user story
+
+- Job seekers can submit and track job applications: PR [#67](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/67)
+- Updated application checks for the new `job_postings` columns: PR [#98](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/98)
+- Tasks: #41 Job application submission backend, #43 Job application submission testing, #45 Application status tracking backend, #47 Application status tracking testing
 - AI logs: `AI_logs/Dani/Sprint2/`
-- _[...]_
-- **Time spent:** _[...]_
+- **Time spent:** _[to fill in]_

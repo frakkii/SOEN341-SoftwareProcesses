@@ -1,12 +1,14 @@
 # Sprint 2 Plan
 
 **Team:** DASM (CareerConnect)
-**Sprint 2:** starts 2026-10-12, ends _[due date]_
+**Sprint 2:** planned at Meeting 3 on 2026-10-05 ([minutes](../../minutes/2026-10-05_meeting3_sprint2-planning.md)), ends _[due date]_
 **Board:** CareerConnect Sprint Board (GitHub Projects), columns To Do → In Progress → In Review → Done
 
 We planned Sprint 2 the same way as Sprint 1 ([DASM Sprint planning 1.xlsx](DASM%20Sprint%20planning%201.xlsx)): pick the user stories for the sprint, split each one into frontend, backend, database and testing tasks as GitHub issues, and assign each task to a team member. Each story also has at least two acceptance tests (see [ACCEPTANCE_TESTS.md](../acceptance_tests/ACCEPTANCE_TESTS.md)).
 
-## Sprint goal
+## Sprint objectives
+
+Advance the functionality of the web application, expand the database structure, and fix any unresolved issues from Sprint 1.
 
 Deliver the four core Sprint 2 features end to end:
 
@@ -17,15 +19,17 @@ Deliver the four core Sprint 2 features end to end:
 
 ## Team
 
-| Name | GitHub |
-|---|---|
-| Maria-Francesca Staicu | frakkii |
-| Audrey Prevost | MothMother |
-| Donald Champ | dchamp214 |
-| Shanza Riasat | Shanza687 |
-| Mario Habib | MarioHabib33 |
-| Hirushi Rathnayaka | hirurathnayaka77 |
-| Dani Tannir | datannir-bit |
+Responsibilities agreed at Meeting 3. Everyone also owns at least one user story and adds its subtasks.
+
+| Name | GitHub | Sprint 2 responsibilities |
+|---|---|---|
+| Maria-Francesca Staicu | frakkii | Sprint 1 bugs, frontend job application submission and tracking, Sprint 2 sprint planning |
+| Audrey Prevost | MothMother | Database maintenance, frontend recruiter dashboard and posting creation, posting management |
+| Donald Champ | dchamp214 | Backend recruiter dashboard and posting management |
+| Shanza Riasat | Shanza687 | Resume upload backend, CI pipeline, Sprint 2 report submission |
+| Mario Habib | MarioHabib33 | Resume upload and user profile frontend |
+| Hirushi Rathnayaka | hirurathnayaka77 | Sprint 1 bugs, job search and job listing backend, acceptance tests |
+| Dani Tannir | datannir-bit | Backend job application submission and tracking |
 
 ## Stories and tasks
 
@@ -108,5 +112,5 @@ These stories stay in the backlog: #6 deadline notifications, #7 saved jobs, #10
 - [ ] Assign #57, #61, #71 and #73
 - [ ] Merge or close Shanza's resume versioning PR #104 (and #105–#111)
 - [ ] Run the acceptance tests and record each result on its issue
-- [ ] Upload all Sprint 2 meeting minutes to `minutes/`
-- [ ] Each member fills in their time and links in [Sprint2_MemberContribution.md](../Sprint2_MemberContribution.md)
+- [ ] Upload the other Sprint 2 meeting minutes to `minutes/` (Meeting 3 is there)
+- [ ] Each member fills in their time spent in [Sprint2_MemberContribution.md](../Sprint2_MemberContribution.md)
