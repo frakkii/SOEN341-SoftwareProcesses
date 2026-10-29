@@ -9,9 +9,10 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 
 - Job application tracking frontend and theme consistency fixes: PR [#74](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/74)
 - Continuous Integration pipeline (GitHub Actions builds the backend and runs all tests on every push and PR to `main`): PR [#112](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/112). Originally assigned to Shanza at Meeting 3
-- Acceptance tests for every Sprint 1 and Sprint 2 user story (22 tests, `documentation/acceptance_tests/`) and the script that creates them as labeled GitHub issues linked to each story. Originally assigned to Hiru at Meeting 3
+- Logout for job seekers and recruiters (server session ends, not just the browser): PR [#138](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/138), user story #139
+- Acceptance tests for every Sprint 1 and Sprint 2 user story (24 tests, `documentation/acceptance_tests/`) and the script that creates them as labeled GitHub issues linked to each story. Originally assigned to Hiru at Meeting 3
 - Sprint 2 plan, this contribution log, Meeting 3 minutes: branch `docs/sprint2-deliverables`
-- Tasks: #40 Job application submission frontend, #44 Application status tracking frontend, #64 Job search and filtering frontend, #66 Job details page frontend, #70 Profile frontend
+- Tasks: #40 Job application submission frontend, #44 Application status tracking frontend, #64 Job search and filtering frontend, #66 Job details page frontend, #70 Profile frontend, #140 Logout backend, #141 Logout frontend
 - AI logs: `AI_logs/Francesca/Sprint2/`
 - **Time spent:** _[to fill in]_
 
