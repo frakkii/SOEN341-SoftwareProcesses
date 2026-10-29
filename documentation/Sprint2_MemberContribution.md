@@ -48,7 +48,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Sprint 2 report submission
 - Tasks: #37 Resume upload backend, #38 Resume update functionality, #39 Resume upload testing, #57 Multiple resume storage and selection
 - AI logs: `AI_logs/Shanza/AI_LOG_sprint2.md`
-- **Time spent:** _[to fill in]_
+- **Time spent:** 7 hours
 
 ## Mario Habib (40283335)
 **Planned:** resume upload feature and user profile frontend, user story
