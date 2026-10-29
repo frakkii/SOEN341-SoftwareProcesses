@@ -47,7 +47,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Earlier resume versioning attempts: PR [#104](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/104) and follow-up uploads #105–#111, closed without merging because they replaced files that #101 had changed
 - Sprint 2 report submission
 - Tasks: #37 Resume upload backend, #38 Resume update functionality, #39 Resume upload testing, #57 Multiple resume storage and selection
-- AI logs: `AI_logs/Shanza/AI_LOG_sprint2.md`
+- AI logs: `AI_logs/Shanza/AI_LOG_sprint2.md`, `AI_log_sprint2pt2.md` and `AI_log_sprint2pt2.md`
 - **Time spent:** 7 hours
 
 ## Mario Habib (40283335)
