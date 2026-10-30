@@ -68,6 +68,10 @@ body{
 /* Two-field rows (First/Last name, City/Province, Country/Postal code, etc.) */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .two-col .field{margin-bottom:0}
+.role-choice{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.role-choice label{display:flex;align-items:center;gap:8px;margin:0;padding:12px 14px;border:2px solid var(--line);border-radius:14px;background:#faf9ff;font-weight:600;cursor:pointer}
+.role-choice label:has(input:checked){border-color:var(--violet);background:#fff}
+.field .role-choice input{width:auto;padding:0;appearance:auto;accent-color:var(--violet);margin:0}
 
 .mode-login .reg{display:none}
 
