@@ -79,4 +79,4 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Updated application checks for the new `job_postings` columns: PR [#98](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/98)
 - Tasks: #41 Job application submission backend, #43 Job application submission testing, #45 Application status tracking backend, #47 Application status tracking testing
 - AI logs: `AI_logs/Dani/Sprint2/`
-- **Time spent:** _[to fill in]_
+- **Time spent:** 7 hours
