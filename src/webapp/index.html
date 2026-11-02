@@ -118,11 +118,28 @@
         showError('');
     }
 
-    function updateRecruiterFields() {
+    /*function updateRecruiterFields() {
         const isRecruiter = isRegisterMode && document.getElementById('role').value === 'Recruiter';
         document.querySelectorAll('.recruiter-only').forEach(el => el.classList.toggle('hidden', !isRecruiter));
         document.getElementById('companyName').required = isRecruiter;
-    }
+    }*/
+
+    function getSelectedRole() {
+    const checked = document.querySelector('input[name="role"]:checked');
+    return checked ? checked.value : 'Job Seeker';
+}
+
+function updateRecruiterFields() {
+    const selectedRole = getSelectedRole();
+    const isRecruiter = isRegisterMode && selectedRole === 'Recruiter';
+
+    document.querySelectorAll('.recruiter-only').forEach(el => {
+        el.classList.toggle('hidden', !isRecruiter);
+    });
+
+    const companyName = document.getElementById('companyName');
+    if (companyName) companyName.required = isRecruiter;
+} /* This ^ is experimental and should resolve an issue with account creation */
 
     function showError(message) {
         const el = document.getElementById('error');
@@ -148,13 +165,14 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const button = document.getElementById('submit-btn');
+        const role = getSelectedRole(); //this is also experimental
 
         showError('');
         button.disabled = true;
         try {
             if (isRegisterMode) {
                 const field = id => document.getElementById(id).value;
-                const role = field('role');
+               // const role = field('role');
                 await postJson('/api/auth/register', {
                     role,
                     name: field('name'),
