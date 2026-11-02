@@ -31,10 +31,17 @@
 
         <form id="auth-form" onsubmit="handleSubmit(event)">
             <div class="field register-only hidden">
-               <label>
-                  <input type="radio" name="accountType" value="jobSeeker" checked>Personal account</label>
-               <label>
-                  <input type="radio" name="accountType" value="recruiter">Employer / Recruiter</label>
+               <div class="account-type-toggle" role="radiogroup" aria-label="Account type">
+                    <label class="account-type-option">
+                          <input type="radio" name="role" value="Job Seeker" checked>
+                          <span>Personal account</span>
+                    </label>
+
+                    <label class="account-type-option">
+                          <input type="radio" name="role" value="Recruiter">
+                          <span>Employer / Recruiter</span>
+                    </label>
+               </div>
             </div>
             <div class="two-col register-only hidden">
                 <div class="field">
@@ -111,12 +118,35 @@
         showError('');
     }
 
-    function updateRecruiterFields() {
-        const isRecruiter = isRegisterMode && document.getElementById('role').value === 'Recruiter';
-        document.querySelectorAll('.recruiter-only').forEach(el => el.classList.toggle('hidden', !isRecruiter));
-        document.getElementById('companyName').required = isRecruiter;
-    }
+    function getSelectedRole() {
+    const checked = document.querySelector('input[name="role"]:checked');
+    return checked ? checked.value : 'Job Seeker';
+}
 
+function updateRecruiterFields() {
+    const selectedRole = getSelectedRole();
+    const isRecruiter = isRegisterMode && selectedRole === 'Recruiter';
+
+    document.querySelectorAll('.recruiter-only').forEach(el => {
+        el.classList.toggle('hidden', !isRecruiter);
+    });
+
+    const companyName = document.getElementById('companyName');
+    if (companyName) companyName.required = isRecruiter;
+} // this ^ is a TEST -- Audrey :3
+
+    /* This radio change listener calls the updateRecruiterField() function whenever the account type 
+    toggle gets switched from "job seeker" to "recruiter", so that the company name field can appear
+    and dissapear accordingly -- A. :3 */
+    
+document.querySelectorAll('input[name="role"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        if (isRegisterMode) {
+            updateRecruiterFields();
+        }
+    });
+});
+    
     function showError(message) {
         const el = document.getElementById('error');
         el.textContent = message;
@@ -141,13 +171,14 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const button = document.getElementById('submit-btn');
+        const role = getSelectedRole();
 
         showError('');
         button.disabled = true;
         try {
             if (isRegisterMode) {
                 const field = id => document.getElementById(id).value;
-                const role = field('role');
+                //const role = field('role');
                 await postJson('/api/auth/register', {
                     role,
                     name: field('name'),
