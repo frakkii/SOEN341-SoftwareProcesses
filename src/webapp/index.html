@@ -31,10 +31,17 @@
 
         <form id="auth-form" onsubmit="handleSubmit(event)">
             <div class="field register-only hidden">
-               <label>
-                  <input type="radio" name="accountType" value="jobSeeker" checked>Personal account</label>
-               <label>
-                  <input type="radio" name="accountType" value="recruiter">Employer / Recruiter</label>
+               <div class="account-type-toggle" role="radiogroup" aria-label="Account type">
+                    <label class="account-type-option">
+                          <input type="radio" name="role" value="jobSeeker" checked>
+                          <span>Personal account</span>
+                    </label>
+
+                    <label class="account-type-option">
+                          <input type="radio" name="role" value="recruiter">
+                          <span>Employer / Recruiter</span>
+                    </label>
+               </div>
             </div>
             <div class="two-col register-only hidden">
                 <div class="field">
