@@ -31,10 +31,11 @@
 
         <form id="auth-form" onsubmit="handleSubmit(event)">
             <div class="field register-only hidden">
-               <label>
-                  <input type="radio" name="accountType" value="jobSeeker" checked>Personal account</label>
-               <label>
-                  <input type="radio" name="accountType" value="recruiter">Employer / Recruiter</label>
+                <label>Account Type</label>
+                <div class="role-choice">
+                    <label><input type="radio" name="role" value="Job Seeker" checked onchange="updateRecruiterFields()"> Job Seeker</label>
+                    <label><input type="radio" name="role" value="Recruiter" onchange="updateRecruiterFields()"> Employer / Recruiter</label>
+                </div>
             </div>
             <div class="two-col register-only hidden">
                 <div class="field">
@@ -111,8 +112,12 @@
         showError('');
     }
 
+    function selectedRole() {
+        return document.querySelector('input[name="role"]:checked').value;
+    }
+
     function updateRecruiterFields() {
-        const isRecruiter = isRegisterMode && document.getElementById('role').value === 'Recruiter';
+        const isRecruiter = isRegisterMode && selectedRole() === 'Recruiter';
         document.querySelectorAll('.recruiter-only').forEach(el => el.classList.toggle('hidden', !isRecruiter));
         document.getElementById('companyName').required = isRecruiter;
     }
@@ -147,7 +152,7 @@
         try {
             if (isRegisterMode) {
                 const field = id => document.getElementById(id).value;
-                const role = field('role');
+                const role = selectedRole();
                 await postJson('/api/auth/register', {
                     role,
                     name: field('name'),
