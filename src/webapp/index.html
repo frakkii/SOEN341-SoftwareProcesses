@@ -33,12 +33,12 @@
             <div class="field register-only hidden">
                <div class="account-type-toggle" role="radiogroup" aria-label="Account type">
                     <label class="account-type-option">
-                          <input type="radio" id="role" value="Job Seeker" checked>
+                          <input type="radio" name="role" value="Job Seeker" checked>
                           <span>Personal account</span>
                     </label>
 
                     <label class="account-type-option">
-                          <input type="radio" id="role" value="Recruiter">
+                          <input type="radio" name="role" value="Recruiter">
                           <span>Employer / Recruiter</span>
                     </label>
                </div>
@@ -118,11 +118,28 @@
         showError('');
     }
 
-    function updateRecruiterFields() {
+    /*function updateRecruiterFields() {
         const isRecruiter = isRegisterMode && document.getElementById('role').value === 'Recruiter';
         document.querySelectorAll('.recruiter-only').forEach(el => el.classList.toggle('hidden', !isRecruiter));
         document.getElementById('companyName').required = isRecruiter;
-    }
+    }*/
+
+    function getSelectedRole() {
+    const checked = document.querySelector('input[name="role"]:checked');
+    return checked ? checked.value : 'Job Seeker';
+}
+
+function updateRecruiterFields() {
+    const selectedRole = getSelectedRole();
+    const isRecruiter = isRegisterMode && selectedRole === 'Recruiter';
+
+    document.querySelectorAll('.recruiter-only').forEach(el => {
+        el.classList.toggle('hidden', !isRecruiter);
+    });
+
+    const companyName = document.getElementById('companyName');
+    if (companyName) companyName.required = isRecruiter;
+} // this is a TEST
 
     function showError(message) {
         const el = document.getElementById('error');
@@ -148,14 +165,14 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const button = document.getElementById('submit-btn');
-        
+        const role = getSelectedRole();
 
         showError('');
         button.disabled = true;
         try {
             if (isRegisterMode) {
                 const field = id => document.getElementById(id).value;
-                const role = field('role');
+                //const role = field('role');
                 await postJson('/api/auth/register', {
                     role,
                     name: field('name'),
