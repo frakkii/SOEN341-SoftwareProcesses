@@ -118,12 +118,6 @@
         showError('');
     }
 
-    /*function updateRecruiterFields() {
-        const isRecruiter = isRegisterMode && document.getElementById('role').value === 'Recruiter';
-        document.querySelectorAll('.recruiter-only').forEach(el => el.classList.toggle('hidden', !isRecruiter));
-        document.getElementById('companyName').required = isRecruiter;
-    }*/
-
     function getSelectedRole() {
     const checked = document.querySelector('input[name="role"]:checked');
     return checked ? checked.value : 'Job Seeker';
@@ -139,8 +133,20 @@ function updateRecruiterFields() {
 
     const companyName = document.getElementById('companyName');
     if (companyName) companyName.required = isRecruiter;
-} // this is a TEST
+} // this ^ is a TEST -- Audrey :3
 
+    /* This radio change listener calls the updateRecruiterField() function whenever the account type 
+    toggle gets switched from "job seeker" to "recruiter", so that the company name field can appear
+    and dissapear accordingly -- A. :3 */
+    
+document.querySelectorAll('input[name="role"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        if (isRegisterMode) {
+            updateRecruiterFields();
+        }
+    });
+});
+    
     function showError(message) {
         const el = document.getElementById('error');
         el.textContent = message;
