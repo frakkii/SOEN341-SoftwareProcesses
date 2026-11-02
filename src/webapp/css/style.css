@@ -41,6 +41,56 @@ body{
 .chip.under-review{background:#8b5cf6}.chip.rejected{background:#ef4444}
 
 /* Form card */
+
+/* New params for the new account role toggle switch on the index page - audrey :3 */
+
+.account-type-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    background: #f4f5f7;
+    border: 1px solid #dfe3ea;
+    border-radius: 14px;
+    padding: 0.35rem;
+    width: 100%;
+}
+
+.account-type-option {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+.account-type-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.account-type-option span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    border-radius: 10px;
+    background: transparent;
+    color: #3b4250;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.account-type-option input:checked + span {
+    background: linear-gradient(135deg, #5c67f2, #7a5cf5);
+    color: white;
+    box-shadow: 0 6px 18px rgba(92, 103, 242, 0.25);
+}
+
+.account-type-option input:focus-visible + span {
+    outline: 2px solid #5c67f2;
+    outline-offset: 2px;
+}
+
 .panel{position:relative;background:#fff;border-radius:30px;padding:36px 34px 30px;box-shadow:0 30px 80px rgba(30,27,75,.4);overflow:hidden}
 .panel h2{font:800 1.9rem var(--display);margin:6px 0 4px;letter-spacing:-.01em}
 .sub{color:var(--muted);margin:0 0 22px;font-size:.95rem;line-height:1.5}
