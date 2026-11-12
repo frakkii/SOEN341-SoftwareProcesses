@@ -371,21 +371,23 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 ## #8 Create and manage job postings (Sprint 3)
 
-### AT-30: Recruiter edits and archives their own job posting
+### AT-30: Recruiter edits and archives an owned posting
 
 - **User story:** #8 (Create and manage job postings)
 - **Related tasks:** #48, #49, #50, #51
 - **Sprint:** 3
 
-**Given** I am logged in as a recruiter and have an active job posting
+**Given** Recruiter A owns an active posting and Recruiter B owns a separate active posting
 
 **Steps**
-1. Open My Postings
-2. Edit the posting details and save
-3. Archive the posting
-4. Open job search as a job seeker
+1. Log in as Recruiter A and open My Postings
+2. Edit posting A's details and save
+3. Reopen posting A and verify the updated details
+4. Archive or deactivate posting A
+5. Open job search as a job seeker
+6. Log in as Recruiter A and try to edit posting B
 
-**Then** The updated details are saved, the posting is archived, and it is no longer shown as an active job to job seekers; I cannot edit another recruiter's posting
+**Then** Posting A retains its updated details, is archived or deactivated, and is no longer shown as an active job to job seekers; Recruiter A cannot edit posting B and receives a clear authorization error
 
 **Automated coverage:** `Pending: no automated test method currently exists`
 
@@ -489,73 +491,82 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 ## #6 Notifications and reminders (Sprint 3)
 
-### AT-25: Job seeker sees application status and interview notifications
+### AT-25: Job seeker sees status updates and distinct interview notifications
 
 - **User story:** #6 (Notifications and reminders)
 - **Related tasks:** #63
 - **Sprint:** 3
 
-**Given** I am logged in as a job seeker and a recruiter updates my application status
+**Given** I am logged in as a job seeker with an application owned by me
 
 **Steps**
-1. Change an application to a new status
-2. Change an application to Interview
-3. Open Notifications
+1. As the recruiter, change my application to a non-interview status
+2. As the recruiter, advance my application to Interview
+3. Open Notifications as the job seeker
+4. Review the status-update and interview notifications
+5. Log in as a different job seeker and open Notifications
 
-**Then** Notifications show the job title, the new status, and a distinct interview invitation message; unread notifications have an indicator
+**Then** The intended job seeker sees the job title and new status in the status-update notification, sees a distinct interview-invitation notification for the interview event, each unread notification has an unread indicator, and the other job seeker cannot see either notification
 
 **Automated coverage:** `Pending: no automated test method currently exists`
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 
-### AT-26: Job seeker sees an upcoming deadline reminder
+### AT-26: Job seeker sees deadline reminders without duplicates
 
 - **User story:** #6 (Notifications and reminders)
 - **Related tasks:** #63
 - **Sprint:** 3
 
-**Given** I have saved a job whose application deadline is tomorrow
+**Given** I am logged in as a job seeker with one saved job whose deadline is tomorrow, one saved job whose deadline has expired, and no other saved jobs with upcoming deadlines
 
 **Steps**
 1. Open Notifications
-2. Find the deadline reminder
+2. Review the reminder for the saved job due tomorrow
+3. Refresh Notifications or request reminders again
+4. Review the expired saved job
+5. Review the empty upcoming-deadlines state after the tomorrow deadline is no longer upcoming
 
-**Then** The reminder shows the job title, the formatted deadline, and an actionable reminder message
+**Then** The upcoming reminder shows the job title, formatted deadline, and actionable message; requesting reminders again does not create a duplicate for the same deadline and reminder interval; the expired job is clearly indicated and does not receive an active upcoming reminder; and the no-upcoming-deadlines message is shown when applicable
 
 **Automated coverage:** `Pending: no automated test method currently exists`
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 
-### AT-27: Recruiter sees a new application notification
+### AT-27: Recruiter sees new-application notifications for owned postings
 
 - **User story:** #6 (Notifications and reminders)
 - **Related tasks:** #63
 - **Sprint:** 3
 
-**Given** I am logged in as a recruiter and a job seeker applies to my posting
+**Given** Recruiter A owns posting A, Recruiter B owns posting B, and a job seeker applies to posting A
 
 **Steps**
-1. Open Notifications
-2. Review the new application notification
+1. Log in as Recruiter A and open Notifications
+2. Review the new-application notification
+3. Log in as Recruiter B and open Notifications
 
-**Then** The notification identifies the posting and applicant activity, and it is visible only to the posting owner
+**Then** Recruiter A sees a notification identifying posting A and the new applicant activity; Recruiter B does not see that notification; and the notification is marked for the posting owner only
 
 **Automated coverage:** `Pending: no automated test method currently exists`
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 
-### AT-28: Notifications show a clear empty state
+### AT-28: Notifications show empty and API-error states
 
 - **User story:** #6 (Notifications and reminders)
 - **Related tasks:** #63
 - **Sprint:** 3
 
-**Given** The authenticated user has no notifications
+**Given** The authenticated user has no notifications, and the notifications API can be made to return an error
 
 **Steps**
-1. Open Notifications
+1. Open Notifications with an authenticated account that has no notifications
+2. Verify the empty state
+3. Make the notifications API unavailable or return an error
+4. Reload Notifications
 
-**Then** A clear empty-state message is shown and no notification cards are rendered
+**Then** The empty state gives a clear no-notifications message and renders no notification cards; when the API fails, a clear unavailable/error message is shown instead of a false successful result
 
 **Automated coverage:** `Pending: no automated test method currently exists`
 
@@ -563,20 +574,22 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 ## #33 Application analytics dashboard (Sprint 3)
 
-### AT-29: Job seeker views accurate application analytics by status
+### AT-29: Job seeker views isolated application analytics and empty state
 
 - **User story:** #33 (Application analytics dashboard)
 - **Related tasks:** #56
 - **Sprint:** 3
 
-**Given** I am logged in as a job seeker with applications in Applied, Interview, Offered and Rejected statuses
+**Given** Job seeker Alice has applications in Applied, Interview, Offered, and Rejected statuses, and job seeker Bob has separate applications
 
 **Steps**
-1. Open the application analytics dashboard
+1. Log in as Alice and open the application analytics dashboard
 2. Review the total application count
-3. Review the count shown for each status
+3. Review the count shown for Applied, Interview, Offered, and Rejected
+4. Compare the dashboard counts with Alice's application records
+5. Log in as a new job seeker with no applications and open the dashboard
 
-**Then** The dashboard shows the correct total and status counts for my applications only, and the counts reflect my current application records
+**Then** Alice sees the correct total and per-status counts for Alice's current applications only, Bob's applications are excluded, and a clear no-applications empty state is shown for the new job seeker
 
 **Automated coverage:** `Pending: no automated test method currently exists`
 
@@ -584,21 +597,23 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 ## #10 AI resume feedback (Sprint 3)
 
-### AT-31: Job seeker receives AI-generated resume feedback
+### AT-31: Job seeker receives safe AI resume feedback
 
 - **User story:** #10 (AI resume feedback)
 - **Related tasks:** #60
 - **Sprint:** 3
 
-**Given** I am logged in as a job seeker with a supported resume uploaded
+**Given** I am logged in as a job seeker with a supported readable resume, an unsupported resume file, and an unreadable or unprocessable resume file available for testing
 
 **Steps**
 1. Open the resume feedback feature
-2. Request feedback
-3. Wait for the analysis to finish
-4. Review the generated feedback
+2. Request feedback for the supported readable resume
+3. Observe the page while analysis is in progress
+4. Wait for the analysis to finish and review the generated feedback
+5. Request feedback for the unsupported file
+6. Request feedback for the unreadable or unprocessable file
 
-**Then** The feedback is displayed with suggestions about resume content, organization and clarity, includes an advisory message, and processing errors show a clear message
+**Then** A loading indicator is shown while processing; successful feedback contains suggestions about resume content, organization, and clarity plus a clear advisory message that it should be reviewed before use; the unsupported file is rejected with a clear message; and the unreadable or unprocessable file shows a clear processing-error message without a false success result
 
 **Automated coverage:** `Pending: no automated test method currently exists`
 
