@@ -1,4 +1,4 @@
-﻿# Acceptance Tests (Sprints 1 and 2)
+﻿# Acceptance Tests (Sprints 1, 2 and 3)
 
 Each test is also a GitHub issue labeled `acceptance-test` and linked to its user story as a sub-issue.
 Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
@@ -369,6 +369,28 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 
+## #8 Create and manage job postings (Sprint 3)
+
+### AT-30: Recruiter edits and archives their own job posting
+
+- **User story:** #8 (Create and manage job postings)
+- **Related tasks:** #48, #49, #50, #51
+- **Sprint:** 3
+
+**Given** I am logged in as a recruiter and have an active job posting
+
+**Steps**
+1. Open My Postings
+2. Edit the posting details and save
+3. Archive the posting
+4. Open job search as a job seeker
+
+**Then** The updated details are saved, the posting is archived, and it is no longer shown as an active job to job seekers; I cannot edit another recruiter's posting
+
+**Automated coverage:** `Pending: no automated test method currently exists`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
 ## #9 View applicants for each posting (Sprint 2)
 
 ### AT-20: Recruiter reviews applicants and their resumes
@@ -465,3 +487,119 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 
+## #6 Notifications and reminders (Sprint 3)
+
+### AT-25: Job seeker sees application status and interview notifications
+
+- **User story:** #6 (Notifications and reminders)
+- **Related tasks:** #63
+- **Sprint:** 3
+
+**Given** I am logged in as a job seeker and a recruiter updates my application status
+
+**Steps**
+1. Change an application to a new status
+2. Change an application to Interview
+3. Open Notifications
+
+**Then** Notifications show the job title, the new status, and a distinct interview invitation message; unread notifications have an indicator
+
+**Automated coverage:** `Pending: no automated test method currently exists`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+### AT-26: Job seeker sees an upcoming deadline reminder
+
+- **User story:** #6 (Notifications and reminders)
+- **Related tasks:** #63
+- **Sprint:** 3
+
+**Given** I have saved a job whose application deadline is tomorrow
+
+**Steps**
+1. Open Notifications
+2. Find the deadline reminder
+
+**Then** The reminder shows the job title, the formatted deadline, and an actionable reminder message
+
+**Automated coverage:** `Pending: no automated test method currently exists`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+### AT-27: Recruiter sees a new application notification
+
+- **User story:** #6 (Notifications and reminders)
+- **Related tasks:** #63
+- **Sprint:** 3
+
+**Given** I am logged in as a recruiter and a job seeker applies to my posting
+
+**Steps**
+1. Open Notifications
+2. Review the new application notification
+
+**Then** The notification identifies the posting and applicant activity, and it is visible only to the posting owner
+
+**Automated coverage:** `Pending: no automated test method currently exists`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+### AT-28: Notifications show a clear empty state
+
+- **User story:** #6 (Notifications and reminders)
+- **Related tasks:** #63
+- **Sprint:** 3
+
+**Given** The authenticated user has no notifications
+
+**Steps**
+1. Open Notifications
+
+**Then** A clear empty-state message is shown and no notification cards are rendered
+
+**Automated coverage:** `Pending: no automated test method currently exists`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+## #33 Application analytics dashboard (Sprint 3)
+
+### AT-29: Job seeker views accurate application analytics by status
+
+- **User story:** #33 (Application analytics dashboard)
+- **Related tasks:** #56
+- **Sprint:** 3
+
+**Given** I am logged in as a job seeker with applications in Applied, Interview, Offered and Rejected statuses
+
+**Steps**
+1. Open the application analytics dashboard
+2. Review the total application count
+3. Review the count shown for each status
+
+**Then** The dashboard shows the correct total and status counts for my applications only, and the counts reflect my current application records
+
+**Automated coverage:** `Pending: no automated test method currently exists`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+## #10 AI resume feedback (Sprint 3)
+
+### AT-31: Job seeker receives AI-generated resume feedback
+
+- **User story:** #10 (AI resume feedback)
+- **Related tasks:** #60
+- **Sprint:** 3
+
+**Given** I am logged in as a job seeker with a supported resume uploaded
+
+**Steps**
+1. Open the resume feedback feature
+2. Request feedback
+3. Wait for the analysis to finish
+4. Review the generated feedback
+
+**Then** The feedback is displayed with suggestions about resume content, organization and clarity, includes an advisory message, and processing errors show a clear message
+
+**Automated coverage:** `Pending: no automated test method currently exists`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_

@@ -1,4 +1,4 @@
-# Creates the Sprint 1 and Sprint 2 acceptance tests as GitHub issues, labels them
+# Creates the Sprint 1, Sprint 2 and Sprint 3 acceptance tests as GitHub issues, labels them
 # "acceptance-test", and links each one to its user story as a sub-issue.
 #
 # Needs the GitHub CLI, signed in:   winget install GitHub.cli   then   gh auth login
@@ -23,6 +23,9 @@ $Stories = @{
     8  = @{ Sprint = 2; Title = 'Create and manage job postings';         Tasks = 48, 49, 50, 51 }
     9  = @{ Sprint = 2; Title = 'View applicants for each posting';       Tasks = 61 }
     139 = @{ Sprint = 2; Title = 'Log out of my account';                 Tasks = 140, 141 }
+    6  = @{ Sprint = 3; Title = 'Notifications and reminders';            Tasks = 63 }
+    33 = @{ Sprint = 3; Title = 'Application analytics dashboard';         Tasks = 56 }
+    10 = @{ Sprint = 3; Title = 'AI resume feedback';                     Tasks = 60 }
 }
 
 $Tests = @(
@@ -165,15 +168,60 @@ $Tests = @(
        Steps = 'Open Your Postings and click Logout', 'Log in again, open Create Posting and click Logout'
        Then  = 'Each time I am taken to the login page and my recruiter pages need a new login'
        Auto  = 'AuthControllerTests.logoutEndsTheSession, logoutWithoutASessionStillSucceeds' }
+
+    # ---- #6 Notifications and reminders (Sprint 3) ----
+    @{ Id = 'AT-25'; Story = 6; Title = 'Job seeker sees application status and interview notifications'
+       Given = 'I am logged in as a job seeker and a recruiter updates my application status'
+       Steps = 'Change an application to a new status', 'Change an application to Interview', 'Open Notifications'
+       Then  = 'Notifications show the job title, the new status, and a distinct interview invitation message; unread notifications have an indicator'
+       Auto  = 'Pending: no automated test method currently exists' }
+    @{ Id = 'AT-26'; Story = 6; Title = 'Job seeker sees an upcoming deadline reminder'
+       Given = 'I have saved a job whose application deadline is tomorrow'
+       Steps = 'Open Notifications', 'Find the deadline reminder'
+       Then  = 'The reminder shows the job title, the formatted deadline, and an actionable reminder message'
+       Auto  = 'Pending: no automated test method currently exists' }
+    @{ Id = 'AT-27'; Story = 6; Title = 'Recruiter sees a new application notification'
+       Given = 'I am logged in as a recruiter and a job seeker applies to my posting'
+       Steps = 'Open Notifications', 'Review the new application notification'
+       Then  = 'The notification identifies the posting and applicant activity, and it is visible only to the posting owner'
+       Auto  = 'Pending: no automated test method currently exists' }
+    @{ Id = 'AT-28'; Story = 6; Title = 'Notifications show a clear empty state'
+       Given = 'The authenticated user has no notifications'
+       Steps = 'Open Notifications'
+       Then  = 'A clear empty-state message is shown and no notification cards are rendered'
+       Auto  = 'Pending: no automated test method currently exists' }
+
+    # ---- #33 Application analytics dashboard (Sprint 3) ----
+    @{ Id = 'AT-29'; Story = 33; Title = 'Job seeker views accurate application analytics by status'
+       Given = 'I am logged in as a job seeker with applications in Applied, Interview, Offered and Rejected statuses'
+       Steps = 'Open the application analytics dashboard', 'Review the total application count', 'Review the count shown for each status'
+       Then  = 'The dashboard shows the correct total and status counts for my applications only, and the counts reflect my current application records'
+       Auto  = 'Pending: no automated test method currently exists' }
+
+    # ---- #8 Job posting management (Sprint 3) ----
+    @{ Id = 'AT-30'; Story = 8; Title = 'Recruiter edits and archives their own job posting'
+       Sprint = 3
+       Given = 'I am logged in as a recruiter and have an active job posting'
+       Steps = 'Open My Postings', 'Edit the posting details and save', 'Archive the posting', 'Open job search as a job seeker'
+       Then  = 'The updated details are saved, the posting is archived, and it is no longer shown as an active job to job seekers; I cannot edit another recruiter''s posting'
+       Auto  = 'Pending: no automated test method currently exists' }
+
+    # ---- #10 AI resume feedback (Sprint 3) ----
+    @{ Id = 'AT-31'; Story = 10; Title = 'Job seeker receives AI-generated resume feedback'
+       Given = 'I am logged in as a job seeker with a supported resume uploaded'
+       Steps = 'Open the resume feedback feature', 'Request feedback', 'Wait for the analysis to finish', 'Review the generated feedback'
+       Then  = 'The feedback is displayed with suggestions about resume content, organization and clarity, includes an advisory message, and processing errors show a clear message'
+       Auto  = 'Pending: no automated test method currently exists' }
 )
 
 function Get-Body($t) {
     $s = $Stories[$t.Story]
+    $sprint = if ($t.ContainsKey('Sprint')) { $t.Sprint } else { $s.Sprint }
     $steps = for ($i = 0; $i -lt $t.Steps.Count; $i++) { "$($i + 1). $($t.Steps[$i])" }
     @"
 - **User story:** #$($t.Story) ($($s.Title))
 - **Related tasks:** $(($s.Tasks | ForEach-Object { "#$_" }) -join ', ')
-- **Sprint:** $($s.Sprint)
+- **Sprint:** $sprint
 
 **Given** $($t.Given)
 
@@ -189,13 +237,18 @@ $($steps -join "`n")
 }
 
 # Markdown copy for the repo
-$md = @('# Acceptance Tests (Sprints 1 and 2)', '',
+$md = @('# Acceptance Tests (Sprints 1, 2 and 3)', '',
         'Each test is also a GitHub issue labeled `acceptance-test` and linked to its user story as a sub-issue.',
         'Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.', '')
-foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139) {
-    $md += "## #$n $($Stories[$n].Title) (Sprint $($Stories[$n].Sprint))", ''
-    foreach ($t in $Tests | Where-Object { $_.Story -eq $n }) {
-        $md += "### $($t.Id): $($t.Title)", '', (Get-Body $t), ''
+foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139, 6, 33, 10) {
+    $storyTests = @($Tests | Where-Object { $_.Story -eq $n })
+    foreach ($group in ($storyTests | Group-Object {
+        if ($_.ContainsKey('Sprint')) { $_.Sprint } else { $Stories[$n].Sprint }
+    })) {
+        $md += "## #$n $($Stories[$n].Title) (Sprint $($group.Name))", ''
+        foreach ($t in $group.Group) {
+            $md += "### $($t.Id): $($t.Title)", '', (Get-Body $t), ''
+        }
     }
 }
 $md -join "`n" | Out-File -Encoding utf8 (Join-Path $PSScriptRoot 'ACCEPTANCE_TESTS.md')

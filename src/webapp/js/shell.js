@@ -4,6 +4,26 @@
 (function () {
   const user = localStorage.getItem('userName');
   if (!user) { location.replace('index.html'); return; }
+  const role = localStorage.getItem('userRole') || 'Job Seeker';
+  const isRecruiter = role === 'Recruiter';
+  const demoMode = new URLSearchParams(location.search).get('demoNotifications');
+  const demoEnabled = demoMode === '1' || demoMode === 'empty';
+  const demoNotifications = demoMode === '1' ? [
+    { id: 'demo-status', type: 'APPLICATION_STATUS_UPDATED', title: 'Junior Developer', message: 'Your application status changed to Under Review.', createdAt: '2026-11-12T13:15:00Z', read: false },
+    { id: 'demo-interview', type: 'INTERVIEW_INVITATION', title: 'Software Engineer Intern', message: 'You have been invited to an interview.', createdAt: '2026-11-11T16:30:00Z', read: false },
+    { id: 'demo-deadline', type: 'DEADLINE_REMINDER', title: 'Product Designer', message: 'Your saved job application deadline is approaching.', applicationDeadline: '2026-11-15', createdAt: '2026-11-10T09:00:00Z', read: true },
+    { id: 'demo-application', type: 'NEW_APPLICATION', title: 'Junior Developer', message: 'A new application was received for your posting.', createdAt: '2026-11-09T14:45:00Z', read: true }
+  ] : [];
+  const demoStore = {
+    get() {
+      return demoNotifications.map(notification => ({ ...notification }));
+    },
+    markRead(id) {
+      const notification = demoNotifications.find(item => item.id === id);
+      if (notification) notification.read = true;
+      return notification;
+    }
+  };
 
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -30,6 +50,7 @@
     users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2A6.5 6.5 0 0 1 21.5 20"/>',
     x: '<path d="M6 6l12 12M18 6 6 18"/>',
     send: '<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>'
+    ,bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>'
   };
   const icon = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${PATHS[n]}</svg>`;
   const initials = n => n.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
@@ -128,43 +149,92 @@
   // ---- top bar ----
   const page = location.pathname.split('/').pop() || 'home.html';
   const cur = (...p) => p.includes(page) ? ' active' : '';
+  const navigation = isRecruiter ? `
+    <a href="recruiterhome.html" class="${cur('recruiterhome.html').trim()}">Home</a>
+    <a href="recruiterpostings.html" class="${cur('recruiterpostings.html', 'recruiterapplicants.html').trim()}">Your Postings</a>
+    <a href="notifications.html" class="notification-link${cur('notifications.html')}" aria-label="Notifications">
+      ${icon('bell')}<span>Notifications</span><b class="notification-badge hidden" id="notification-count" aria-label="Unread notifications"></b>
+    </a>
+    <a href="#" data-soon="Messages">Messages</a>
+    <a href="#" data-soon="Company Profile &amp; Account Settings">Company Profile &amp; Account Settings</a>
+    <a href="#" data-logout>Log out</a>` : `
+    <a href="home.html" class="${cur('home.html').trim()}">Home</a>
+    <a href="jobs.html" class="${cur('jobs.html', 'job.html').trim()}">Postings</a>
+    <div class="dd${cur('resume.html', 'applications.html')}">
+      <button type="button" class="dd-btn" aria-haspopup="true" aria-expanded="false">My Tools ${icon('chev')}</button>
+      <div class="dd-menu"><div class="dd-panel">
+        <a href="resume.html"><span class="ic g1">${icon('doc')}</span>My CVs &amp; Cover Letters</a>
+        <a href="#" data-soon="Favourited Postings"><span class="ic g3">${icon('star')}</span>Favourited Postings<em>Soon</em></a>
+        <a href="applications.html"><span class="ic g2">${icon('chart')}</span>My Applications</a>
+      </div></div>
+    </div>
+    <a href="notifications.html" class="notification-link${cur('notifications.html')}" aria-label="Notifications">
+      ${icon('bell')}<span>Notifications</span><b class="notification-badge hidden" id="notification-count" aria-label="Unread notifications"></b>
+    </a>
+    <a href="#" data-soon="Messages">Messages</a>
+    <a href="#" data-soon="Settings">Settings</a>
+    <a href="#" data-logout>Log out</a>`;
   document.body.insertAdjacentHTML('afterbegin', `
   <header class="topbar">
     <a class="brand" href="home.html">
       <span class="mark" aria-hidden="true">C</span>
       <span><b>CareerConnect</b><small>Welcome, <span id="username"></span></small></span>
     </a>
-    <nav class="nav" aria-label="Main">
-      <a href="home.html" class="${cur('home.html').trim()}">Home</a>
-      <a href="jobs.html" class="${cur('jobs.html', 'job.html').trim()}">Postings</a>
-      <div class="dd${cur('resume.html', 'applications.html')}">
-        <button type="button" class="dd-btn" aria-haspopup="true" aria-expanded="false">My Tools ${icon('chev')}</button>
-        <div class="dd-menu"><div class="dd-panel">
-          <a href="resume.html"><span class="ic g1">${icon('doc')}</span>My CVs &amp; Cover Letters</a>
-          <a href="#" data-soon="Favourited Postings"><span class="ic g3">${icon('star')}</span>Favourited Postings<em>Soon</em></a>
-          <a href="applications.html"><span class="ic g2">${icon('chart')}</span>My Applications</a>
-        </div></div>
-      </div>
-      <a href="#" data-soon="Messages">Messages</a>
-      <a href="#" data-soon="Settings">Settings</a>
-      <a href="#" data-logout>Log out</a>
-    </nav>
-    <a class="me${cur('profile.html')}" href="profile.html" aria-label="Your profile" title="Your profile"><span class="av" data-me></span></a>
+    <nav class="nav" aria-label="${isRecruiter ? 'Recruiter navigation' : 'Main'}">${navigation}</nav>
+    <a class="me${cur('profile.html')}" href="${isRecruiter ? 'recruiterhome.html' : 'profile.html'}" aria-label="Your profile" title="Your profile"><span class="av" data-me></span></a>
   </header>`);
   document.getElementById('username').textContent = user;
 
-  const dd = document.querySelector('.dd'), ddBtn = dd.querySelector('.dd-btn');
-  const setOpen = o => { dd.classList.toggle('open', o); ddBtn.setAttribute('aria-expanded', o); };
-  ddBtn.addEventListener('click', e => { e.stopPropagation(); setOpen(!dd.classList.contains('open')); });
-  document.addEventListener('click', e => { if (!dd.contains(e.target)) setOpen(false); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+  const dd = document.querySelector('.dd'), ddBtn = dd && dd.querySelector('.dd-btn');
+  const setOpen = o => { if (dd) { dd.classList.toggle('open', o); ddBtn.setAttribute('aria-expanded', o); } };
+  if (dd) {
+    ddBtn.addEventListener('click', e => { e.stopPropagation(); setOpen(!dd.classList.contains('open')); });
+    document.addEventListener('click', e => { if (!dd.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+  }
   document.addEventListener('click', e => {
     const a = e.target.closest('[data-soon]');
     if (a) { e.preventDefault(); setOpen(false); toast((a.dataset.soon || 'This') + ' is coming soon.'); }
   });
 
+  const notificationData = {
+    demo: demoEnabled,
+    role,
+    visible(data) {
+      const notifications = Array.isArray(data) ? data : (data.notifications || []);
+      const allowed = isRecruiter ? ['NEW_APPLICATION'] :
+        ['APPLICATION_STATUS_UPDATED', 'INTERVIEW_INVITATION', 'DEADLINE_REMINDER'];
+      return notifications.filter(notification => allowed.includes(
+        String(notification.type || notification.notificationType || '').toUpperCase()
+      ));
+    },
+    async get() {
+      if (demoEnabled) return demoStore.get();
+      return api('/api/notifications');
+    },
+    async markRead(id) {
+      if (demoEnabled) return demoStore.markRead(id);
+      return api('/api/notifications/' + encodeURIComponent(id) + '/read', { method: 'PATCH' });
+    },
+    updateBadge(data) {
+      const notifications = this.visible(data);
+      const unread = Array.isArray(data) ? notifications.filter(n => n.read !== true && n.isRead !== true).length
+        : notifications.filter(n => n.read !== true && n.isRead !== true).length;
+      const badge = document.getElementById('notification-count');
+      if (!badge) return;
+      badge.classList.toggle('hidden', unread === 0);
+      if (unread > 0) badge.textContent = unread > 99 ? '99+' : String(unread);
+    }
+  };
+
+  // The backend may return either an array or { notifications, unreadCount }.
+  // The page owns full rendering; the shell only keeps the global unread badge current.
+  notificationData.get().then(data => {
+    notificationData.updateBadge(data);
+  }).catch(() => {});
+
   document.head.appendChild(Object.assign(document.createElement('script'), { src: 'js/logout.js' }));
 
-  window.CC = { user, esc, icon, initials, store, toast, applyAvatars, strength, readImage, api, jobView, fmtDate, colorFor };
+  window.CC = { user, role, esc, icon, initials, store, toast, applyAvatars, strength, readImage, api, jobView, fmtDate, colorFor, notificationData };
   applyAvatars();
 })();
