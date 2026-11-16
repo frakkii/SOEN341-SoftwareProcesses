@@ -60,7 +60,7 @@ Sprint 2 delivered creating, closing and reopening postings and the applicant li
 | Dashboard unit tests (28 Node tests for the dashboard logic, 4 backend tests) | datannir-bit | _in #56_ | In review: PR #162 |
 | Frontend unit test job in CI | datannir-bit | _in #56_ | In review: PR #162 |
 | Acceptance test AT-29 (counts by status, only my applications, empty state) | hirurathnayaka77 | #158 | Written in PR #161 |
-| Acceptance tests AT-32 (history search/filter/sort) and AT-33 (applications over time) | frakkii | _new_ | Written on `docs/sprint3-management` |
+| Acceptance tests AT-32 (history search/filter/sort) and AT-33 (applications over time) | frakkii | #164, #165 | Written in PR #163 |
 
 The dashboard reads `GET /api/applications` (already returns status, `appliedAt` and `updatedAt`), so no new backend endpoint or migration is needed.
 
@@ -105,7 +105,8 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 
 - [ ] Assign the unassigned Sprint 3 tasks above and fill in the Team table
 - [ ] Create GitHub issues for the _new_ tasks and add them to the board
-- [ ] Merge #161 and #162; create issues for AT-32 and AT-33 and link them to #33
+- [x] Create issues for AT-32 and AT-33 and link them to #33 (#164, #165)
+- [ ] Merge #161 and #162
 - [ ] Run every Sprint 3 acceptance test and record the result on its issue
 - [ ] Upload the Sprint 3 meeting minutes to `minutes/` (copy [TEMPLATE.md](../../minutes/TEMPLATE.md))
 - [ ] Each member fills in [Sprint3_MemberContribution.md](../Sprint3_MemberContribution.md)
