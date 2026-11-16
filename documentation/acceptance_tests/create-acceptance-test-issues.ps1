@@ -1,4 +1,4 @@
-# Creates the Sprint 1 and Sprint 2 acceptance tests as GitHub issues, labels them
+# Creates the Sprint 1, Sprint 2 and Sprint 3 acceptance tests as GitHub issues, labels them
 # "acceptance-test", and links each one to its user story as a sub-issue.
 #
 # Needs the GitHub CLI, signed in:   winget install GitHub.cli   then   gh auth login
@@ -23,6 +23,7 @@ $Stories = @{
     8  = @{ Sprint = 2; Title = 'Create and manage job postings';         Tasks = 48, 49, 50, 51 }
     9  = @{ Sprint = 2; Title = 'View applicants for each posting';       Tasks = 61 }
     139 = @{ Sprint = 2; Title = 'Log out of my account';                 Tasks = 140, 141 }
+    33 = @{ Sprint = 3; Title = 'Application analytics dashboard';        Tasks = 56 }
 }
 
 $Tests = @(
@@ -165,6 +166,18 @@ $Tests = @(
        Steps = 'Open Your Postings and click Logout', 'Log in again, open Create Posting and click Logout'
        Then  = 'Each time I am taken to the login page and my recruiter pages need a new login'
        Auto  = 'AuthControllerTests.logoutEndsTheSession, logoutWithoutASessionStillSucceeds' }
+
+    # ---- #33 Application analytics dashboard (Sprint 3) ----
+    @{ Id = 'AT-32'; Story = 33; Title = 'Job seeker searches, filters and sorts their application history'
+       Given = 'I am logged in as a job seeker with at least three applications at different companies, in different statuses, applied on different days'
+       Steps = 'Open My Applications', 'Type part of one company name in Search', 'Clear the search and choose Interview in the Status filter', 'Choose a status none of my applications has', 'Click Clear filters, then switch Sort by between Newest first and Oldest first'
+       Then  = 'Search shows only applications whose job title or company matches; the Status filter shows only that status and the result count matches; a status with no applications shows a no-match message with a Clear filters button; sorting orders the history by application date; and the summary totals and charts do not change while filtering'
+       Auto  = 'PR #162: analytics.test.js filterApplications and sortApplications tests, "filtering never changes the dashboard totals"' }
+    @{ Id = 'AT-33'; Story = 33; Title = 'Job seeker sees applications submitted over time'
+       Given = 'I am logged in as a job seeker who applied to two jobs this month and to one job in an earlier month of this year'
+       Steps = 'Open My Applications', 'Look at the Applications over time chart with the 12 months range', 'Switch the range to 6 months, then to All time', 'Open View as table under the chart', 'Apply to another job, return to My Applications and click Refresh'
+       Then  = 'The chart has one bar per month in date order, shows 2 for this month and 1 for the earlier month, and shows months without applications as 0; changing the range changes how many months are shown; the table lists the same counts as the chart; and after applying again this month shows 3'
+       Auto  = 'PR #162: analytics.test.js monthlyCounts tests, ApplicationControllerTests.applicationsComeNewestFirstWithIsoDatesForTheMonthlyChart' }
 )
 
 function Get-Body($t) {
@@ -189,10 +202,10 @@ $($steps -join "`n")
 }
 
 # Markdown copy for the repo
-$md = @('# Acceptance Tests (Sprints 1 and 2)', '',
+$md = @('# Acceptance Tests (Sprints 1, 2 and 3)', '',
         'Each test is also a GitHub issue labeled `acceptance-test` and linked to its user story as a sub-issue.',
         'Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.', '')
-foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139) {
+foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139, 33) {
     $md += "## #$n $($Stories[$n].Title) (Sprint $($Stories[$n].Sprint))", ''
     foreach ($t in $Tests | Where-Object { $_.Story -eq $n }) {
         $md += "### $($t.Id): $($t.Title)", '', (Get-Body $t), ''
