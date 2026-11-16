@@ -1,7 +1,22 @@
 
-# Notifications and Reminders Backend
+# AI Log sprint 3
+**Task:** Notification and reminder backend
 
-This document collects the earlier responses about the notification backend: the initial recommendations, the implementation summary, and the step-by-step walkthrough.
+**Purpose of AI Use:** Review the existing backend that i made, add more functionality and test it
+
+**Chat Link or Prompt/Response:** Added the prompts and responces below  
+**Prompt:** see below
+**Response:** see below
+
+**AI-Suggested Content:** Generated code to make real time notification related to the job postings
+
+**Validation:** reviewed using test cases
+
+**Decision:** Accepted after multiple prompts
+
+**Reflection:** Deeper understanding of the Spring Boot technologie and aspects of the backend for a notification function
+
+**Responsible Person:** Shanza Riasat
 
 ## Initial recommendations
 
