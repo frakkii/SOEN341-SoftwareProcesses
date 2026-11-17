@@ -1,14 +1,19 @@
-# Builds the backend and runs its tests on every push and pull request to main.
+# Builds the backend and runs its tests on every push (any branch) and on every
+# pull request to main, so feature branches get feedback before a PR is opened.
 # Tests use in-memory H2 (src/backend/src/test/resources/application.properties),
 # so no Supabase credentials are needed here.
 name: CI
 
 on:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
+
+# A newer push to the same branch or PR cancels the run that is still going
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
@@ -30,6 +35,32 @@ jobs:
 
       - name: Build and test
         run: ./mvnw -B verify
+
+      # Totals per test class on the run's Summary page, so nobody has to download the reports
+      - name: Test summary
+        if: always()
+        run: |
+          shopt -s nullglob
+          reports=(target/surefire-reports/TEST-*.xml)
+          {
+            echo "## Backend tests"
+            if [ ${#reports[@]} -eq 0 ]; then
+              echo "No test reports were produced (the build failed before the tests ran)."
+              exit 0
+            fi
+            echo "| Test class | Tests | Failures | Errors | Skipped |"
+            echo "|---|---:|---:|---:|---:|"
+            total=0; bad=0; skipped=0
+            for f in "${reports[@]}"; do
+              head=$(grep -m1 -o '<testsuite [^>]*>' "$f")
+              attr() { echo "$head" | grep -o " $1=\"[^\"]*\"" | cut -d'"' -f2; }
+              t=$(attr tests); fl=$(attr failures); e=$(attr errors); s=$(attr skipped)
+              echo "| $(attr name | sed 's/.*\.//') | $t | $fl | $e | $s |"
+              total=$((total + t)); bad=$((bad + fl + e)); skipped=$((skipped + s))
+            done
+            echo
+            echo "**$total tests, $bad failed, $skipped skipped**"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload test reports
         if: always()

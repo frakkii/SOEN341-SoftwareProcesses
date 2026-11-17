@@ -1,4 +1,4 @@
-﻿# Acceptance Tests (Sprints 1 and 2)
+﻿# Acceptance Tests (Sprints 1, 2 and 3)
 
 Each test is also a GitHub issue labeled `acceptance-test` and linked to its user story as a sub-issue.
 Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
@@ -462,6 +462,50 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 **Then** Each time I am taken to the login page and my recruiter pages need a new login
 
 **Automated coverage:** `AuthControllerTests.logoutEndsTheSession, logoutWithoutASessionStillSucceeds`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+## #33 Application analytics dashboard (Sprint 3)
+
+### AT-32: Job seeker searches, filters and sorts their application history
+
+- **User story:** #33 (Application analytics dashboard)
+- **Related tasks:** #56
+- **Sprint:** 3
+
+**Given** I am logged in as a job seeker with at least three applications at different companies, in different statuses, applied on different days
+
+**Steps**
+1. Open My Applications
+2. Type part of one company name in Search
+3. Clear the search and choose Interview in the Status filter
+4. Choose a status none of my applications has
+5. Click Clear filters, then switch Sort by between Newest first and Oldest first
+
+**Then** Search shows only applications whose job title or company matches; the Status filter shows only that status and the result count matches; a status with no applications shows a no-match message with a Clear filters button; sorting orders the history by application date; and the summary totals and charts do not change while filtering
+
+**Automated coverage:** `PR #162: analytics.test.js filterApplications and sortApplications tests, "filtering never changes the dashboard totals"`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+### AT-33: Job seeker sees applications submitted over time
+
+- **User story:** #33 (Application analytics dashboard)
+- **Related tasks:** #56
+- **Sprint:** 3
+
+**Given** I am logged in as a job seeker who applied to two jobs this month and to one job in an earlier month of this year
+
+**Steps**
+1. Open My Applications
+2. Look at the Applications over time chart with the 12 months range
+3. Switch the range to 6 months, then to All time
+4. Open View as table under the chart
+5. Apply to another job, return to My Applications and click Refresh
+
+**Then** The chart has one bar per month in date order, shows 2 for this month and 1 for the earlier month, and shows months without applications as 0; changing the range changes how many months are shown; the table lists the same counts as the chart; and after applying again this month shows 3
+
+**Automated coverage:** `PR #162: analytics.test.js monthlyCounts tests, ApplicationControllerTests.applicationsComeNewestFirstWithIsoDatesForTheMonthlyChart`
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 
