@@ -19,17 +19,17 @@ Every Sprint 3 feature needs unit tests that run in CI, and every Sprint 3 story
 
 ## Team
 
-From the team's Sprint 3 task split. Members should correct their own row.
+Responsibilities agreed at Meeting 4 on 2026-11-05 ([minutes](../../minutes/2026-11-05_meeting4_sprint3-planning.md)). Everyone also owns a user story.
 
 | Name | GitHub | Sprint 3 responsibilities |
 |---|---|---|
-| Maria-Francesca Staicu | frakkii | Application analytics dashboard frontend; project management, documentation and CI pipeline |
-| Audrey Prevost | MothMother | _[to fill in]_ |
-| Donald Champ | dchamp214 | _[to fill in]_ |
+| Maria-Francesca Staicu | frakkii | Application analytics dashboard frontend; CI pipeline; project board, backlog, sprint plan and task assignments. Later also took on the missing recruiter features (edit, archive, applicant filters) |
+| Audrey Prevost | MothMother | Fixed bugs from Sprint 2 |
+| Donald Champ | dchamp214 | Fixing and reviewing code |
 | Shanza Riasat | Shanza687 | Notifications and reminders backend |
-| Mario Habib | MarioHabib33 | _[to fill in]_ |
-| Hirushi Rathnayaka | hirurathnayaka77 | Notifications frontend, Sprint 3 acceptance tests |
-| Dani Tannir | datannir-bit | Application analytics dashboard (frontend, tests, frontend CI job) |
+| Mario Habib | MarioHabib33 | Recruiter dashboard, settings feature (6 hours) |
+| Hirushi Rathnayaka | hirurathnayaka77 | Notifications and reminders frontend, acceptance tests |
+| Dani Tannir | datannir-bit | Application analytics dashboard backend (delivered the frontend, tests and frontend CI job too, in #162) |
 
 ## Stories and tasks
 
@@ -112,7 +112,7 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 - [ ] Merge #161 (notifications frontend) once its conflicts are resolved
 - [x] Merge the recruiter edit, archive and filters work (#169) and record AT-30 on #159
 - [ ] Run every Sprint 3 acceptance test and record the result on its issue
-- [ ] Upload the Sprint 3 meeting minutes to `minutes/` (copy [TEMPLATE.md](../../minutes/TEMPLATE.md))
+- [x] Upload the Sprint 3 meeting minutes to `minutes/` (Meeting 4; add any later meetings with [TEMPLATE.md](../../minutes/TEMPLATE.md))
 - [ ] Each member fills in [Sprint3_MemberContribution.md](../Sprint3_MemberContribution.md)
 - [ ] Each member adds their Sprint 3 AI log and Sprint 3 PDF report in `AI_logs/<name>/Sprint3/`
 - [ ] Submit the one-page Sprint 3 summary report

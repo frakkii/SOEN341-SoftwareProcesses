@@ -1,6 +1,6 @@
 # Sprint 3 Member Contributions
 
-Compiled on 2026-11-16 from GitHub pull requests, branches and issues. Each member should check their own section, add anything missing, and fill in **Time spent**. The task split is in the [Sprint 3 plan](sprint_planning/Sprint3_Plan.md).
+Compiled on 2026-11-16 from GitHub pull requests, branches and issues. Each member should check their own section, add anything missing, and fill in **Time spent**. **Planned** is from Meeting 4 (2026-11-05, [minutes](../minutes/2026-11-05_meeting4_sprint3-planning.md)); the task split is in the [Sprint 3 plan](sprint_planning/Sprint3_Plan.md).
 
 Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 
@@ -21,33 +21,33 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - **Time spent:** _[to fill in]_
 
 ## Audrey Prevost (40027535)
-**Planned:** _[to fill in]_
+**Planned:** user story, fixed bugs from Sprint 2
 
 - AI logs (account type selector, manage posts branch overview, Spring Data projections, creating job postings): PR [#167](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/167)
 - _[add Sprint 3 work]_
 - **Time spent:** _[to fill in]_
 
 ## Donald Champ (40270957)
-**Planned:** _[to fill in]_
+**Planned:** user story, fixing and reviewing code
 
 - _[add Sprint 3 work]_
 - **Time spent:** _[to fill in]_
 
 ## Shanza Riasat (40337845)
-**Planned:** notifications and reminders backend
+**Planned:** user story, notifications and reminders backend
 
 - Notifications backend (REST API, stored notifications, daily reminder job, mark as read) described in `AI_logs/Shanza/AI_Log_sprint3.md`. **The Java code is not in the repository yet**: commit `3f2da65` only added the AI log
 - **Time spent:** _[to fill in]_
 
 ## Mario Habib (40283335)
-**Planned:** _[to fill in]_
+**Planned:** user story, recruiter dashboard, settings feature (6 hours)
 
 - Recruiter UI redesign (recruiter home, postings, applicants, create posting), recruiter and job seeker settings pages, `GET /api/auth/me` session check, session cookie settings: PR [#166](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/166)
 - AI log: `AI_logs/Mario/Sprint3/task1-profile-employer-refinement.md`
 - **Time spent:** _[to fill in]_
 
 ## Hirushi Rathnayaka (40237379)
-**Planned:** notifications frontend, Sprint 3 acceptance tests
+**Planned:** user story, notifications and reminders frontend, acceptance tests
 
 - Notifications page, unread indicator and notification links in the top bar, plus acceptance tests AT-25 to AT-31 for stories #6, #8, #10 and #33: PR [#161](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/161) (open)
 - Acceptance test issues #154–#160
@@ -55,7 +55,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - **Time spent:** _[to fill in]_
 
 ## Dani Tannir (40298707)
-**Planned:** application analytics and history dashboard
+**Planned:** user story, application analytics and history dashboard backend
 
 - Application analytics and history dashboard: stat tiles, status breakdown chart, applications per month, history search/filter/sort; 28 frontend unit tests, 4 backend tests, and a frontend test job in CI: PR [#162](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/162) (merged)
 - Tasks: #56 Application summary dashboard frontend
