@@ -64,10 +64,7 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Integer>
             JOIN job_postings j ON j.post_id = f.post_id
             WHERE f.status = TRUE
               AND (j.status IS NULL OR j.status = 'Open')
-              AND j.application_deadline BETWEEN :today AND :reminderThrough
+              AND j.application_deadline = :deadline
             """, nativeQuery = true)
-    List<SavedDeadlineCandidate> findSavedPostingsNearingDeadline(
-            @Param("today") LocalDate today,
-            @Param("reminderThrough") LocalDate reminderThrough
-    );
+    List<SavedDeadlineCandidate> findSavedPostingsWithDeadline(@Param("deadline") LocalDate deadline);
 }

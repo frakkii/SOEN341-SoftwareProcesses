@@ -81,6 +81,17 @@ class NotificationControllerTests {
                 .getSession();
     }
 
+    private int insertSavedPosting(Integer personId, Integer employerId, LocalDate deadline) {
+        int postId = NEXT_POST_ID.getAndIncrement();
+        jdbc.update("INSERT INTO job_postings (employer_id, post_id, title, description, department, "
+                        + "application_deadline, salary, required_skills, status) "
+                        + "VALUES (?, ?, 'Saved posting', 'Description', 'Engineering', ?, '60000', 'Java', 'Open')",
+                employerId, postId, Date.valueOf(deadline));
+        jdbc.update("INSERT INTO fav_postings (person_id, post_id, status) VALUES (?, ?, TRUE)",
+                personId, postId);
+        return postId;
+    }
+
     @Test
     void userCanListFilterAndMarkOnlyTheirOwnNotificationsRead() throws Exception {
         MockHttpSession session = loggedInJobSeeker();
@@ -138,14 +149,7 @@ class NotificationControllerTests {
         Integer personId = (Integer) seeker.getAttribute(AuthController.SESSION_USER_ID);
         MockHttpSession recruiter = loggedInRecruiter();
         Integer employerId = (Integer) recruiter.getAttribute(AuthController.SESSION_USER_ID);
-        int postId = NEXT_POST_ID.getAndIncrement();
-        LocalDate deadline = LocalDate.now().plusDays(2);
-        jdbc.update("INSERT INTO job_postings (employer_id, post_id, title, description, department, "
-                        + "application_deadline, salary, required_skills, status) "
-                        + "VALUES (?, ?, 'Saved posting', 'Description', 'Engineering', ?, '60000', 'Java', 'Open')",
-                employerId, postId, Date.valueOf(deadline));
-        jdbc.update("INSERT INTO fav_postings (person_id, post_id, status) VALUES (?, ?, TRUE)",
-                personId, postId);
+        insertSavedPosting(personId, employerId, LocalDate.now().plusDays(1));
 
         deadlineReminders.createUpcomingDeadlineReminders();
         deadlineReminders.createUpcomingDeadlineReminders();
@@ -154,5 +158,31 @@ class NotificationControllerTests {
         org.assertj.core.api.Assertions.assertThat(result)
                 .filteredOn(notification -> notification.type().equals("JOB_DEADLINE"))
                 .hasSize(1);
+    }
+
+    @Test
+    void expiredDeadlinesAreIgnoredAndRemindersStayWithTheSavedJobOwner() throws Exception {
+        MockHttpSession ownerSession = loggedInJobSeeker();
+        Integer ownerId = (Integer) ownerSession.getAttribute(AuthController.SESSION_USER_ID);
+        MockHttpSession anotherSession = loggedInJobSeeker();
+        Integer anotherUserId = (Integer) anotherSession.getAttribute(AuthController.SESSION_USER_ID);
+        MockHttpSession recruiter = loggedInRecruiter();
+        Integer employerId = (Integer) recruiter.getAttribute(AuthController.SESSION_USER_ID);
+
+        insertSavedPosting(ownerId, employerId, LocalDate.now().plusDays(1));
+        insertSavedPosting(ownerId, employerId, LocalDate.now().minusDays(1));
+
+        deadlineReminders.createUpcomingDeadlineReminders();
+
+        var ownerNotifications = notifications.list("Job Seeker", ownerId, false);
+        org.assertj.core.api.Assertions.assertThat(ownerNotifications)
+                .filteredOn(notification -> notification.type().equals("JOB_DEADLINE"))
+                .hasSize(1)
+                .allSatisfy(notification ->
+                        org.assertj.core.api.Assertions.assertThat(notification.message())
+                                .contains("Saved posting")
+                                .contains(LocalDate.now().plusDays(1).toString()));
+        org.assertj.core.api.Assertions.assertThat(notifications.list("Job Seeker", anotherUserId, false))
+                .noneMatch(notification -> notification.type().equals("JOB_DEADLINE"));
     }
 }

@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public class DeadlineReminderService {
 
     private static final String JOB_SEEKER = "Job Seeker";
-    private static final int REMINDER_WINDOW_DAYS = 3;
+    private static final int REMINDER_DAYS_BEFORE_DEADLINE = 1;
 
     private final JobPostingRepository postings;
     private final NotificationService notifications;
@@ -22,8 +22,8 @@ public class DeadlineReminderService {
 
     @Scheduled(cron = "0 0 9 * * *")
     public void createUpcomingDeadlineReminders() {
-        LocalDate today = LocalDate.now();
-        postings.findSavedPostingsNearingDeadline(today, today.plusDays(REMINDER_WINDOW_DAYS))
+        LocalDate reminderDate = LocalDate.now().plusDays(REMINDER_DAYS_BEFORE_DEADLINE);
+        postings.findSavedPostingsWithDeadline(reminderDate)
                 .forEach(candidate -> notifications.create(
                         JOB_SEEKER,
                         candidate.getPersonId(),
@@ -31,7 +31,7 @@ public class DeadlineReminderService {
                         candidate.getTitle() + " closes on " + candidate.getApplicationDeadline() + ".",
                         "JOB_DEADLINE",
                         "/job.html?id=" + candidate.getPostId(),
-                        "JOB_DEADLINE:" + candidate.getPersonId() + ":" + candidate.getPostId()
+                        "JOB_DEADLINE:1D:" + candidate.getPersonId() + ":" + candidate.getPostId()
                                 + ":" + candidate.getApplicationDeadline()));
     }
 }
