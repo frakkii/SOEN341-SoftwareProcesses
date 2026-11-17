@@ -80,6 +80,17 @@ Stop the app with **Ctrl+C** in its terminal. If it's running somewhere you can'
 
 Add a port number to stop a copy on another port, e.g. `.\stop 8082`.
 
+### If the app won't start
+Maven ends every failed start with the same message, `Process terminated with exit code: 1`. The real reason is printed **above** it, so scroll up. The run scripts check the first two causes for you before starting:
+
+| You see (above the Maven error) | Fix |
+|---|---|
+| `SUPABASE_DB_PASSWORD is not set`, or `password authentication failed` / `no password was supplied` | Set the password in this terminal (step 2), then run again |
+| `Port 8081 is already in use` / `Web server failed to start. Port 8081 was already in use.` | Another copy is running. Run `.\stop` (or `./stop.sh`), then run again |
+| `max clients reached` / `MaxClientsInSessionMode` | Too many copies of the app are connected to Supabase at once. Stop copies you aren't using (yours or ones left running in an IDE) and try again |
+| `UnknownHostException` or `Connection refused` | No internet connection, or a network that blocks port 5432 (some campus/public Wi-Fi). Try another network |
+| Anything else | Copy the lines starting at the first `ERROR` or `Caused by` and share them with the team |
+
 ### Making changes
 - **Frontend** files (HTML/CSS/JS) are in `src/webapp/`. **Backend** code (Spring Boot) is in `src/backend/`. The one app serves both the pages and the API (`/api/...`).
 - Restart the app after any change, including frontend edits, since the pages are copied into the app when it starts.
