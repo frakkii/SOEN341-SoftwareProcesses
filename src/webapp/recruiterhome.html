@@ -4,204 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareerConnect - Recruiter Home</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/recruiter.css">
 </head>
-
 <body>
-    <header class="topbar">
-        <a class="brand" href="recruiterhome.html" aria-label="CareerConnect home">
-            <span class="mark">C</span>
-            <div>
-                <b>CareerConnect</b>
-                <small>Recruiter dashboard</small>
+<script src="js/recruiter.js"></script>
+
+<main class="wrap">
+    <div class="rc-grid">
+        <section class="rc-stack">
+            <div class="rc-card rc-hero">
+                <div>
+                    <h1>Welcome back, <span id="username">Recruiter</span></h1>
+                    <p>Here is where your hiring stands today.</p>
+                </div>
+                <a class="btn primary" href="createposting.html">Post a job</a>
             </div>
-        </a>
 
-        <nav class="nav" aria-label="Primary navigation">
-            <a href="recruiterhome.html" class="active">Home</a>
-            <a href="recruiterpostings.html">Your Postings</a>
-            <a href="#">Messages</a>
-            <a href="#">Company Profile &amp; Account Settings</a>
-            <a href="#" id="logout">Logout</a>
-        </nav>
+            <div class="rc-stats" aria-label="Hiring summary">
+                <div><strong id="sOpen">-</strong><span>Open jobs</span></div>
+                <div><strong id="sApplicants">-</strong><span>Total applicants</span></div>
+                <div><strong id="sSoon">-</strong><span>Closing in 7 days</span></div>
+                <div><strong id="sClosed">-</strong><span>Closed jobs</span></div>
+            </div>
 
-        <a class="me" href="recruiterhome.html" aria-label="Recruiter profile">
-            <span class="av sm" id="profile-badge">R</span>
-        </a>
-    </header>
-
-    <main class="wrap dashboard">
-        <div class="page-title">
-            <h1>Welcome back, <span id="username">Recruiter</span>!</h1>
-            <p>Here are your hiring updates at a glance.</p>
-        </div>
-
-        <div class="dashboard-grid">
-            <section class="stack">
-                <div class="tiles" aria-label="Recruiter shortcuts">
-                    <a href="createposting.html" class="tile t1">
-                        <span>✍️</span>
-                        <div>
-                            <b>Create a posting</b>
-                            <small>Draft a new opportunity for your team.</small>
-                        </div>
-                    </a>
-
-                    <a href="recruiterpostings.html" class="tile t2">
-                        <span>👥</span>
-                        <div>
-                            <b>Review applicants</b>
-                            <small>Track candidates and shortlist strong fits.</small>
-                        </div>
-                    </a>
-
-                    <a href="#" class="tile t3">
-                        <span>💬</span>
-                        <div>
-                            <b>Messages</b>
-                            <small>Reply quickly and keep candidates moving.</small>
-                        </div>
-                    </a>
-
-                    <a href="#" class="tile t4">
-                        <span>📊</span>
-                        <div>
-                            <b>Insights</b>
-                            <small>Monitor hiring momentum and team activity.</small>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="stats-grid" aria-label="Recruiter summary metrics">
-                    <article class="card stat-card success">
-                        <small>Open listings</small>
-                        <h3>12</h3>
-                    </article>
-
-                    <article class="card stat-card info">
-                        <small>New applicants</small>
-                        <h3>24</h3>
-                    </article>
-
-                    <article class="card stat-card warning">
-                        <small>Interviews booked</small>
-                        <h3>8</h3>
-                    </article>
-                </div>
-
-                <section class="card pad panel">
-                    <div class="panel-head">
-                        <h2>Hiring pipeline</h2>
-                        <a href="createposting.html" class="text-link">View all</a>
-                    </div>
-
-                    <ul class="pipeline-list">
-                        <li>
-                            <span class="dot violet"></span>
-                            <div>
-                                <strong>Senior Frontend Engineer</strong>
-                                <small>8 applicants • 3 interviews scheduled</small>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="dot cyan"></span>
-                            <div>
-                                <strong>Product Analyst</strong>
-                                <small>12 applicants • 2 new this week</small>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="dot orange"></span>
-                            <div>
-                                <strong>QA Automation Tester</strong>
-                                <small>5 applicants • 1 offer extended</small>
-                            </div>
-                        </li>
-                    </ul>
-                </section>
+            <section class="rc-card">
+                <div class="rc-sec-head"><h2>Your jobs</h2><a class="rc-link" href="recruiterpostings.html">See all</a></div>
+                <div id="jobs"><div class="rc-empty">Loading...</div></div>
             </section>
+        </section>
 
-            <aside class="stack side-panel">
-                <section class="card pad profile-card">
-                    <div class="profile-mini">
-                        <span class="av c1" id="profile-badge-side">R</span>
-                        <div>
-                            <h2>Acme Labs</h2>
-                            <small>Hiring team</small>
-                        </div>
-                    </div>
+        <aside class="rc-stack">
+            <section class="rc-card rc-co">
+                <div class="logo" id="coLogo">C</div>
+                <h2 id="coName">Your company</h2>
+                <p id="coEmail"></p>
+                <a class="btn" href="recruitersettings.html">Account settings</a>
+            </section>
+            <section class="rc-card">
+                <div class="rc-sec-head"><h2>Quick actions</h2></div>
+                <ul class="rc-list">
+                    <li><a href="createposting.html">Post a new job</a></li>
+                    <li><a href="recruiterpostings.html">Review applicants</a></li>
+                    <li><a href="recruitersettings.html">Settings</a></li>
+                </ul>
+            </section>
+            <section class="rc-card rc-tip">
+                <b>Recruiter tip</b>
+                <p>Respond to new applicants within 48 hours. Fast replies keep strong candidates engaged.</p>
+            </section>
+        </aside>
+    </div>
+</main>
 
-                    <div class="mini-metrics">
-                        <div>
-                            <strong>6</strong>
-                            <span>Active roles</span>
-                        </div>
-                        <div>
-                            <strong>31</strong>
-                            <span>Shortlisted</span>
-                        </div>
-                    </div>
+<script>
+    const $ = id => document.getElementById(id);
+    const fmt = d => d ? new Date(String(d).slice(0, 10) + "T00:00").toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "No deadline";
 
-                    <a href="#" class="btn block primary">Manage team</a>
-                </section>
+    RC.ready.then(user => {
+      $("username").textContent = user.name;
+      $("coName").textContent = user.companyName || "Your company";
+      $("coLogo").textContent = (user.companyName || "C").charAt(0).toUpperCase();
+      $("coEmail").textContent = user.email;
+      return RC.api("/api/postings");
+    }).then(jobs => {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const days = j => j.applicationDeadline ? Math.ceil((new Date(String(j.applicationDeadline).slice(0, 10) + "T00:00") - today) / 864e5) : null;
+      const isOpen = j => String(j.status).toLowerCase() === "open";
+      const open = jobs.filter(isOpen);
+      $("sOpen").textContent = open.length;
+      $("sApplicants").textContent = jobs.reduce((n, j) => n + (j.applicants || 0), 0);
+      $("sSoon").textContent = open.filter(j => { const d = days(j); return d !== null && d >= 0 && d <= 7; }).length;
+      $("sClosed").textContent = jobs.length - open.length;
 
-                <section class="card pad activity-card">
-                    <div class="panel-head compact">
-                        <h2>Recent activity</h2>
-                    </div>
-
-                    <ul class="activity-list">
-                        <li>
-                            <span class="activity-icon success">✓</span>
-                            <div>
-                                <strong>Frontend posting published</strong>
-                                <small>2 hours ago</small>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="activity-icon info">✦</span>
-                            <div>
-                                <strong>4 new applicants received</strong>
-                                <small>Today</small>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="activity-icon warning">↗</span>
-                            <div>
-                                <strong>Interview schedule updated</strong>
-                                <small>Yesterday</small>
-                            </div>
-                        </li>
-                    </ul>
-                </section>
-            </aside>
-        </div>
-    </main>
-
-    <script>
-        const name = localStorage.getItem("userName");
-        const usernameEl = document.getElementById("username");
-        const profileBadge = document.getElementById("profile-badge");
-        const profileBadgeSide = document.getElementById("profile-badge-side");
-
-        if (name && name.trim()) {
-            const safeName = name.trim();
-            usernameEl.textContent = safeName;
-            profileBadge.textContent = safeName.charAt(0).toUpperCase();
-            profileBadgeSide.textContent = safeName.charAt(0).toUpperCase();
-        } else {
-            window.location.href = "index.html";
-        }
-
-        document.getElementById("logout").addEventListener("click", function (event) {
-            event.preventDefault();
-            localStorage.removeItem("userName");
-            window.location.href = "index.html";
-        });
-    </script>
-    <script src="js/logout.js"></script>
+      $("jobs").innerHTML = jobs.length ? jobs.slice(0, 5).map(j => `
+        <div class="rc-job">
+          <div class="logo">${RC.esc((j.title || "J").charAt(0).toUpperCase())}</div>
+          <div class="info">
+            <a href="recruiterapplicants.html?id=${encodeURIComponent(j.id)}">${RC.esc(j.title)}</a>
+            <small>${RC.esc(j.location || "")} &middot; Apply by ${fmt(j.applicationDeadline)}</small>
+          </div>
+          <span class="rc-pill ${isOpen(j) ? "open" : "closed"}">${RC.esc(j.status || "")}</span>
+          <div class="count"><b>${j.applicants || 0}</b><span>applicants</span></div>
+        </div>`).join("") :
+        '<div class="rc-empty">You have no jobs yet.<br><a class="rc-link" href="createposting.html">Post your first job</a></div>';
+    }).catch(e => { $("jobs").innerHTML = `<div class="rc-empty">${RC.esc(e.message)}</div>`; });
+</script>
 </body>
 </html>
