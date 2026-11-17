@@ -45,11 +45,11 @@ Sprint 2 delivered creating, closing and reopening postings and the applicant li
 | Task | Assignee | Issue | Status |
 |---|---|---|---|
 | Recruiter pages redesign (home, postings, applicants, create posting, settings) | MarioHabib33 | _none_ | Done: PR #166 |
-| Edit postings: `PUT /api/recruiter/postings/{id}` and an edit dialog on Manage Postings | frakkii | _new_ | Done on `feature/recruiter-edit-archive-filters` |
-| Archive and restore postings (new `Archived` status, hidden from job search and the main list) | frakkii | _new_ | Done on `feature/recruiter-edit-archive-filters` |
-| Filter applicants by status, date applied and search, newest/oldest sort | frakkii | _new_ | Done on `feature/recruiter-edit-archive-filters` |
-| Posting management tests (9 backend tests, 11 frontend tests; 4 tests for `/api/auth/me` from #166) | frakkii | _new_ | Done on `feature/recruiter-edit-archive-filters` |
-| Acceptance test AT-30 | hirurathnayaka77 | #159 | Written in PR #161; passed by hand on 2026-11-16 against `feature/recruiter-edit-archive-filters` |
+| Edit postings: `PUT /api/recruiter/postings/{id}` and an edit dialog on Manage Postings | frakkii | _new_ | Done: PR #169 |
+| Archive and restore postings (new `Archived` status, hidden from job search and the main list) | frakkii | _new_ | Done: PR #169 |
+| Filter applicants by status, date applied and search, newest/oldest sort | frakkii | _new_ | Done: PR #169 |
+| Posting management tests (9 backend tests, 11 frontend tests; 4 tests for `/api/auth/me` from #166) | frakkii | _new_ | Done: PR #169 |
+| Acceptance test AT-30 | hirurathnayaka77 | #159 | Written in PR #161; passed on 2026-11-16 (recorded on #159) |
 
 ### 2. Application analytics and history dashboard
 
@@ -100,7 +100,7 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 - **Notifications backend missing.** PR #161's notifications page calls an API that does not exist on `main`. Shanza needs to push the Java code (controller, service, entity, repository, Flyway migration and tests), or the notifications feature cannot be demoed.
 - **AI feature not started.** #60 has no branch, PR or assignee. The guidelines require it to be started in Sprint 3.
 - **PR #161 conflicts with `main`** in 7 files (acceptance test files from #163, recruiter pages and `shell.js` from #166). It needs resolving before the notifications frontend can merge.
-- ~~Recruiter dashboard not started~~: redesign merged in #166; edit, archive and applicant filters on `feature/recruiter-edit-archive-filters`.
+- ~~Recruiter dashboard not started~~: redesign merged in #166; edit, archive and applicant filters merged in #169; AT-30 passed.
 - ~~Dashboard not tested by hand~~: tested and merged (#162); AT-29, AT-32 and AT-33 passed.
 
 ## Before the sprint ends
@@ -110,7 +110,7 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 - [x] Create issues for AT-32 and AT-33 and link them to #33 (#164, #165)
 - [x] Merge #162 (dashboard)
 - [ ] Merge #161 (notifications frontend) once its conflicts are resolved
-- [ ] Merge `feature/recruiter-edit-archive-filters`, then record AT-30 on #159
+- [x] Merge the recruiter edit, archive and filters work (#169) and record AT-30 on #159
 - [ ] Run every Sprint 3 acceptance test and record the result on its issue
 - [ ] Upload the Sprint 3 meeting minutes to `minutes/` (copy [TEMPLATE.md](../../minutes/TEMPLATE.md))
 - [ ] Each member fills in [Sprint3_MemberContribution.md](../Sprint3_MemberContribution.md)
