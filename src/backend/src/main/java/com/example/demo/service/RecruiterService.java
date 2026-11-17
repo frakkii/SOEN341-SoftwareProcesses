@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.ApplicantResponse;
+import com.example.demo.dto.PostingUpdateRequest;
 import com.example.demo.exception.ApplicationException;
 import com.example.demo.model.Application;
 import com.example.demo.model.ApplicationStatus;
@@ -14,11 +15,13 @@ import com.example.demo.repository.ResumeRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // A recruiter reviewing the applications to their own postings. The controller
 // works out who is logged in; this class only receives their id. Postings and
@@ -79,20 +82,59 @@ public class RecruiterService {
                 new ApplicationException(HttpStatus.NOT_FOUND, "This applicant has no resume on file."));
     }
 
+    // Open, Closed or Archived. Archiving also closes the posting; reopening an archived one restores it
     public JobPosting setPostingStatus(Integer employerId, Integer postId, String status) {
         String normalized = status == null ? "" : status.trim();
-        String value;
-        if (normalized.equalsIgnoreCase(JobPosting.OPEN)) {
-            value = JobPosting.OPEN;
-        } else if (normalized.equalsIgnoreCase(JobPosting.CLOSED)) {
-            value = JobPosting.CLOSED;
-        } else {
-            throw new ApplicationException("Posting status must be Open or Closed.");
-        }
+        String value = Stream.of(JobPosting.OPEN, JobPosting.CLOSED, JobPosting.ARCHIVED)
+                .filter(s -> s.equalsIgnoreCase(normalized))
+                .findFirst()
+                .orElseThrow(() -> new ApplicationException("Posting status must be Open, Closed or Archived."));
 
         JobPosting posting = ownPosting(employerId, postId);
         posting.setStatus(value);
         return postings.save(posting);
+    }
+
+    // Replaces a posting's details with the same rules as creating one. The status is unchanged.
+    public JobPosting editPosting(Integer employerId, Integer postId, PostingUpdateRequest request) {
+        if (request == null) {
+            throw new ApplicationException("Posting details are required.");
+        }
+        String title = trimmed(request.title());
+        if (title.isEmpty()) {
+            throw new ApplicationException("Job title is required.");
+        }
+        maxLength("Job title", title, 255);
+        if (request.applicationDeadline() == null) {
+            throw new ApplicationException("Application deadline is required.");
+        }
+        if (request.applicationDeadline().isBefore(LocalDate.now())) {
+            throw new ApplicationException("Application deadline can't be in the past.");
+        }
+        String department = maxLength("Department", trimmed(request.department()), 255);
+        String salary = maxLength("Salary", trimmed(request.salary()), 255);
+        String location = maxLength("Location", trimmed(request.location()), 255);
+        String industry = maxLength("Industry", trimmed(request.industry()), 255);
+        String jobType = maxLength("Job type", trimmed(request.jobType()), 100);
+
+        JobPosting posting = ownPosting(employerId, postId);
+        posting.edit(title, department, salary, trimmed(request.requiredSkills()), trimmed(request.description()),
+                request.applicationDeadline(),
+                location.isEmpty() ? "Not specified" : location,     // same default as creating a posting
+                industry.isEmpty() ? null : industry,
+                jobType.isEmpty() ? null : jobType);
+        return postings.save(posting);
+    }
+
+    private static String trimmed(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private static String maxLength(String field, String value, int max) {
+        if (value.length() > max) {
+            throw new ApplicationException(field + " must be at most " + max + " characters.");
+        }
+        return value;
     }
 
     // Number of applications for each posting id; postings with none are left out

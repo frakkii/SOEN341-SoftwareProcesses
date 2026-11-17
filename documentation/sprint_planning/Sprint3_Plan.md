@@ -44,11 +44,12 @@ Sprint 2 delivered creating, closing and reopening postings and the applicant li
 
 | Task | Assignee | Issue | Status |
 |---|---|---|---|
-| Edit and archive postings (backend) | _unassigned_ | _new_ | Not started |
-| Edit and archive postings (frontend) | _unassigned_ | _new_ | Not started |
-| Filter applicants by status and date (frontend) | _unassigned_ | _new_ | Not started |
-| Posting management tests | _unassigned_ | _new_ | Not started |
-| Acceptance test AT-30 | hirurathnayaka77 | #159 | Written in PR #161 |
+| Recruiter pages redesign (home, postings, applicants, create posting, settings) | MarioHabib33 | _none_ | Done: PR #166 |
+| Edit postings: `PUT /api/recruiter/postings/{id}` and an edit dialog on Manage Postings | frakkii | _new_ | Done on `feature/recruiter-edit-archive-filters` |
+| Archive and restore postings (new `Archived` status, hidden from job search and the main list) | frakkii | _new_ | Done on `feature/recruiter-edit-archive-filters` |
+| Filter applicants by status, date applied and search, newest/oldest sort | frakkii | _new_ | Done on `feature/recruiter-edit-archive-filters` |
+| Posting management tests (9 backend tests, 11 frontend tests; 4 tests for `/api/auth/me` from #166) | frakkii | _new_ | Done on `feature/recruiter-edit-archive-filters` |
+| Acceptance test AT-30 | hirurathnayaka77 | #159 | Written in PR #161; passed by hand on 2026-11-16 against `feature/recruiter-edit-archive-filters` |
 
 ### 2. Application analytics and history dashboard
 
@@ -56,8 +57,8 @@ Sprint 2 delivered creating, closing and reopening postings and the applicant li
 
 | Task | Assignee | Issue | Status |
 |---|---|---|---|
-| #56 Application summary dashboard frontend (stat tiles, status breakdown, applications per month, history search/filter/sort) | datannir-bit, frakkii | #56 | In review: PR #162 (CI passing) |
-| Dashboard unit tests (28 Node tests for the dashboard logic, 4 backend tests) | datannir-bit | _in #56_ | In review: PR #162 |
+| #56 Application summary dashboard frontend (stat tiles, status breakdown, applications per month, history search/filter/sort) | datannir-bit, frakkii | #56 | Done: PR #162 (merged after testing by frakkii, chart fix `ec81b77`) |
+| Dashboard unit tests (28 Node tests for the dashboard logic, 4 backend tests) | datannir-bit | _in #56_ | Done: PR #162 |
 | Frontend unit test job in CI | datannir-bit | _in #56_ | In review: PR #162 |
 | Acceptance test AT-29 (counts by status, only my applications, empty state) | hirurathnayaka77 | #158 | Written in PR #161 |
 | Acceptance tests AT-32 (history search/filter/sort) and AT-33 (applications over time) | frakkii | #164, #165 | Written in PR #163 |
@@ -97,16 +98,19 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 ## Risks found while planning
 
 - **Notifications backend missing.** PR #161's notifications page calls an API that does not exist on `main`. Shanza needs to push the Java code (controller, service, entity, repository, Flyway migration and tests), or the notifications feature cannot be demoed.
-- **Recruiter dashboard and AI feature not started.** Neither has a branch or PR yet. They are 2 of the 4 Sprint 3 features.
-- **Overlapping PRs.** PR #161 and `docs/sprint3-management` both edit `ACCEPTANCE_TESTS.md` and its script. Merge #161 first, then rebase this branch.
-- **Dashboard not tested by hand yet.** PR #162's log says it has not been run against real accounts. Test it before the demo.
+- **AI feature not started.** #60 has no branch, PR or assignee. The guidelines require it to be started in Sprint 3.
+- **PR #161 conflicts with `main`** in 7 files (acceptance test files from #163, recruiter pages and `shell.js` from #166). It needs resolving before the notifications frontend can merge.
+- ~~Recruiter dashboard not started~~: redesign merged in #166; edit, archive and applicant filters on `feature/recruiter-edit-archive-filters`.
+- ~~Dashboard not tested by hand~~: tested and merged (#162); AT-29, AT-32 and AT-33 passed.
 
 ## Before the sprint ends
 
 - [ ] Assign the unassigned Sprint 3 tasks above and fill in the Team table
 - [ ] Create GitHub issues for the _new_ tasks and add them to the board
 - [x] Create issues for AT-32 and AT-33 and link them to #33 (#164, #165)
-- [ ] Merge #161 and #162
+- [x] Merge #162 (dashboard)
+- [ ] Merge #161 (notifications frontend) once its conflicts are resolved
+- [ ] Merge `feature/recruiter-edit-archive-filters`, then record AT-30 on #159
 - [ ] Run every Sprint 3 acceptance test and record the result on its issue
 - [ ] Upload the Sprint 3 meeting minutes to `minutes/` (copy [TEMPLATE.md](../../minutes/TEMPLATE.md))
 - [ ] Each member fills in [Sprint3_MemberContribution.md](../Sprint3_MemberContribution.md)

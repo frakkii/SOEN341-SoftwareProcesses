@@ -36,10 +36,20 @@
     .status-open { background:#dcfce7; color:#166534; }
     .status-draft { background:#f3e8ff; color:#6d28d9; }
     .status-closed { background:#fee2e2; color:#991b1b; }
+    .status-archived { background:#e5e7eb; color:#374151; }
     .row-actions { display:flex; gap:8px; flex-wrap:wrap; }
     .row-actions .btn {
       padding:7px 10px; font-size:0.78rem; border-radius:10px;
     }
+    .toolbar select {
+      padding:10px 14px; border:1px solid #e6e1fb; border-radius:12px; font:inherit; background:#fff;
+    }
+    .empty-row td { text-align:center; color:var(--muted); padding:28px 14px; }
+    /* Edit dialog: same fields as the create form */
+    #editDialog { width:min(720px, calc(100vw - 32px)); max-height:calc(100vh - 32px); }
+    #editDialog .dlg { max-height:calc(100vh - 32px); overflow:auto; }
+    #editDialog .rc-alert { margin:0 0 14px; }
+    #editDialog .dlg-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:6px; }
   </style>
 </head>
 <body>
@@ -56,6 +66,13 @@
     <div class="page-actions">
       <div class="toolbar">
         <input id="searchInput" type="search" placeholder="Search postings..." aria-label="Search postings">
+        <select id="statusFilter" aria-label="Show postings">
+          <option value="active">Open and closed</option>
+          <option value="Open">Open only</option>
+          <option value="Closed">Closed only</option>
+          <option value="Archived">Archived</option>
+          <option value="all">All postings</option>
+        </select>
       </div>
       <a href="createposting.html" class="btn primary">+ Create posting</a>
     </div>
@@ -77,6 +94,49 @@
     </div>
   </section>
 </main>
+
+<dialog id="editDialog" aria-labelledby="editTitle">
+  <form id="editForm" class="dlg" novalidate>
+    <h2 id="editTitle">Edit posting</h2>
+    <div id="editMessage" class="rc-alert err" role="alert"></div>
+    <label class="rc-f"><span>Job title <i>*</i></span>
+      <input type="text" id="e-title" maxlength="120" required></label>
+    <div class="rc-row">
+      <label class="rc-f"><span>Department</span>
+        <input type="text" id="e-department" maxlength="80"></label>
+      <label class="rc-f"><span>Location</span>
+        <input type="text" id="e-location" maxlength="120"></label>
+    </div>
+    <div class="rc-row">
+      <label class="rc-f"><span>Category</span>
+        <select id="e-industry">
+          <option value="">Not specified</option>
+          <option>Technology</option><option>Engineering</option><option>Data &amp; Analytics</option>
+          <option>Design</option><option>Finance</option><option>Marketing</option>
+          <option>Healthcare</option><option>Education</option><option>Sales</option>
+        </select></label>
+      <label class="rc-f"><span>Job type</span>
+        <select id="e-jobType">
+          <option value="">Not specified</option>
+          <option>Full-time</option><option>Part-time</option><option>Internship</option><option>Contract</option>
+        </select></label>
+    </div>
+    <div class="rc-row">
+      <label class="rc-f"><span>Salary</span>
+        <input type="text" id="e-salary" maxlength="60"></label>
+      <label class="rc-f"><span>Application deadline <i>*</i></span>
+        <input type="date" id="e-deadline" required></label>
+    </div>
+    <label class="rc-f"><span>Required skills &amp; competencies</span>
+      <textarea id="e-skills" rows="3"></textarea></label>
+    <label class="rc-f"><span>Job description</span>
+      <textarea id="e-description" rows="6"></textarea></label>
+    <div class="dlg-actions">
+      <button type="button" class="btn" id="editCancel">Cancel</button>
+      <button type="submit" class="btn primary" id="editSave">Save changes</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
   let jobs = [];
@@ -101,7 +161,8 @@ try {
     location: posting.location || "Not specified",
     applicants: posting.applicants || 0,
     status: posting.status || "Open",
-    deadline: posting.applicationDeadline
+    deadline: posting.applicationDeadline,
+    raw: posting                      // the full details, for the edit form
   }));
 
   renderTable();
@@ -124,14 +185,40 @@ catch (error) {
     const map = {
       Open: "status-open",
       Draft: "status-draft",
-      Closed: "status-closed"
+      Closed: "status-closed",
+      Archived: "status-archived"
     };
     return `<span class="status-pill ${map[status] || ""}">${esc(status)}</span>`;
+  }
+
+  const statusFilter = document.getElementById("statusFilter");
+
+  // "active" hides archived postings; that's what archiving is for
+  function matchesStatus(job) {
+    const show = statusFilter.value;
+    if (show === "all") return true;
+    if (show === "active") return job.status !== "Archived";
+    return job.status === show;
+  }
+
+  function actionButtons(job) {
+    const buttons = [
+      `<a class="btn" href="recruiterapplicants.html?id=${encodeURIComponent(job.id)}">View applicants</a>`,
+      `<button class="btn" data-edit="${job.id}">Edit</button>`
+    ];
+    if (job.status === "Archived") {
+      buttons.push(`<button class="btn" data-status="Open" data-id="${job.id}">Restore</button>`);
+    } else {
+      buttons.push(`<button class="btn" data-status="${job.status === "Closed" ? "Open" : "Closed"}" data-id="${job.id}">${job.status === "Closed" ? "Reopen" : "Close"}</button>`);
+      buttons.push(`<button class="btn" data-status="Archived" data-id="${job.id}">Archive</button>`);
+    }
+    return buttons.join("");
   }
 
   function renderTable() {
     const query = searchInput.value.trim().toLowerCase();
     const filtered = jobs.filter(job =>
+      matchesStatus(job) &&
       [job.title, job.department, job.location, job.status]
         .join(" ")
         .toLowerCase()
@@ -157,13 +244,15 @@ catch (error) {
         <td>${job.applicants}</td>
         <td>${statusMarkup(job.status)}</td>
         <td>
-          <div class="row-actions">
-            <a class="btn" href="recruiterapplicants.html?id=${encodeURIComponent(job.id)}">View applicants</a>
-            <button class="btn" data-toggle="${job.id}">${job.status === "Closed" ? "Reopen" : "Close"}</button>
-          </div>
+          <div class="row-actions">${actionButtons(job)}</div>
         </td>
       </tr>
-    `).join("");
+    `).join("") || `<tr class="empty-row"><td colspan="6">${
+      jobs.length === 0 ? "You haven't created any postings yet."
+        : statusFilter.value === "Archived" ? "No archived postings."
+        : statusFilter.value === "active" && !query && jobs.every(j => j.status === "Archived")
+          ? "All your postings are archived. Choose \"Archived\" above to see them."
+        : "No postings match."}</td></tr>`;
   }
 
   sortButtons.forEach(button => {
@@ -182,14 +271,23 @@ catch (error) {
   });
 
   searchInput.addEventListener("input", renderTable);
+  statusFilter.addEventListener("change", renderTable);
 
-  // Close or reopen a posting. Closed postings are hidden from job search and stop new applications.
-  rowsEl.addEventListener("click", async event => {
-    const button = event.target.closest("[data-toggle]");
-    if (!button) return;
-    const job = jobs.find(j => String(j.id) === button.dataset.toggle);
-    const next = job.status === "Closed" ? "Open" : "Closed";
-    if (next === "Closed" && !confirm(`Close "${job.title}"? Job seekers won't be able to find or apply to it.`)) return;
+  rowsEl.addEventListener("click", event => {
+    const edit = event.target.closest("[data-edit]");
+    if (edit) return openEdit(jobs.find(j => String(j.id) === edit.dataset.edit));
+    const button = event.target.closest("[data-status]");
+    if (button) changeStatus(button, jobs.find(j => String(j.id) === button.dataset.id), button.dataset.status);
+  });
+
+  // Close, reopen, archive or restore. Closed and archived postings are hidden from job search
+  // and stop new applications; archived ones are also hidden here unless "Archived" is shown.
+  async function changeStatus(button, job, next) {
+    const warnings = {
+      Closed: `Close "${job.title}"? Job seekers won't be able to find or apply to it.`,
+      Archived: `Archive "${job.title}"? It will be closed and moved out of your main list. You can restore it from "Archived".`
+    };
+    if (warnings[next] && !confirm(warnings[next])) return;
 
     button.disabled = true;
     try {
@@ -202,10 +300,85 @@ catch (error) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || "Couldn't update the posting");
       job.status = data.status;
+      job.raw.status = data.status;
       renderTable();
     } catch (error) {
       alert(error.message);
       button.disabled = false;
+    }
+  }
+
+  // ---- Edit dialog ----
+  const dialog = document.getElementById("editDialog");
+  const form = document.getElementById("editForm");
+  const editMessage = document.getElementById("editMessage");
+  const field = id => document.getElementById("e-" + id);
+  let editing = null;
+
+  // Selects only accept listed values, so add the posting's own value if it isn't one of them
+  function selectValue(select, value) {
+    if (value && ![...select.options].some(o => o.value === value)) select.add(new Option(value, value));
+    select.value = value || "";
+  }
+
+  function openEdit(job) {
+    editing = job;
+    const p = job.raw;
+    field("title").value = p.title || "";
+    field("department").value = p.department || "";
+    field("location").value = p.location === "Not specified" ? "" : (p.location || "");
+    selectValue(field("industry"), p.industry);
+    selectValue(field("jobType"), p.jobType);
+    field("salary").value = p.salary || "";
+    field("deadline").value = p.applicationDeadline || "";
+    field("deadline").min = new Date().toLocaleDateString("en-CA");   // YYYY-MM-DD, local date
+    field("skills").value = p.requiredSkills || "";
+    field("description").value = p.description || "";
+    editMessage.classList.remove("show");
+    document.getElementById("editSave").disabled = false;
+    dialog.showModal();
+    field("title").focus();
+  }
+
+  document.getElementById("editCancel").addEventListener("click", () => dialog.close());
+
+  function showEditError(text) {
+    editMessage.textContent = text;
+    editMessage.classList.add("show");
+  }
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!field("title").value.trim()) { field("title").focus(); return showEditError("Job title is required."); }
+    if (!field("deadline").value) { field("deadline").focus(); return showEditError("Application deadline is required."); }
+
+    const body = {
+      title: field("title").value,
+      department: field("department").value,
+      location: field("location").value,
+      industry: field("industry").value,
+      jobType: field("jobType").value,
+      salary: field("salary").value,
+      applicationDeadline: field("deadline").value,
+      requiredSkills: field("skills").value,
+      description: field("description").value
+    };
+    const save = document.getElementById("editSave");
+    save.disabled = true;
+    try {
+      const response = await fetch(`/api/recruiter/postings/${editing.id}`, {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Couldn't save the posting");
+      dialog.close();
+      await loadPostings();       // show what the server saved (trimmed, defaults applied)
+    } catch (error) {
+      showEditError(error.message);
+      save.disabled = false;
     }
   });
 

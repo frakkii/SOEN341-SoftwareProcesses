@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ApplicantResponse;
+import com.example.demo.dto.PostingUpdateRequest;
 import com.example.demo.exception.ApplicationException;
 import com.example.demo.model.JobPosting;
 import com.example.demo.model.Resume;
@@ -50,6 +51,21 @@ public class RecruiterController {
         return ResponseEntity.ok(Map.of(
                 "message", "Posting is now " + posting.getStatus() + ".",
                 "postId", posting.getId(),
+                "status", posting.getStatus()
+        ));
+    }
+
+    // Edits a posting's details (title, deadline, location...); only its owner can
+    @PutMapping("/postings/{postId}")
+    public ResponseEntity<?> editPosting(@PathVariable Integer postId,
+                                         @RequestBody(required = false) PostingUpdateRequest request,
+                                         HttpSession session) {
+        JobPosting posting = recruiterService.editPosting(recruiterId(session), postId, request);
+        return ResponseEntity.ok(Map.of(
+                "message", "Posting updated.",
+                "postId", posting.getId(),
+                "title", posting.getTitle(),
+                "applicationDeadline", posting.getApplicationDeadline().toString(),
                 "status", posting.getStatus()
         ));
     }

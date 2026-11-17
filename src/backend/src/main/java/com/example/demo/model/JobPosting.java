@@ -10,6 +10,8 @@ public class JobPosting {
     // Values of the status column. Job seekers can only apply while a posting is open.
     public static final String OPEN = "Open";
     public static final String CLOSED = "Closed";
+    // Archived postings are closed and hidden from the recruiter's main list
+    public static final String ARCHIVED = "Archived";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -89,6 +91,20 @@ public class JobPosting {
     public String getStatus() { return status == null ? OPEN : status; }
 
     public void setStatus(String status) { this.status = status; }
+
+    // Replaces the editable details; the owner, status and id stay the same
+    public void edit(String title, String department, String salary, String requiredSkills, String description,
+                     LocalDate applicationDeadline, String location, String industry, String jobType) {
+        this.title = title;
+        this.department = department;
+        this.salary = salary;
+        this.requiredSkills = requiredSkills;
+        this.description = description;
+        this.applicationDeadline = applicationDeadline;
+        this.location = location;
+        this.industry = industry;
+        this.jobType = jobType;
+    }
 
     // Open and the deadline hasn't passed (applying on the deadline day is allowed)
     public boolean isAcceptingApplications(LocalDate today) {
