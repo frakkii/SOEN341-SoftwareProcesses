@@ -95,7 +95,9 @@ private final JobPostingRepository jobPostingRepository;
                         posting.getApplicationDeadline(),
                         posting.getLocation(),
                         posting.getStatus(),
-                        applicants.getOrDefault(posting.getId(), 0L)
+                        applicants.getOrDefault(posting.getId(), 0L),
+                        posting.getIndustry(),
+                        posting.getJobType()
                 ))
                 .toList();
 
@@ -128,6 +130,8 @@ private final JobPostingRepository jobPostingRepository;
             LocalDate applicationDeadline,
             String location,
             String status,
-            long applicants
+            long applicants,
+            String industry,      // so the recruiter's edit form can show the current values
+            String jobType
     ) {}
 }

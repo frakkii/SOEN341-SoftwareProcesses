@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -161,7 +162,7 @@ class RecruiterControllerTests {
     }
 
     @Test
-    void postingStatusMustBeOpenOrClosed() throws Exception {
+    void postingStatusMustBeOpenClosedOrArchived() throws Exception {
         MockHttpSession recruiter = loggedIn("Recruiter");
         Integer postId = createPosting(recruiter);
 
@@ -170,7 +171,195 @@ class RecruiterControllerTests {
                         .content("{\"status\":\"Paused\"}")
                         .session(recruiter))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Posting status must be Open or Closed."));
+                .andExpect(jsonPath("$.message").value("Posting status must be Open, Closed or Archived."));
+    }
+
+    // ---- Editing and archiving postings (Sprint 3, AT-30) -----------------
+
+    private ResultActions editPosting(MockHttpSession session, Object postId, String json) throws Exception {
+        return mockMvc.perform(put("/api/recruiter/postings/" + postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .session(session));
+    }
+
+    private static String details(String title, LocalDate deadline) {
+        return "{\"title\":\"" + title + "\",\"department\":\"Quality\",\"salary\":\"$70k\","
+                + "\"requiredSkills\":\"Cypress\",\"description\":\"Lead testing\","
+                + "\"location\":\"Toronto, ON\",\"industry\":\"Technology\",\"jobType\":\"Contract\","
+                + "\"applicationDeadline\":\"" + deadline + "\"}";
+    }
+
+    private ResultActions setPostingStatus(MockHttpSession session, Integer postId, String status) throws Exception {
+        return mockMvc.perform(patch("/api/recruiter/postings/" + postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":\"" + status + "\"}")
+                .session(session));
+    }
+
+    @Test
+    void recruiterEditsTheirPostingAndJobSeekersSeeTheChange() throws Exception {
+        MockHttpSession recruiter = loggedIn("Recruiter");
+        Integer postId = createPosting(recruiter);
+        LocalDate newDeadline = LocalDate.now().plusDays(30);
+
+        editPosting(recruiter, postId, details("  Senior QA Tester ", newDeadline))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Posting updated."))
+                .andExpect(jsonPath("$.title").value("Senior QA Tester"))
+                .andExpect(jsonPath("$.status").value("Open"));
+
+        mockMvc.perform(get("/api/postings").session(recruiter))
+                .andExpect(jsonPath("$[0].title").value("Senior QA Tester"))
+                .andExpect(jsonPath("$[0].department").value("Quality"))
+                .andExpect(jsonPath("$[0].salary").value("$70k"))
+                .andExpect(jsonPath("$[0].requiredSkills").value("Cypress"))
+                .andExpect(jsonPath("$[0].description").value("Lead testing"))
+                .andExpect(jsonPath("$[0].location").value("Toronto, ON"))
+                .andExpect(jsonPath("$[0].industry").value("Technology"))
+                .andExpect(jsonPath("$[0].jobType").value("Contract"))
+                .andExpect(jsonPath("$[0].applicationDeadline").value(newDeadline.toString()))
+                .andExpect(jsonPath("$[0].status").value("Open"));
+
+        mockMvc.perform(get("/api/jobs/" + postId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Senior QA Tester"));
+    }
+
+    @Test
+    void editingKeepsExistingApplicationsAndAClosedStatus() throws Exception {
+        MockHttpSession recruiter = loggedIn("Recruiter");
+        Integer postId = createPosting(recruiter);
+        Long applicationId = applyTo(postId);
+        setPostingStatus(recruiter, postId, "Closed").andExpect(status().isOk());
+
+        editPosting(recruiter, postId, details("QA Lead", LocalDate.now().plusDays(10)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("Closed"));
+
+        mockMvc.perform(get("/api/recruiter/postings/" + postId + "/applications").session(recruiter))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].applicationId").value(applicationId));
+    }
+
+    @Test
+    void blankOptionalFieldsGetTheSameDefaultsAsCreating() throws Exception {
+        MockHttpSession recruiter = loggedIn("Recruiter");
+        Integer postId = createPosting(recruiter);
+
+        editPosting(recruiter, postId, "{\"title\":\"QA\",\"location\":\" \",\"industry\":\"\","
+                + "\"applicationDeadline\":\"" + LocalDate.now() + "\"}")
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/postings").session(recruiter))
+                .andExpect(jsonPath("$[0].location").value("Not specified"))
+                .andExpect(jsonPath("$[0].department").value(""))
+                .andExpect(jsonPath("$[0].industry").doesNotExist())
+                .andExpect(jsonPath("$[0].jobType").doesNotExist());
+    }
+
+    @Test
+    void editingNeedsATitleAndAFutureDeadline() throws Exception {
+        MockHttpSession recruiter = loggedIn("Recruiter");
+        Integer postId = createPosting(recruiter);
+
+        editPosting(recruiter, postId, details("   ", LocalDate.now().plusDays(5)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Job title is required."));
+        editPosting(recruiter, postId, "{\"title\":\"QA\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Application deadline is required."));
+        editPosting(recruiter, postId, details("QA", LocalDate.now().minusDays(1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Application deadline can't be in the past."));
+        mockMvc.perform(put("/api/recruiter/postings/" + postId).session(recruiter))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Posting details are required."));
+
+        // Nothing was saved by the rejected edits
+        mockMvc.perform(get("/api/postings").session(recruiter))
+                .andExpect(jsonPath("$[0].title").value("QA Tester"));
+    }
+
+    @Test
+    void editingRejectsFieldsTooLongForTheDatabase() throws Exception {
+        MockHttpSession recruiter = loggedIn("Recruiter");
+        Integer postId = createPosting(recruiter);
+
+        editPosting(recruiter, postId, details("x".repeat(256), LocalDate.now().plusDays(5)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Job title must be at most 255 characters."));
+        editPosting(recruiter, postId, "{\"title\":\"QA\",\"jobType\":\"" + "x".repeat(101) + "\","
+                + "\"applicationDeadline\":\"" + LocalDate.now().plusDays(5) + "\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Job type must be at most 100 characters."));
+    }
+
+    @Test
+    void recruitersCannotEditAnotherRecruitersPosting() throws Exception {
+        MockHttpSession owner = loggedIn("Recruiter");
+        Integer postId = createPosting(owner);
+
+        editPosting(loggedIn("Recruiter"), postId, details("Hacked", LocalDate.now().plusDays(5)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Job posting not found."));
+
+        mockMvc.perform(get("/api/postings").session(owner))
+                .andExpect(jsonPath("$[0].title").value("QA Tester"));
+    }
+
+    @Test
+    void editingAPostingRequiresARecruiter() throws Exception {
+        Integer postId = createPosting(loggedIn("Recruiter"));
+        String body = details("QA", LocalDate.now().plusDays(5));
+
+        editPosting(new MockHttpSession(), postId, body).andExpect(status().isUnauthorized());
+        editPosting(loggedIn("Job Seeker"), postId, body).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void archivedPostingIsHiddenFromJobSeekersAndCanBeRestored() throws Exception {
+        MockHttpSession recruiter = loggedIn("Recruiter");
+        Integer postId = createPosting(recruiter);
+        Long applicationId = applyTo(postId);
+
+        setPostingStatus(recruiter, postId, "archived")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("Archived"));
+
+        // Gone for job seekers: no details page and no new applications
+        mockMvc.perform(get("/api/jobs/" + postId)).andExpect(status().isNotFound());
+        MockHttpSession jobSeeker = loggedIn("Job Seeker");
+        mockMvc.perform(multipart("/api/resume")
+                        .file(new MockMultipartFile("resume", "cv.pdf", "application/pdf",
+                                ResumeControllerTests.contents("cv.pdf", "cv")))
+                        .session(jobSeeker))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/applications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"postId\":" + postId + "}")
+                        .session(jobSeeker))
+                .andExpect(status().isBadRequest());
+
+        // Still the recruiter's, with its applicants kept
+        mockMvc.perform(get("/api/postings").session(recruiter))
+                .andExpect(jsonPath("$[0].status").value("Archived"));
+        mockMvc.perform(get("/api/recruiter/postings/" + postId + "/applications").session(recruiter))
+                .andExpect(jsonPath("$[0].applicationId").value(applicationId));
+
+        setPostingStatus(recruiter, postId, "Open").andExpect(status().isOk());
+        mockMvc.perform(get("/api/jobs/" + postId)).andExpect(status().isOk());
+    }
+
+    @Test
+    void recruitersCannotArchiveAnotherRecruitersPosting() throws Exception {
+        MockHttpSession owner = loggedIn("Recruiter");
+        Integer postId = createPosting(owner);
+
+        setPostingStatus(loggedIn("Recruiter"), postId, "Archived").andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/postings").session(owner))
+                .andExpect(jsonPath("$[0].status").value("Open"));
     }
 
     @Test

@@ -267,6 +267,60 @@ class AuthControllerTests {
         mockMvc.perform(post("/api/auth/logout")).andExpect(status().isOk());
     }
 
+    // ---- GET /api/auth/me (pages use it to check the server still has their session) ----
+
+    private MockHttpSession loggedIn(Map<String, String> fields) throws Exception {
+        register(fields).andExpect(status().isOk());
+        return (MockHttpSession) login(fields.get("email"), fields.get("password"))
+                .andExpect(status().isOk())
+                .andReturn().getRequest().getSession(false);
+    }
+
+    @Test
+    void meWithoutASessionIsUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("User is not logged in"));
+    }
+
+    @Test
+    void meReturnsTheLoggedInJobSeekerWithoutThePassword() throws Exception {
+        String email = uniqueEmail();
+        MockHttpSession session = loggedIn(jobSeeker(email));
+
+        mockMvc.perform(get("/api/auth/me").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("Job Seeker"))
+                .andExpect(jsonPath("$.name").value("Jane"))
+                .andExpect(jsonPath("$.surname").value("Doe"))
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.companyName").doesNotExist())
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void meReturnsTheRecruitersCompany() throws Exception {
+        String email = uniqueEmail();
+        MockHttpSession session = loggedIn(recruiter(email));
+
+        mockMvc.perform(get("/api/auth/me").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("Recruiter"))
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.companyName").value("Acme Corp"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void meIsUnauthorizedAfterLogout() throws Exception {
+        MockHttpSession session = loggedIn(jobSeeker(uniqueEmail()));
+        mockMvc.perform(get("/api/auth/me").session(session)).andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/auth/logout").session(session)).andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/auth/me").session(session)).andExpect(status().isUnauthorized());
+    }
+
     @Test
     void concurrentRegistrationsOfSameEmailCreateOnlyOneAccount() throws Exception {
         String email = uniqueEmail();

@@ -69,7 +69,8 @@ jobs:
           name: test-reports
           path: src/backend/target/surefire-reports/
 
-  # Unit tests for the browser-side dashboard logic (src/webapp/js/analytics.js, charts.js).
+  # Unit tests for browser-side logic in src/webapp/js (dashboard charts, applicant filters...).
+  # Every src/webapp/tests/*.test.js file runs, so new test files are picked up automatically.
   # Uses Node's built-in test runner, so there is nothing to npm install.
   frontend:
     name: Frontend unit tests
@@ -83,5 +84,5 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Run dashboard tests
-        run: node --test src/webapp/tests/analytics.test.js
+      - name: Run frontend tests
+        run: node --test src/webapp/tests/*.test.js

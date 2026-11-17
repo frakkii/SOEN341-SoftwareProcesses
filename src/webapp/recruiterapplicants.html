@@ -26,6 +26,15 @@
       padding:7px 10px; border:2px solid var(--line); border-radius:10px; background:#fff; font:600 .82rem var(--body); color:var(--ink);
     }
     .final { color:var(--muted); font-size:.82rem; font-weight:600; }
+    .filters { display:grid; grid-template-columns:minmax(160px, 2fr) minmax(175px, 1.4fr) repeat(3, minmax(130px, 1fr)) auto; gap:12px; align-items:end; margin-bottom:16px; }
+    .filters > div { min-width:0; }
+    .filters label { display:block; font-size:.78rem; font-weight:700; color:#4a4673; margin-bottom:4px; }
+    .filters input, .filters select {
+      width:100%; box-sizing:border-box; padding:9px 12px; border:1px solid #e6e1fb; border-radius:12px; font:inherit; background:#fff;
+    }
+    .filter-warning { color:#991b1b; font-weight:600; font-size:.85rem; margin:-6px 0 12px; }
+    .empty-row td { text-align:center; color:var(--muted); padding:28px 14px; }
+    @media (max-width:900px) { .filters { grid-template-columns:1fr 1fr; } }
   </style>
 </head>
 <body>
@@ -46,6 +55,21 @@
 
     <div class="message hidden" id="message" role="status"></div>
 
+    <form class="filters" id="filters" role="search" onsubmit="return false">
+      <div><label for="f-query">Search</label>
+        <input type="search" id="f-query" placeholder="Name, email or city" autocomplete="off"></div>
+      <div><label for="f-status">Status</label>
+        <select id="f-status"><option value="All">All statuses</option></select></div>
+      <div><label for="f-from">Applied from</label>
+        <input type="date" id="f-from"></div>
+      <div><label for="f-to">Applied to</label>
+        <input type="date" id="f-to"></div>
+      <div><label for="f-sort">Sort by</label>
+        <select id="f-sort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></div>
+      <div><button type="button" class="btn" id="f-clear">Clear filters</button></div>
+    </form>
+    <p class="filter-warning hidden" id="f-warning" role="alert">"Applied from" is after "Applied to", so no applicant can match.</p>
+
     <div class="table-wrap">
       <table class="job-table">
         <thead>
@@ -64,6 +88,7 @@
   </section>
 </main>
 
+<script src="js/applicantFilters.js"></script>
 <script>
   // Applications only move forward; Offered and Rejected are final (enforced by the server too)
   const STAGES = ["Applied", "Under Review", "Interview", "Offered", "Rejected"];
@@ -99,14 +124,52 @@
     return i >= 3 ? [] : STAGES.slice(i + 1);
   }
 
+  // ---- Filters (logic in js/applicantFilters.js) ----
+  const F = window.CCApplicantFilters;
+  const $ = id => document.getElementById(id);
+
+  function currentFilters() {
+    return { query: $("f-query").value, status: $("f-status").value, from: $("f-from").value, to: $("f-to").value };
+  }
+
+  // Status options show how many applicants are at each stage
+  function fillStatusFilter() {
+    const counts = F.countByStatus(applicants);
+    const keep = $("f-status").value || "All";
+    $("f-status").innerHTML = `<option value="All">All statuses (${applicants.length})</option>` +
+      F.STAGES.map(s => `<option value="${s}">${s} (${counts[s]})</option>`).join("");
+    $("f-status").value = keep;
+  }
+
+  function clearFilters() {
+    $("f-query").value = "";
+    $("f-status").value = "All";
+    $("f-from").value = "";
+    $("f-to").value = "";
+    $("f-sort").value = "newest";
+    render();
+  }
+
   function render() {
-    document.getElementById("count").textContent =
-      applicants.length === 1 ? "1 applicant" : `${applicants.length} applicants`;
-    if (!applicants.length) {
+    const total = applicants.length;
+    if (!total) {
+      document.getElementById("count").textContent = "0 applicants";
       rowsEl.innerHTML = `<tr><td colspan="6">No one has applied to this posting yet.</td></tr>`;
       return;
     }
-    rowsEl.innerHTML = applicants.map(a => {
+    fillStatusFilter();
+    const f = currentFilters();
+    $("f-warning").classList.toggle("hidden", !F.invalidRange(f.from, f.to));
+    const shown = F.sortApplicants(F.filterApplicants(applicants, f), $("f-sort").value);
+    document.getElementById("count").textContent = shown.length === total
+      ? (total === 1 ? "1 applicant" : `${total} applicants`)
+      : `Showing ${shown.length} of ${total} applicants`;
+    if (!shown.length) {
+      rowsEl.innerHTML = `<tr class="empty-row"><td colspan="6">No applicants match these filters.
+        <button type="button" class="btn" data-clear>Clear filters</button></td></tr>`;
+      return;
+    }
+    rowsEl.innerHTML = shown.map(a => {
       const options = nextStages(a.status);
       const move = options.length
         ? `<div class="row-actions">
@@ -129,7 +192,12 @@
     }).join("");
   }
 
+  ["f-query"].forEach(id => $(id).addEventListener("input", render));
+  ["f-status", "f-from", "f-to", "f-sort"].forEach(id => $(id).addEventListener("change", render));
+  $("f-clear").addEventListener("click", clearFilters);
+
   rowsEl.addEventListener("click", async event => {
+    if (event.target.closest("[data-clear]")) return clearFilters();
     const button = event.target.closest("[data-update]");
     if (!button) return;
     const id = button.dataset.update;
