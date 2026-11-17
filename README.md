@@ -29,7 +29,7 @@ On the recruiter side, CareerConnect lets employers create, edit, and close job 
 - Frontend: HTML/CSS/JavaScript (served by Spring Boot)
 - Backend: Spring Boot (Java 17)
 - Database: PostgreSQL hosted on Supabase (schema managed with Flyway)
-- AI Integration: - Planned Generative AI integration for resume feedback; model/provider not yet selected.
+- AI Integration: AI resume feedback with the Claude API (Anthropic Java SDK, model `claude-opus-5-5`); runs in demo mode without an API key (see [AI resume feedback](#ai-resume-feedback))
 - Testing tools: JUnit (Spring Boot Test)
 - Hosting/Deployment: Currently run locally; deployment platform to be confirmed.
 
@@ -90,6 +90,17 @@ Maven ends every failed start with the same message, `Process terminated with ex
 | `max clients reached` / `MaxClientsInSessionMode` | Too many copies of the app are connected to Supabase at once. Stop copies you aren't using (yours or ones left running in an IDE) and try again |
 | `UnknownHostException` or `Connection refused` | No internet connection, or a network that blocks port 5432 (some campus/public Wi-Fi). Try another network |
 | Anything else | Copy the lines starting at the first `ERROR` or `Caused by` and share them with the team |
+
+### AI resume feedback
+Job seekers can click **Get feedback** under **My Tools → My CVs & Cover Letters** to get AI suggestions on their current resume (PDF or DOCX). It uses the Claude API, which needs an Anthropic API key:
+
+| Terminal | Command |
+|---|---|
+| macOS / Linux / Git Bash | `export ANTHROPIC_API_KEY='your-key'` |
+| Windows PowerShell | `$env:ANTHROPIC_API_KEY='your-key'` |
+| Windows Command Prompt | `set ANTHROPIC_API_KEY=your-key` |
+
+Without a key the app runs the feature in **demo mode**: it returns sample feedback clearly labeled as not a real AI review, so the feature can be shown and tested without a key or any cost. The tests and CI always use demo mode. Never commit a key to the repository. Each real review is a paid API call, so share a key only with teammates who need it. To use a different model, set `CAREERCONNECT_AI_MODEL`.
 
 ### Making changes
 - **Frontend** files (HTML/CSS/JS) are in `src/webapp/`. **Backend** code (Spring Boot) is in `src/backend/`. The one app serves both the pages and the API (`/api/...`).
