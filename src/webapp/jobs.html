@@ -16,7 +16,7 @@
 <main class="wrap">
     <div class="page-title">
         <h1>Find your next role</h1>
-        <p>Search open postings by keyword, location or category.</p>
+        <p>Search open postings by keyword, location, category or job type.</p>
     </div>
 
     <form class="card search" id="search" role="search">
@@ -36,6 +36,13 @@
                 <option value="Healthcare"><option value="Marketing"><option value="Education">
                 <option value="Design"><option value="Sales">
             </datalist>
+        </div>
+        <div class="field">
+            <label for="type">Job type</label>
+            <select id="type" name="jobType">
+                <option value="">Any type</option>
+                <option>Full-time</option><option>Part-time</option><option>Internship</option><option>Contract</option>
+            </select>
         </div>
         <button type="submit" class="btn primary" id="search-btn"></button>
     </form>

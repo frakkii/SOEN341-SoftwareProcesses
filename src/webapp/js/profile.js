@@ -110,7 +110,18 @@
     b.setAttribute('aria-pressed', on); b.textContent = on ? 'Requested' : 'Connect';
   });
 
+  // Recruiters (403) don't have a job seeker profile: replace the empty, editable profile
+  // with an explanation instead of only a toast that fades away
+  function notForRecruiters() {
+    const main = $('main');
+    main.className = 'wrap';
+    main.innerHTML = `<div class="card empty" role="alert">
+        <p>Profiles are for job seeker accounts. Recruiter accounts don't have one.</p>
+        <p style="margin-top:14px"><a class="btn primary" href="recruiterhome.html">Go to recruiter home</a></p>
+      </div>`;
+  }
+
   paint();
   api('/api/profile').then(p => { profile = p; paint(); })
-    .catch(err => toast(err.status === 403 ? 'Profiles are for job seeker accounts.' : 'Could not load your profile. ' + err.message));
+    .catch(err => err.status === 403 ? notForRecruiters() : toast('Could not load your profile. ' + err.message));
 })();
