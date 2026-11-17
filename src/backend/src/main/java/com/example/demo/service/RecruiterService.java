@@ -30,13 +30,16 @@ public class RecruiterService {
     private final ApplicationRepository applications;
     private final PersonUserRepository personUsers;
     private final ResumeRepository resumes;
+    private final NotificationService notifications;
 
     public RecruiterService(JobPostingRepository postings, ApplicationRepository applications,
-                            PersonUserRepository personUsers, ResumeRepository resumes) {
+                            PersonUserRepository personUsers, ResumeRepository resumes,
+                            NotificationService notifications) {
         this.postings = postings;
         this.applications = applications;
         this.personUsers = personUsers;
         this.resumes = resumes;
+        this.notifications = notifications;
     }
 
     public List<ApplicantResponse> getApplicants(Integer employerId, Integer postId) {
@@ -70,6 +73,15 @@ public class RecruiterService {
         application.updateStatus(next);
         Application saved = applications.save(application);
         PersonUser person = personUsers.findById(saved.getPersonId()).orElseThrow();
+        JobPosting posting = postings.findById(saved.getPostId()).orElseThrow();
+        notifications.create(
+                "Job Seeker",
+                saved.getPersonId(),
+                "Application status updated",
+                "Your application for " + posting.getTitle() + " is now " + next.getLabel() + ".",
+                "APPLICATION_STATUS",
+                "/applications.html",
+                "APPLICATION_STATUS:" + saved.getId() + ":" + next.name());
         return ApplicantResponse.from(saved, person, resumes.existsByPersonIdAndCurrentTrue(saved.getPersonId()));
     }
 

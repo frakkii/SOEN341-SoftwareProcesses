@@ -46,4 +46,28 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Integer>
             @Param("jobType") String jobType,
             @Param("today") LocalDate today
     );
+
+    interface SavedDeadlineCandidate {
+        Integer getPersonId();
+
+        Integer getPostId();
+
+        String getTitle();
+
+        LocalDate getApplicationDeadline();
+    }
+
+    @Query(value = """
+            SELECT f.person_id AS "personId", j.post_id AS "postId", j.title AS "title",
+                   j.application_deadline AS "applicationDeadline"
+            FROM fav_postings f
+            JOIN job_postings j ON j.post_id = f.post_id
+            WHERE f.status = TRUE
+              AND (j.status IS NULL OR j.status = 'Open')
+              AND j.application_deadline BETWEEN :today AND :reminderThrough
+            """, nativeQuery = true)
+    List<SavedDeadlineCandidate> findSavedPostingsNearingDeadline(
+            @Param("today") LocalDate today,
+            @Param("reminderThrough") LocalDate reminderThrough
+    );
 }
