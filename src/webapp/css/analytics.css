@@ -54,7 +54,8 @@
   background:var(--violet);transition:height .3s}
 .bars li>.bar.zero{background:var(--line)}
 .bars li:hover>.bar{background:var(--pink)}
-.bar-lbl{padding-top:6px;color:var(--muted);font-size:.72rem;font-weight:700;line-height:1.2}
+/* Same height with or without the year line, so every bar sits on the same baseline */
+.bar-lbl{height:2.4em;padding-top:6px;color:var(--muted);font-size:.72rem;font-weight:700;line-height:1.2}
 .bar-lbl small{display:block;font-size:.66rem;color:var(--ink2)}
 .chart-empty,.chart-note{margin-top:14px;color:var(--muted);font-size:.88rem}
 .chart-empty{padding:40px 0;text-align:center}
