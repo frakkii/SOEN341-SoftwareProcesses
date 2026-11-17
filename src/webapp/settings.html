@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app.css">
+    <style>
+        .set{max-width:760px;display:grid;gap:18px}
+        .set h2{font-size:1.15rem;margin:0 0 4px}.set .sub{margin:0 0 14px;color:var(--muted)}
+        .kv{display:grid;grid-template-columns:140px 1fr;gap:8px 16px;margin:0}.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:700;word-break:break-all}
+        .sw{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+        .sw:last-child{border:0}.sw b{display:block}.sw small{color:var(--muted)}
+        .sw input{appearance:none;width:44px;height:24px;border-radius:12px;background:#cfc9ee;position:relative;cursor:pointer;flex:none;transition:.15s}
+        .sw input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s}
+        .sw input:checked{background:var(--violet)}.sw input:checked::after{left:23px}
+    </style>
+</head>
+<body>
+<!-- Top navigation bar is rendered by js/shell.js (also redirects to the login page if not logged in) -->
+<main class="wrap">
+    <div class="page-title"><h1>Settings</h1><p>Manage your account and preferences.</p></div>
+    <div class="set">
+        <section class="card pad">
+            <h2>Account</h2><p class="sub">Your sign-in details.</p>
+            <dl class="kv"><dt>Name</dt><dd id="aName">-</dd><dt>Email</dt><dd id="aEmail">-</dd><dt>Account type</dt><dd>Job Seeker</dd></dl>
+            <p style="margin:14px 0 0"><a class="btn" href="profile.html">Edit my profile</a></p>
+        </section>
+        <section class="card pad">
+            <h2>Notifications</h2><p class="sub">Saved on this device until email alerts launch.</p>
+            <label class="sw"><span><b>Application updates</b><small>Tell me when a recruiter changes my application status.</small></span><input type="checkbox" id="notifyStatus"></label>
+            <label class="sw"><span><b>New jobs in my field</b><small>A digest of fresh postings.</small></span><input type="checkbox" id="notifyJobs"></label>
+        </section>
+        <section class="card pad">
+            <h2>Privacy</h2><p class="sub">Saved on this device.</p>
+            <label class="sw"><span><b>Visible to recruiters</b><small>Let recruiters who receive your application view your profile.</small></span><input type="checkbox" id="visible"></label>
+        </section>
+        <section class="card pad">
+            <h2>Session</h2><p class="sub">Sign out of CareerConnect on this browser.</p>
+            <a href="#" data-logout class="btn">Log out</a>
+        </section>
+    </div>
+</main>
+<script src="js/shell.js"></script>
+<script>
+    const KEY = 'cc_settings_' + CC.user.toLowerCase();
+    const get = () => { try { return { notifyStatus: true, notifyJobs: false, visible: true, ...JSON.parse(localStorage.getItem(KEY)) }; } catch { return { notifyStatus: true, notifyJobs: false, visible: true }; } };
+    const s = get();
+    ['notifyStatus', 'notifyJobs', 'visible'].forEach(k => {
+      const el = document.getElementById(k); el.checked = !!s[k];
+      el.addEventListener('change', () => { try { localStorage.setItem(KEY, JSON.stringify({ ...get(), [k]: el.checked })); } catch {} CC.toast('Saved'); });
+    });
+    CC.api('/api/auth/me').then(u => {
+      document.getElementById('aName').textContent = (u.name + ' ' + u.surname).trim();
+      document.getElementById('aEmail').textContent = u.email;
+    }).catch(() => {});
+</script>
+</body>
+</html>

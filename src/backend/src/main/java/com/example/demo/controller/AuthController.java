@@ -177,6 +177,29 @@ public class AuthController {
         return invalidCredentials();
     }
 
+    // Lets the pages check that the server still has a session for this browser
+    // (the browser's localStorage can outlive the server session, e.g. after a restart).
+    @GetMapping("/me")
+    public ResponseEntity<?> me(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        Integer id = session == null ? null : (Integer) session.getAttribute(SESSION_USER_ID);
+        String role = session == null ? null : (String) session.getAttribute(SESSION_ROLE);
+        if (id == null || role == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "User is not logged in"));
+        }
+        if (RECRUITER.equals(role)) {
+            return employerUsers.findById(id)
+                    .<ResponseEntity<?>>map(u -> ResponseEntity.ok(Map.of(
+                            "role", role, "name", u.getRecruiterName(), "surname", u.getRecruiterSurname(),
+                            "email", u.getEmail(), "companyName", u.getCompanyName())))
+                    .orElseGet(() -> ResponseEntity.status(401).body(Map.of("message", "User is not logged in")));
+        }
+        return personUsers.findById(id)
+                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(Map.of(
+                        "role", role, "name", u.getName(), "surname", u.getSurname(), "email", u.getEmail())))
+                .orElseGet(() -> ResponseEntity.status(401).body(Map.of("message", "User is not logged in")));
+    }
+
     // Ends the session so the other controllers treat the browser as logged out.
     // Succeeds even when nobody is logged in, so the logout button always works.
     @PostMapping("/logout")

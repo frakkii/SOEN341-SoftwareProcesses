@@ -1,0 +1,116 @@
+/* Recruiter look & feel (LinkedIn Recruiter inspired). Loaded after app.css on every recruiter page.
+   Everything is scoped to body.rc so the job seeker pages are untouched. */
+body.rc{
+  --bg:#f3f2ef; --surface:#fff; --surface2:#f9fafb; --text:#191919; --muted:#666; --line:#e0dfdc;
+  --blue:#0a66c2; --blue-d:#004182; --blue-l:#e8f3ff; --green:#057642; --amber:#915907; --red:#b24020; --nav:#1d2226;
+  background:var(--bg); color:var(--text);
+  font:400 14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+html.rc-dark body.rc{
+  --bg:#000; --surface:#1b1f23; --surface2:#22272c; --text:#ffffffe6; --muted:#a0a4a8; --line:#38434f;
+  --blue:#71b7fb; --blue-d:#a8d1fd; --blue-l:#0f2a44; --green:#57c490; --amber:#e8b05b; --red:#f08a6b; --nav:#000;
+}
+body.rc h1,body.rc h2,body.rc h3{font-family:inherit;letter-spacing:0;color:var(--text)}
+
+/* ---- top bar ---- */
+.rc-nav{position:sticky;top:0;z-index:60;background:var(--nav);color:#fff;border-bottom:1px solid #000}
+.rc-nav-in{max-width:1128px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;gap:8px}
+.rc-brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;margin-right:12px}
+.rc-mark{width:34px;height:34px;border-radius:4px;background:#0a66c2;display:grid;place-items:center;font-weight:800;font-size:20px}
+.rc-brand b{font-size:15px;font-weight:600;display:block;line-height:1.1}
+.rc-brand small{font-size:11px;color:#b0b7be;display:block}
+.rc-links{display:flex;height:100%;flex:1}
+.rc-links a{display:flex;align-items:center;padding:0 14px;height:100%;color:#c3c9ce;text-decoration:none;font-weight:600;font-size:14px;border-bottom:3px solid transparent;box-sizing:border-box}
+.rc-links a:hover{color:#fff;background:#ffffff14}
+.rc-links a.active{color:#fff;border-bottom-color:#71b7fb}
+.rc-right{display:flex;align-items:center;gap:12px}
+.rc-cta{background:#0a66c2;color:#fff!important;border-radius:999px;padding:6px 16px;font-weight:600;text-decoration:none;font-size:14px}
+.rc-cta:hover{background:#004182}
+.rc-me{position:relative}
+.rc-me>button{display:flex;align-items:center;gap:6px;background:none;border:0;color:#c3c9ce;cursor:pointer;font:inherit;padding:4px}
+.rc-av{width:30px;height:30px;border-radius:50%;background:#0a66c2;color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+.rc-menu{display:none;position:absolute;right:0;top:44px;width:260px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px #0003;overflow:hidden}
+.rc-me.open .rc-menu{display:block}
+.rc-menu .who{padding:14px 16px;border-bottom:1px solid var(--line)}
+.rc-menu .who b{display:block}.rc-menu .who span{color:var(--muted);font-size:13px}
+.rc-menu a{display:block;padding:10px 16px;color:var(--text);text-decoration:none;font-weight:600}
+.rc-menu a:hover{background:var(--surface2)}
+
+/* ---- page frame ---- */
+body.rc .wrap{max-width:1128px;padding:24px 16px 64px}
+body.rc .page-title{margin-bottom:16px}
+body.rc .page-title h1{font-size:24px;font-weight:600}
+body.rc .page-title p{color:var(--muted);margin-top:2px}
+body.rc .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:none}
+body.rc .card.pad,.rc-card{padding:20px}
+.rc-card{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.rc-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+.rc-stack{display:grid;gap:16px}
+@media(max-width:900px){.rc-grid{grid-template-columns:1fr}.rc-links a{padding:0 8px}.rc-brand small{display:none}}
+@media(max-width:640px){.rc-links{display:none}}
+
+/* ---- buttons ---- */
+body.rc .btn{border:1px solid var(--blue);color:var(--blue);background:transparent;border-radius:999px;padding:7px 16px;font:600 14px/1.2 inherit;box-shadow:none;transform:none}
+body.rc .btn:hover{background:var(--blue-l);transform:none}
+body.rc .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:none}
+html.rc-dark body.rc .btn.primary{color:#000}
+body.rc .btn.primary:hover{background:var(--blue-d);transform:none;box-shadow:none}
+body.rc .btn.ghost{border-color:var(--line);color:var(--muted)}
+.rc-link{color:var(--blue);font-weight:600;text-decoration:none}.rc-link:hover{text-decoration:underline}
+
+/* ---- home ---- */
+.rc-hero{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px;flex-wrap:wrap}
+.rc-hero h1{font-size:22px;font-weight:600;margin:0}.rc-hero p{margin:4px 0 0;color:var(--muted)}
+.rc-stats{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.rc-stats div{padding:16px 20px;border-right:1px solid var(--line)}.rc-stats div:last-child{border:0}
+.rc-stats strong{display:block;font-size:28px;font-weight:600;line-height:1.1}
+.rc-stats span{color:var(--muted);font-size:13px}
+@media(max-width:640px){.rc-stats{grid-template-columns:repeat(2,1fr)}}
+.rc-sec-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.rc-sec-head h2{font-size:16px;font-weight:600;margin:0}
+.rc-job{display:flex;gap:14px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+.rc-job:last-child{border:0}
+.rc-job .logo{width:44px;height:44px;border-radius:4px;background:var(--blue-l);color:var(--blue);display:grid;place-items:center;font-weight:700;flex:none}
+.rc-job .info{flex:1;min-width:0}.rc-job .info a{font-weight:600;color:var(--text);text-decoration:none}
+.rc-job .info a:hover{color:var(--blue);text-decoration:underline}
+.rc-job .info small{display:block;color:var(--muted)}
+.rc-job .count{text-align:center;min-width:76px}.rc-job .count b{display:block;font-size:18px}.rc-job .count span{font-size:12px;color:var(--muted)}
+.rc-pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;background:var(--blue-l);color:var(--blue)}
+.rc-pill.open{background:#e3f4ea;color:var(--green)}.rc-pill.closed{background:#fbe9e3;color:var(--red)}
+html.rc-dark .rc-pill.open{background:#12301f}html.rc-dark .rc-pill.closed{background:#3a1d14}
+.rc-empty{padding:32px 20px;text-align:center;color:var(--muted)}
+.rc-co{padding:20px;text-align:center}.rc-co .logo{width:64px;height:64px;margin:0 auto 10px;border-radius:6px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:28px;font-weight:700}
+.rc-co h2{font-size:16px;margin:0}.rc-co p{margin:2px 0 12px;color:var(--muted);font-size:13px;word-break:break-all}
+.rc-list{list-style:none;margin:0;padding:8px 0}.rc-list a{display:block;padding:9px 20px;color:var(--text);text-decoration:none;font-weight:600}
+.rc-list a:hover{background:var(--surface2);color:var(--blue)}
+.rc-tip{padding:16px 20px;color:var(--muted);font-size:13px}.rc-tip b{color:var(--text)}
+
+/* ---- forms (create posting + settings) ---- */
+.rc-form-card{padding:0}.rc-form-sec{padding:20px 24px;border-bottom:1px solid var(--line)}.rc-form-sec:last-of-type{border:0}
+.rc-form-sec h2{font-size:16px;font-weight:600;margin:0 0 2px}.rc-form-sec>p{margin:0 0 14px;color:var(--muted);font-size:13px}
+.rc-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:640px){.rc-row{grid-template-columns:1fr}}
+.rc-f{display:block;margin-bottom:14px}.rc-f>span{display:block;font-weight:600;margin-bottom:4px;font-size:14px}.rc-f>span i{color:var(--red);font-style:normal}
+.rc-f input,.rc-f select,.rc-f textarea{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid #8c8c8c;border-radius:4px;background:var(--surface);color:var(--text);font:inherit}
+html.rc-dark .rc-f input,html.rc-dark .rc-f select,html.rc-dark .rc-f textarea{border-color:#66707a}
+.rc-f textarea{resize:vertical;min-height:110px}
+.rc-f input:focus,.rc-f select:focus,.rc-f textarea:focus{outline:2px solid var(--blue);outline-offset:0;border-color:var(--blue)}
+.rc-f small{color:var(--muted);display:block;margin-top:3px;font-size:12px}
+.rc-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--line);background:var(--surface2);border-radius:0 0 8px 8px}
+.rc-alert{display:none;margin:0 24px 16px;padding:10px 14px;border-radius:4px;font-weight:600}
+.rc-alert.show{display:block}.rc-alert.err{background:#fbe9e3;color:#7a2a12}.rc-alert.ok{background:#e3f4ea;color:#05512f}
+.rc-switch{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.rc-switch:last-child{border:0}.rc-switch b{display:block}.rc-switch small{color:var(--muted)}
+.rc-switch input{appearance:none;width:40px;height:22px;border-radius:11px;background:#8c8c8c;position:relative;cursor:pointer;flex:none;transition:.15s}
+.rc-switch input::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s}
+.rc-switch input:checked{background:var(--blue)}.rc-switch input:checked::after{left:20px}
+.rc-kv{display:grid;grid-template-columns:160px 1fr;gap:6px 16px}.rc-kv dt{color:var(--muted)}.rc-kv dd{margin:0;font-weight:600;word-break:break-all}
+
+/* ---- restyle the existing postings / applicants tables ---- */
+body.rc .job-table th{background:var(--surface2);color:var(--muted);letter-spacing:.03em}
+body.rc .job-table th,body.rc .job-table td{border-bottom-color:var(--line)}
+body.rc .toolbar input{border:1px solid #8c8c8c;border-radius:999px;background:var(--surface);color:var(--text)}
+body.rc .row-actions select{border:1px solid #8c8c8c;background:var(--surface);color:var(--text)}
+body.rc .status-pill{border-radius:999px}
+body.rc .final{color:var(--muted)}
+.toasts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99;display:grid;gap:8px}
+.toast{background:#1d2226;color:#fff;padding:10px 18px;border-radius:6px;font-weight:600;box-shadow:0 4px 16px #0004}

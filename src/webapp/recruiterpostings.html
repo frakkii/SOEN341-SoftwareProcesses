@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/recruiter.css">
   <style>
     .page-actions { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
     .toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
@@ -42,199 +43,180 @@
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="recruiterhome.html" aria-label="CareerConnect home">
-      <span class="mark">C</span>
-      <div>
-        <b>CareerConnect</b>
-        <small>Recruiter dashboard</small>
+<script src="js/recruiter.js"></script>
+
+
+<main class="wrap dashboard">
+  <div class="page-title">
+    <h1>Manage postings</h1>
+    <p>Review, update, and monitor all active hiring opportunities.</p>
+  </div>
+
+  <section class="card pad">
+    <div class="page-actions">
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search postings..." aria-label="Search postings">
       </div>
-    </a>
-
-    <nav class="nav" aria-label="Primary navigation">
-      <a href="recruiterhome.html">Home</a>
-      <a href="recruiterpostings.html" class="active">Your Postings</a>
-      <a href="#">Messages</a>
-      <a href="#">Company Profile &amp; Account Settings</a>
-      <a href="#" id="logout">Logout</a>
-    </nav>
-
-    <a class="me" href="recruiterhome.html" aria-label="Recruiter profile">
-      <span class="av sm" id="profile-badge">R</span>
-    </a>
-  </header>
-
-  <main class="wrap dashboard">
-    <div class="page-title">
-      <h1>Manage postings</h1>
-      <p>Review, update, and monitor all active hiring opportunities.</p>
+      <a href="createposting.html" class="btn primary">+ Create posting</a>
     </div>
 
-    <section class="card pad">
-      <div class="page-actions">
-        <div class="toolbar">
-          <input id="searchInput" type="search" placeholder="Search postings..." aria-label="Search postings">
-        </div>
-        <a href="createposting.html" class="btn primary">+ Create posting</a>
-      </div>
+    <div class="table-wrap">
+      <table class="job-table">
+        <thead>
+        <tr>
+          <th><button class="sort-btn" data-key="title">Title</button></th>
+          <th><button class="sort-btn" data-key="department">Department</button></th>
+          <th><button class="sort-btn" data-key="location">Location</button></th>
+          <th><button class="sort-btn" data-key="applicants">Applicants</button></th>
+          <th><button class="sort-btn" data-key="status">Status</button></th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="jobRows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
 
-      <div class="table-wrap">
-        <table class="job-table">
-          <thead>
-            <tr>
-              <th><button class="sort-btn" data-key="title">Title</button></th>
-              <th><button class="sort-btn" data-key="department">Department</button></th>
-              <th><button class="sort-btn" data-key="location">Location</button></th>
-              <th><button class="sort-btn" data-key="applicants">Applicants</button></th>
-              <th><button class="sort-btn" data-key="status">Status</button></th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="jobRows"></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+<script>
+  let jobs = [];
 
-  <script>
-    let jobs = [];
+  async function loadPostings() {
+try {
+  const response = await fetch("/api/postings", {
+    method: "GET",
+    credentials: "same-origin"
+  });
 
-    async function loadPostings() {
-  try {
-    const response = await fetch("/api/postings", {
-      method: "GET",
-      credentials: "same-origin"
-    });
-
-    if (!response.ok) {
-      throw new Error("Unable to load postings");
-    }
-
-    const postings = await response.json();
-
-    jobs = postings.map(posting => ({
-      id: posting.id,
-      title: posting.title || "Untitled",
-      department: posting.department || "Not specified",
-      location: posting.location || "Not specified",
-      applicants: posting.applicants || 0,
-      status: posting.status || "Open",
-      deadline: posting.applicationDeadline
-    }));
-
-    renderTable();
-  } 
-  catch (error) {
-    console.error(error);
-    rowsEl.innerHTML = `<tr><td colspan="6">Unable to load postings.</td></tr>`;
+  if (!response.ok) {
+    throw new Error("Unable to load postings");
   }
+
+  const postings = await response.json();
+
+  jobs = postings.map(posting => ({
+    id: posting.id,
+    title: posting.title || "Untitled",
+    department: posting.department || "Not specified",
+    location: posting.location || "Not specified",
+    applicants: posting.applicants || 0,
+    status: posting.status || "Open",
+    deadline: posting.applicationDeadline
+  }));
+
+  renderTable();
+}
+catch (error) {
+  console.error(error);
+  rowsEl.innerHTML = `<tr><td colspan="6">Unable to load postings.</td></tr>`;
+}
 }
 
-    const rowsEl = document.getElementById("jobRows");
-    const searchInput = document.getElementById("searchInput");
-    const sortButtons = document.querySelectorAll(".sort-btn");
+  const rowsEl = document.getElementById("jobRows");
+  const searchInput = document.getElementById("searchInput");
+  const sortButtons = document.querySelectorAll(".sort-btn");
 
-    let currentSort = { key: "applicants", direction: "desc" };
+  let currentSort = { key: "applicants", direction: "desc" };
 
-    const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-    function statusMarkup(status) {
-      const map = {
-        Open: "status-open",
-        Draft: "status-draft",
-        Closed: "status-closed"
-      };
-      return `<span class="status-pill ${map[status] || ""}">${esc(status)}</span>`;
-    }
+  function statusMarkup(status) {
+    const map = {
+      Open: "status-open",
+      Draft: "status-draft",
+      Closed: "status-closed"
+    };
+    return `<span class="status-pill ${map[status] || ""}">${esc(status)}</span>`;
+  }
 
-    function renderTable() {
-      const query = searchInput.value.trim().toLowerCase();
-      const filtered = jobs.filter(job =>
-        [job.title, job.department, job.location, job.status]
-          .join(" ")
-          .toLowerCase()
-          .includes(query)
-      );
+  function renderTable() {
+    const query = searchInput.value.trim().toLowerCase();
+    const filtered = jobs.filter(job =>
+      [job.title, job.department, job.location, job.status]
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
+    );
 
-      filtered.sort((a, b) => {
-        const aValue = a[currentSort.key];
-        const bValue = b[currentSort.key];
+    filtered.sort((a, b) => {
+      const aValue = a[currentSort.key];
+      const bValue = b[currentSort.key];
 
-        if (typeof aValue === "string") {
-          return aValue.localeCompare(bValue) * (currentSort.direction === "asc" ? 1 : -1);
-        }
-
-        return (Number(aValue) - Number(bValue)) * (currentSort.direction === "asc" ? 1 : -1);
-      });
-
-      rowsEl.innerHTML = filtered.map(job => `
-        <tr>
-          <td><strong>${esc(job.title)}</strong></td>
-          <td>${esc(job.department)}</td>
-          <td>${esc(job.location)}</td>
-          <td>${job.applicants}</td>
-          <td>${statusMarkup(job.status)}</td>
-          <td>
-            <div class="row-actions">
-              <a class="btn" href="recruiterapplicants.html?id=${encodeURIComponent(job.id)}">View applicants</a>
-              <button class="btn" data-toggle="${job.id}">${job.status === "Closed" ? "Reopen" : "Close"}</button>
-            </div>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    sortButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        const { key } = button.dataset;
-
-        if (currentSort.key === key) {
-          currentSort.direction = currentSort.direction === "asc" ? "desc" : "asc";
-        } else {
-          currentSort.key = key;
-          currentSort.direction = "asc";
-        }
-
-        renderTable();
-      });
-    });
-
-    searchInput.addEventListener("input", renderTable);
-
-    // Close or reopen a posting. Closed postings are hidden from job search and stop new applications.
-    rowsEl.addEventListener("click", async event => {
-      const button = event.target.closest("[data-toggle]");
-      if (!button) return;
-      const job = jobs.find(j => String(j.id) === button.dataset.toggle);
-      const next = job.status === "Closed" ? "Open" : "Closed";
-      if (next === "Closed" && !confirm(`Close "${job.title}"? Job seekers won't be able to find or apply to it.`)) return;
-
-      button.disabled = true;
-      try {
-        const response = await fetch(`/api/recruiter/postings/${job.id}`, {
-          method: "PATCH",
-          credentials: "same-origin",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: next })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.message || "Couldn't update the posting");
-        job.status = data.status;
-        renderTable();
-      } catch (error) {
-        alert(error.message);
-        button.disabled = false;
+      if (typeof aValue === "string") {
+        return aValue.localeCompare(bValue) * (currentSort.direction === "asc" ? 1 : -1);
       }
+
+      return (Number(aValue) - Number(bValue)) * (currentSort.direction === "asc" ? 1 : -1);
     });
 
-    document.getElementById("logout").addEventListener("click", function (event) {
-      event.preventDefault();
-      localStorage.removeItem("userName");
-      window.location.href = "index.html";
-    });
+    rowsEl.innerHTML = filtered.map(job => `
+      <tr>
+        <td><strong>${esc(job.title)}</strong></td>
+        <td>${esc(job.department)}</td>
+        <td>${esc(job.location)}</td>
+        <td>${job.applicants}</td>
+        <td>${statusMarkup(job.status)}</td>
+        <td>
+          <div class="row-actions">
+            <a class="btn" href="recruiterapplicants.html?id=${encodeURIComponent(job.id)}">View applicants</a>
+            <button class="btn" data-toggle="${job.id}">${job.status === "Closed" ? "Reopen" : "Close"}</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
 
-    loadPostings();
-  </script>
-  <script src="js/logout.js"></script>
+  sortButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      const { key } = button.dataset;
+
+      if (currentSort.key === key) {
+        currentSort.direction = currentSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        currentSort.key = key;
+        currentSort.direction = "asc";
+      }
+
+      renderTable();
+    });
+  });
+
+  searchInput.addEventListener("input", renderTable);
+
+  // Close or reopen a posting. Closed postings are hidden from job search and stop new applications.
+  rowsEl.addEventListener("click", async event => {
+    const button = event.target.closest("[data-toggle]");
+    if (!button) return;
+    const job = jobs.find(j => String(j.id) === button.dataset.toggle);
+    const next = job.status === "Closed" ? "Open" : "Closed";
+    if (next === "Closed" && !confirm(`Close "${job.title}"? Job seekers won't be able to find or apply to it.`)) return;
+
+    button.disabled = true;
+    try {
+      const response = await fetch(`/api/recruiter/postings/${job.id}`, {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: next })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Couldn't update the posting");
+      job.status = data.status;
+      renderTable();
+    } catch (error) {
+      alert(error.message);
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById("logout").addEventListener("click", function (event) {
+    event.preventDefault();
+    localStorage.removeItem("userName");
+    window.location.href = "index.html";
+  });
+
+  loadPostings();
+</script>
+<script src="js/logout.js"></script>
 </body>
 </html>

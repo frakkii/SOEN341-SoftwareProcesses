@@ -3,130 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Job Posting</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>CareerConnect - Post a job</title>
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/recruiter.css" />
 </head>
-<body class="app">
-  <header class="topbar">
-    <div class="brand">
-      <h1>CareerConnect</h1>
-      <p>Recruiter dashboard</p>
-    </div>
-    <nav>
-      <a href="recruiterhome.html">Home</a>
-      <a href="recruiterpostings.html" class="active">Your Postings</a>
-      <a href="#">Messages</a>
-      <a href="#">Company Profile &amp; Account Settings</a>
-      <a href="#" id="logout">Logout</a>
+<body>
+<script src="js/recruiter.js"></script>
 
-    </nav>
-  </header>
+<main class="wrap">
+  <div class="page-title">
+    <h1>Post a job</h1>
+    <p>Tell candidates about the role. Fields marked <span style="color:var(--red)">*</span> are required.</p>
+  </div>
 
-  <main class="page">
-    <h2>Create a Job Listing</h2>
+  <div class="rc-grid">
+    <form id="jobPostingForm" class="rc-card rc-form-card" novalidate>
+      <section class="rc-form-sec">
+        <h2>Job details</h2>
+        <p>The basics candidates see first in search results.</p>
+        <label class="rc-f"><span>Job title <i>*</i></span>
+          <input type="text" id="title" maxlength="120" placeholder="e.g. Software Engineer" required></label>
+        <div class="rc-row">
+          <label class="rc-f"><span>Department <i>*</i></span>
+            <input type="text" id="department" maxlength="80" placeholder="e.g. Engineering" required></label>
+          <label class="rc-f"><span>Location <i>*</i></span>
+            <input type="text" id="location" maxlength="120" placeholder="e.g. Montreal, QC (hybrid) or Remote" required></label>
+        </div>
+        <div class="rc-row">
+          <label class="rc-f"><span>Category <i>*</i></span>
+            <select id="industry" required>
+              <option value="">Choose a category</option>
+              <option>Technology</option><option>Engineering</option><option>Data &amp; Analytics</option>
+              <option>Design</option><option>Finance</option><option>Marketing</option>
+              <option>Healthcare</option><option>Education</option><option>Sales</option>
+            </select></label>
+          <label class="rc-f"><span>Job type <i>*</i></span>
+            <select id="jobType" required>
+              <option>Full-time</option><option>Part-time</option><option>Internship</option><option>Contract</option>
+            </select></label>
+        </div>
+      </section>
 
-    <form id="jobPostingForm">
-      <div class="field">
-        <label for="title">Job Position Title</label>
-        <input type="text" id="title" name="title" placeholder="e.g. Software Engineer" required />
+      <section class="rc-form-sec">
+        <h2>Compensation &amp; timeline</h2>
+        <p>Postings with a salary range get noticeably more applications.</p>
+        <div class="rc-row">
+          <label class="rc-f"><span>Salary <i>*</i></span>
+            <input type="text" id="salary" maxlength="60" placeholder="$90,000 - $120,000" required></label>
+          <label class="rc-f"><span>Application deadline <i>*</i></span>
+            <input type="date" id="deadline" required></label>
+        </div>
+      </section>
+
+      <section class="rc-form-sec">
+        <h2>About the role</h2>
+        <p>Be specific about duties and what great looks like.</p>
+        <label class="rc-f"><span>Required skills &amp; competencies <i>*</i></span>
+          <textarea id="skills" rows="4" placeholder="List key skills, tools, experience, certifications..." required></textarea>
+          <small>Separate skills with commas so candidates can scan them.</small></label>
+        <label class="rc-f"><span>Job description <i>*</i></span>
+          <textarea id="description" rows="8" placeholder="Describe duties, responsibilities, expectations..." required></textarea></label>
+      </section>
+
+      <div id="message" class="rc-alert" role="alert"></div>
+      <div class="rc-actions">
+        <a class="btn ghost" href="recruiterpostings.html">Cancel</a>
+        <button type="submit" class="btn primary" id="submitBtn">Post job</button>
       </div>
-
-      <div class="field">
-        <label for="department">Department</label>
-        <input type="text" id="department" name="department" placeholder="e.g. Engineering" required />
-      </div>
-
-      <div class="field">
-        <label for="location">Location</label>
-        <input type="text" id="location" name="location" placeholder="e.g. Montreal, QC (hybrid) or Remote" required />
-      </div>
-
-      <div class="field">
-        <label for="industry">Category</label>
-        <select id="industry" name="industry" required>
-          <option value="">Choose a category</option>
-          <option>Technology</option><option>Engineering</option><option>Data &amp; Analytics</option>
-          <option>Design</option><option>Finance</option><option>Marketing</option>
-          <option>Healthcare</option><option>Education</option><option>Sales</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="jobType">Job type</label>
-        <select id="jobType" name="jobType" required>
-          <option>Full-time</option><option>Part-time</option><option>Internship</option><option>Contract</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="salary">Salary</label>
-        <input type="text" id="salary" name="salary" placeholder="$90,000 - $120,000" required />
-      </div>
-
-      <div class="field">
-        <label for="skills">Required Skills & Competencies</label>
-        <textarea id="skills" name="skills" rows="4" placeholder="List key skills, tools, experience, certifications..." required></textarea>
-      </div>
-
-      <div class="field">
-        <label for="description">Job Description</label>
-        <textarea id="description" name="description" rows="6" placeholder="Describe duties, responsibilities, expectations..." required></textarea>
-      </div>
-
-      <div class="field">
-        <label for="deadline">Application Deadline</label>
-        <input type="date" id="deadline" name="deadline" required />
-      </div>
-
-      <button type="submit" class="btn">Create Listing</button>
     </form>
 
-    <p id="message" class="hidden"></p>
-  </main>
+    <aside class="rc-stack">
+      <section class="rc-card">
+        <div class="rc-sec-head"><h2>Preview</h2></div>
+        <div class="rc-job">
+          <div class="logo">C</div>
+          <div class="info"><b id="pvTitle">Job title</b>
+            <small id="pvMeta">Location &middot; Job type</small>
+            <small id="pvSalary"></small></div>
+        </div>
+      </section>
+      <section class="rc-card rc-tip">
+        <b>Tips for a great posting</b>
+        <p>Use a standard job title, state the pay range, and keep the description under 400 words. Clear postings attract better-matched candidates.</p>
+      </section>
+    </aside>
+  </div>
+</main>
 
-  <script>
-    const form = document.getElementById("jobPostingForm");
-    const message = document.getElementById("message");
+<script>
+  const $ = id => document.getElementById(id);
+  const form = $("jobPostingForm"), message = $("message"), submitBtn = $("submitBtn");
 
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
+  function show(type, html) { message.className = "rc-alert show " + type; message.innerHTML = html; }
 
-      const payload = {
-        title: document.getElementById("title").value.trim(),
-        department: document.getElementById("department").value.trim(),
-        location: document.getElementById("location").value.trim(),
-        industry: document.getElementById("industry").value,
-        jobType: document.getElementById("jobType").value,
-        salary: document.getElementById("salary").value.trim(),
-        requiredSkills: document.getElementById("skills").value.trim(),
-        description: document.getElementById("description").value.trim(),
-        applicationDeadline: document.getElementById("deadline").value
-      };
+  // Today in local time as YYYY-MM-DD, so a deadline in the past can't be picked
+  const t = new Date(); t.setMinutes(t.getMinutes() - t.getTimezoneOffset());
+  $("deadline").min = t.toISOString().slice(0, 10);
+  $("jobType").value = RC.prefs.get().defaultJobType;
 
-      try {
-        const response = await fetch("/api/postings/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
+  function preview() {
+    $("pvTitle").textContent = $("title").value.trim() || "Job title";
+    $("pvMeta").textContent = ($("location").value.trim() || "Location") + " \u00b7 " + $("jobType").value;
+    $("pvSalary").textContent = $("salary").value.trim();
+  }
+  form.addEventListener("input", preview); preview();
 
-        const data = await response.json();
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
 
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to create job posting");
-        }
+    const payload = {
+      title: $("title").value.trim(),
+      department: $("department").value.trim(),
+      location: $("location").value.trim(),
+      industry: $("industry").value,
+      jobType: $("jobType").value,
+      salary: $("salary").value.trim(),
+      requiredSkills: $("skills").value.trim(),
+      description: $("description").value.trim(),
+      applicationDeadline: $("deadline").value
+    };
 
-        message.innerHTML = 'Job listing created successfully. <a href="recruiterpostings.html">View your postings</a>';
-        message.classList.remove("hidden");
-        form.reset();
-      } catch (error) {
-        message.textContent = error.message;
-        message.classList.remove("hidden");
-      }
-    });
-  </script>
-  <script src="js/logout.js"></script>
+    submitBtn.disabled = true; submitBtn.textContent = "Posting...";
+    try {
+      // RC.api sends the session cookie and sends you back to the login page if the session ended
+      await RC.api("/api/postings/create", { method: "POST", body: payload });
+      show("ok", 'Job posted. <a class="rc-link" href="recruiterpostings.html">View your jobs</a>');
+      form.reset(); $("jobType").value = RC.prefs.get().defaultJobType; preview();
+    } catch (error) {
+      show("err", RC.esc(error.message));
+    } finally {
+      submitBtn.disabled = false; submitBtn.textContent = "Post job";
+    }
+  });
+</script>
 </body>
 </html>

@@ -146,7 +146,7 @@
         </div></div>
       </div>
       <a href="#" data-soon="Messages">Messages</a>
-      <a href="#" data-soon="Settings">Settings</a>
+      <a href="settings.html" class="${cur('settings.html').trim()}">Settings</a>
       <a href="#" data-logout>Log out</a>
     </nav>
     <a class="me${cur('profile.html')}" href="profile.html" aria-label="Your profile" title="Your profile"><span class="av" data-me></span></a>

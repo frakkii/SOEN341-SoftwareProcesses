@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - Settings</title>
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/recruiter.css">
+</head>
+<body>
+<script src="js/recruiter.js"></script>
+
+<main class="wrap" style="max-width:760px">
+    <div class="page-title"><h1>Settings</h1><p>Manage your account and how CareerConnect works for you.</p></div>
+
+    <div class="rc-stack">
+        <section class="rc-card rc-form-sec">
+            <h2>Account</h2><p>Your sign-in details and company.</p>
+            <dl class="rc-kv">
+                <dt>Name</dt><dd id="aName">-</dd>
+                <dt>Email</dt><dd id="aEmail">-</dd>
+                <dt>Company</dt><dd id="aCompany">-</dd>
+                <dt>Role</dt><dd>Recruiter</dd>
+            </dl>
+        </section>
+
+        <section class="rc-card rc-form-sec">
+            <h2>Appearance</h2><p>Saved on this device.</p>
+            <label class="rc-switch"><span><b>Dark mode</b><small>Easier on the eyes in low light.</small></span>
+                <input type="checkbox" id="dark"></label>
+        </section>
+
+        <section class="rc-card rc-form-sec">
+            <h2>Job posting defaults</h2><p>Pre-fills the Post a job form.</p>
+            <label class="rc-f" style="max-width:280px"><span>Default job type</span>
+                <select id="defaultJobType"><option>Full-time</option><option>Part-time</option><option>Internship</option><option>Contract</option></select></label>
+        </section>
+
+        <section class="rc-card rc-form-sec">
+            <h2>Notifications</h2><p>Preferences are saved on this device until email alerts launch.</p>
+            <label class="rc-switch"><span><b>New applicant alerts</b><small>Tell me when someone applies to my jobs.</small></span>
+                <input type="checkbox" id="notifyApplicants"></label>
+            <label class="rc-switch"><span><b>Weekly hiring summary</b><small>A recap of applicants and deadlines.</small></span>
+                <input type="checkbox" id="notifyWeekly"></label>
+        </section>
+
+        <section class="rc-card rc-form-sec">
+            <h2>Session</h2><p>Sign out of CareerConnect on this browser.</p>
+            <a href="#" id="logout" class="btn">Sign out</a>
+        </section>
+    </div>
+</main>
+
+<script>
+    const $ = id => document.getElementById(id);
+    const p = RC.prefs.get();
+    ["dark", "notifyApplicants", "notifyWeekly"].forEach(k => {
+      $(k).checked = !!p[k];
+      $(k).addEventListener("change", () => { RC.prefs.set({ [k]: $(k).checked }); RC.toast("Saved"); });
+    });
+    $("defaultJobType").value = p.defaultJobType;
+    $("defaultJobType").addEventListener("change", () => { RC.prefs.set({ defaultJobType: $("defaultJobType").value }); RC.toast("Saved"); });
+
+    RC.ready.then(u => {
+      $("aName").textContent = (u.name + " " + u.surname).trim();
+      $("aEmail").textContent = u.email;
+      $("aCompany").textContent = u.companyName || "-";
+    });
+</script>
+</body>
+</html>
