@@ -83,8 +83,8 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 
 | Task | Assignee | Issue | Status |
 |---|---|---|---|
-| #60 AI resume analysis and feedback integration | _unassigned_ | #60 | Open |
-| Choose the model/provider and keep the API key out of the repo | _unassigned_ | _new_ | Not started |
+| #60 AI resume analysis and feedback integration: `POST /api/resume/feedback` with the Claude API (Anthropic Java SDK), PDF and DOCX resumes, "Get feedback" on the resume page, demo mode without an API key, 15 tests | frakkii | #60 | Done on `feature/ai-resume-feedback` (demo mode tested; a real Claude call still needs a team API key) |
+| Choose the model/provider and keep the API key out of the repo | frakkii | #180 | Claude (`claude-opus-5-5`); key read from `ANTHROPIC_API_KEY`, never committed. The team still needs a key for real reviews |
 | Acceptance test AT-31 | hirurathnayaka77 | #160 | Written in PR #161 |
 
 ### Supporting work
@@ -98,7 +98,7 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 ## Risks found while planning
 
 - **Notifications backend missing.** PR #161's notifications page calls an API that does not exist on `main`. Shanza needs to push the Java code (controller, service, entity, repository, Flyway migration and tests), or the notifications feature cannot be demoed.
-- **AI feature not started.** #60 has no branch, PR or assignee. The guidelines require it to be started in Sprint 3.
+- **AI feature needs an API key.** Built on `feature/ai-resume-feedback` and working in demo mode; real Claude reviews need an Anthropic API key (each review is a paid call). Decide who holds the key before the demo.
 - **PR #161 conflicts with `main`** in 7 files (acceptance test files from #163, recruiter pages and `shell.js` from #166). It needs resolving before the notifications frontend can merge.
 - ~~Recruiter dashboard not started~~: redesign merged in #166; edit, archive and applicant filters merged in #169; AT-30 passed.
 - ~~Dashboard not tested by hand~~: tested and merged (#162); AT-29, AT-32 and AT-33 passed.
@@ -111,7 +111,7 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 - [x] Merge #162 (dashboard)
 - [ ] Merge #161 (notifications frontend) once its conflicts are resolved
 - [x] Merge the recruiter edit, archive and filters work (#169) and record AT-30 on #159
-- [ ] Run every Sprint 3 acceptance test and record the result on its issue (AT-29, AT-30, AT-32, AT-33 passed; AT-25 to AT-28 and AT-31 still to run)
+- [ ] Run every Sprint 3 acceptance test and record the result on its issue (AT-29, AT-30, AT-32, AT-33 passed; AT-31 passed in demo mode; AT-25 to AT-28 still to run)
 - [x] Run the Sprint 1 and 2 acceptance tests (AT-01 to AT-24): all passed (AT-09 and AT-10 after fixes); see [RESULTS.md](../acceptance_tests/RESULTS.md)
 - [x] Clean up the project board and create issues for untracked Sprint 3 tasks (#175 to #180)
 - [x] Upload the Sprint 3 meeting minutes to `minutes/` (Meeting 4; add any later meetings with [TEMPLATE.md](../../minutes/TEMPLATE.md))

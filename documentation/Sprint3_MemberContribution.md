@@ -5,7 +5,7 @@ Compiled on 2026-11-16 from GitHub pull requests, branches and issues. Each memb
 Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 
 ## Maria-Francesca Staicu (40324837)
-**Planned:** application analytics and history dashboard frontend; project management, documentation and CI pipeline. Also took on the missing parts of the recruiter dashboard feature
+**Planned:** application analytics and history dashboard frontend; project management, documentation and CI pipeline. Also took on the missing parts of the recruiter dashboard feature and started the AI feature, which had no owner
 
 - Checked the Sprint 3 work on GitHub against the Sprint 3 delivery instructions and found the gaps: no Sprint 3 plan or contribution log, the notifications backend code was never pushed (only its AI log is on `main`), and the recruiter dashboard and AI features have no branch yet
 - Sprint 3 plan with user stories, tasks, status and risks: `documentation/sprint_planning/Sprint3_Plan.md`
@@ -17,6 +17,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Tests for `GET /api/auth/me`, which #166 added without tests (4 tests)
 - Ran all 24 Sprint 1 and 2 acceptance tests (AT-01 to AT-24) by hand, which had never been run: 22 passed; AT-09 (recruiters could open the profile page) and AT-10 (no job type filter) failed, so I fixed both and they passed on a rerun. Results on each issue and in `documentation/acceptance_tests/RESULTS.md`
 - Project board cleanup: created task issues #175 to #180 for untracked Sprint 3 work, moved Sprint 3 items to the right columns, assigned owners from Meeting 4
+- AI resume feedback (Sprint 3 feature 4, story #10): `POST /api/resume/feedback` using the Claude API through the Anthropic Java SDK for PDF and DOCX resumes, a Get feedback card on the resume page, and a demo mode so it works with no API key. 15 tests; AT-31 passed in demo mode. Branch `feature/ai-resume-feedback`
 - Register as Job Seeker or Recruiter: PR [#151](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/151)
 - Branches: `docs/sprint3-management` (PR [#163](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/163)), `docs/francesca-sprint3-ai-log2` (PR [#168](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/168)), `feature/recruiter-edit-archive-filters`
 - AI logs: `AI_logs/Francesca/Sprint3/`

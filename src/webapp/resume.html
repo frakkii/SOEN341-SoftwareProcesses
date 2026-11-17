@@ -8,6 +8,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/app.css">
+    <style>
+        .ai-card { margin-top: 18px; }
+        .ai-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+        .ai-head h2 { margin: 0 0 4px; }
+        .ai-loading { display: flex; align-items: center; gap: 10px; margin-top: 16px; color: var(--muted); font-weight: 600; }
+        .ai-spinner { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--violet); animation: ai-spin .8s linear infinite; }
+        @keyframes ai-spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .ai-spinner { animation: none; } }
+        .ai-result { margin-top: 16px; }
+        .ai-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #fef3c7; color: #92400e; font-size: .78rem; font-weight: 800; margin-bottom: 10px; }
+        .ai-result h3 { font-size: 1rem; margin: 16px 0 6px; }
+        .ai-result ul { margin: 0; padding-left: 20px; }
+        .ai-result li { margin: 4px 0; }
+        .ai-area { display: inline-block; min-width: 92px; margin-right: 6px; padding: 1px 8px; border-radius: 8px; background: #efedfb; color: #4c1d95; font-size: .78rem; font-weight: 800; }
+        .ai-notice { margin-top: 14px; font-size: .85rem; color: var(--muted); }
+    </style>
 </head>
 
 <body>
@@ -51,6 +67,22 @@
             </section>
         </div>
     </div>
+
+    <!-- AI resume feedback (story #10): shown once a resume is uploaded -->
+    <section class="card pad ai-card hidden" id="ai" aria-labelledby="ai-title">
+        <div class="ai-head">
+            <div>
+                <h2 id="ai-title">AI resume feedback</h2>
+                <p class="subtitle">Get suggestions on your current resume's content, organization and clarity before you apply.</p>
+            </div>
+            <button type="button" class="btn primary" id="ai-btn">Get feedback</button>
+        </div>
+        <div class="ai-loading hidden" id="ai-loading" role="status">
+            <span class="ai-spinner" aria-hidden="true"></span>Reviewing your resume. This can take up to a minute.
+        </div>
+        <div id="ai-message" class="message error hidden" role="alert"></div>
+        <div class="ai-result hidden" id="ai-result" aria-live="polite"></div>
+    </section>
 </main>
 
 <script src="js/shell.js"></script>
@@ -112,7 +144,66 @@
             document.getElementById("current-details").textContent =
                 formatSize(data.fileSize) + " · uploaded " + new Date(data.uploadedAt).toLocaleString();
         }
+        // Feedback is about one resume: hide it until there is one, and clear old feedback after a new upload
+        document.getElementById("ai").classList.toggle("hidden", !hasResume);
+        resetFeedback();
     }
+
+    // ---- AI resume feedback (POST /api/resume/feedback) ----
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    function resetFeedback() {
+        document.getElementById("ai-result").classList.add("hidden");
+        document.getElementById("ai-result").innerHTML = "";
+        document.getElementById("ai-message").classList.add("hidden");
+        document.getElementById("ai-btn").textContent = "Get feedback";
+    }
+
+    function renderFeedback(data) {
+        const f = data.feedback || {};
+        const list = items => (items || []).map(i => "<li>" + esc(i) + "</li>").join("");
+        document.getElementById("ai-result").innerHTML =
+            (data.demo ? '<span class="ai-badge">Demo mode: sample feedback, not a real AI review</span>' : "") +
+            '<p class="muted">Feedback on ' + esc(data.fileName) + "</p>" +
+            "<p>" + esc(f.summary || "") + "</p>" +
+            "<h3>What's working</h3><ul>" + list(f.strengths) + "</ul>" +
+            "<h3>Suggestions</h3><ul>" + (f.suggestions || []).map(s =>
+                '<li><span class="ai-area">' + esc(s.area) + "</span>" + esc(s.suggestion) + "</li>").join("") + "</ul>" +
+            '<p class="ai-notice">' + esc(data.notice || "") + "</p>";
+        document.getElementById("ai-result").classList.remove("hidden");
+        document.getElementById("ai-btn").textContent = "Get new feedback";
+    }
+
+    async function getFeedback() {
+        const button = document.getElementById("ai-btn");
+        const message = document.getElementById("ai-message");
+        const loading = document.getElementById("ai-loading");
+        message.classList.add("hidden");
+        button.disabled = true;
+        loading.classList.remove("hidden");
+        try {
+            const res = await fetch("/api/resume/feedback", { method: "POST" });
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 401) {
+                localStorage.removeItem("userName");
+                window.location.href = "index.html";
+                return;
+            }
+            if (!res.ok) {
+                throw new Error(data.message || "Feedback couldn't be generated (" + res.status + "). Please try again.");
+            }
+            renderFeedback(data);
+        } catch (err) {
+            document.getElementById("ai-result").classList.add("hidden");
+            message.textContent = err.message;
+            message.classList.remove("hidden");
+        } finally {
+            loading.classList.add("hidden");
+            button.disabled = false;
+        }
+    }
+
+    document.getElementById("ai-btn").addEventListener("click", getFeedback);
 
     async function handleUpload(event) {
         event.preventDefault();
