@@ -111,7 +111,9 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 - [x] Merge #162 (dashboard)
 - [ ] Merge #161 (notifications frontend) once its conflicts are resolved
 - [x] Merge the recruiter edit, archive and filters work (#169) and record AT-30 on #159
-- [ ] Run every Sprint 3 acceptance test and record the result on its issue
+- [ ] Run every Sprint 3 acceptance test and record the result on its issue (AT-29, AT-30, AT-32, AT-33 passed; AT-25 to AT-28 and AT-31 still to run)
+- [x] Run the Sprint 1 and 2 acceptance tests (AT-01 to AT-24): all passed (AT-09 and AT-10 after fixes); see [RESULTS.md](../acceptance_tests/RESULTS.md)
+- [x] Clean up the project board and create issues for untracked Sprint 3 tasks (#175 to #180)
 - [x] Upload the Sprint 3 meeting minutes to `minutes/` (Meeting 4; add any later meetings with [TEMPLATE.md](../../minutes/TEMPLATE.md))
 - [ ] Each member fills in [Sprint3_MemberContribution.md](../Sprint3_MemberContribution.md)
 - [ ] Each member adds their Sprint 3 AI log and Sprint 3 PDF report in `AI_logs/<name>/Sprint3/`

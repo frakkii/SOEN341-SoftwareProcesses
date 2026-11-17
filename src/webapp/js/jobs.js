@@ -1,4 +1,4 @@
-/*  job search page. Results come from GET /api/jobs?keyword=&location=&industry=
+/*  job search page. Results come from GET /api/jobs?keyword=&location=&industry=&jobType=
    (open postings whose deadline hasn't passed). The search is kept in the URL so it
    survives a refresh and can be shared. */
 (function () {
@@ -6,7 +6,7 @@
   const { esc, icon, api, jobView, fmtDate, colorFor } = CC;
   const $ = s => document.querySelector(s);
   const form = $('#search'), results = $('#results'), empty = $('#empty'), count = $('#count');
-  const FIELDS = ['keyword', 'location', 'industry'];
+  const FIELDS = ['keyword', 'location', 'industry', 'jobType'];   // names of the form fields and API parameters
 
   $('#search-btn').innerHTML = `${icon('search')}Search`;
 

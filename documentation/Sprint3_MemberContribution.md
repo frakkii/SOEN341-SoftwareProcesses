@@ -15,6 +15,8 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Dashboard frontend: Dani delivered the dashboard in PR [#162](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/162) before I started. I tested it in the running app (all states, filters, ranges, phone width), fixed a chart alignment bug (commit `ec81b77`), merged it, and ran and recorded AT-29, AT-32 and AT-33 (#158, #164, #165: passed)
 - Recruiter posting management (Sprint 3 feature 1): edit a posting's details (`PUT /api/recruiter/postings/{id}` and an edit dialog), archive and restore postings, and filter applicants by status, date applied and search. 9 backend tests, 11 frontend unit tests, CI now runs every frontend test file. Tested AT-30 by hand. Branch `feature/recruiter-edit-archive-filters`
 - Tests for `GET /api/auth/me`, which #166 added without tests (4 tests)
+- Ran all 24 Sprint 1 and 2 acceptance tests (AT-01 to AT-24) by hand, which had never been run: 22 passed; AT-09 (recruiters could open the profile page) and AT-10 (no job type filter) failed, so I fixed both and they passed on a rerun. Results on each issue and in `documentation/acceptance_tests/RESULTS.md`
+- Project board cleanup: created task issues #175 to #180 for untracked Sprint 3 work, moved Sprint 3 items to the right columns, assigned owners from Meeting 4
 - Register as Job Seeker or Recruiter: PR [#151](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/151)
 - Branches: `docs/sprint3-management` (PR [#163](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/163)), `docs/francesca-sprint3-ai-log2` (PR [#168](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/168)), `feature/recruiter-edit-archive-filters`
 - AI logs: `AI_logs/Francesca/Sprint3/`
