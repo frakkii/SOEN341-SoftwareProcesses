@@ -8,70 +8,89 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/analytics.css">
 </head>
 
 <body>
 <!-- Top navigation bar is rendered by js/shell.js (also redirects to the login page if not logged in) -->
 
 <main class="wrap">
-    <div class="page-title">
-        <h1>My applications</h1>
-        <p>Track every application from Applied through to a final decision.</p>
+    <div class="page-title dash-head">
+        <div>
+            <h1>My applications</h1>
+            <p>Track every application from Applied through to a final decision.</p>
+        </div>
+        <button type="button" class="btn" id="refresh">Refresh</button>
     </div>
 
-    <div class="message error hidden" id="list-message"></div>
-    <div class="apps" id="apps"></div>
+    <div class="message error hidden" id="list-message" role="alert"></div>
+    <p class="loading" id="loading" role="status">Loading your applications…</p>
+
+    <!-- Totals for ALL of the job seeker's applications (never affected by the history filters) -->
+    <section class="hidden" id="summary" aria-labelledby="summary-title">
+        <h2 class="visually-hidden" id="summary-title">Application summary</h2>
+        <ul class="stat-grid" id="stats"></ul>
+    </section>
+
     <div class="card empty hidden" id="empty">
         <p>No applications yet.</p>
         <p style="margin-top:14px"><a class="btn primary" href="jobs.html">Find jobs to apply to</a></p>
     </div>
+
+    <div class="chart-grid hidden" id="charts">
+        <section class="card pad" aria-labelledby="status-title">
+            <h2 class="chart-title" id="status-title">Status breakdown</h2>
+            <div class="donut-wrap" id="status-chart"></div>
+            <details class="table-view"><summary>View as table</summary><div id="status-table"></div></details>
+        </section>
+
+        <section class="card pad" aria-labelledby="time-title">
+            <div class="chart-head">
+                <h2 class="chart-title" id="time-title">Applications over time</h2>
+                <div class="seg small" role="group" aria-label="Time range" id="range">
+                    <button type="button" data-range="6" aria-pressed="false">6 months</button>
+                    <button type="button" data-range="12" aria-pressed="true" class="on">12 months</button>
+                    <button type="button" data-range="all" aria-pressed="false">All time</button>
+                </div>
+            </div>
+            <div id="time-chart"></div>
+            <p class="chart-note hidden" id="undated-note"></p>
+            <details class="table-view"><summary>View as table</summary><div id="time-table"></div></details>
+        </section>
+    </div>
+
+    <section class="hidden" id="history" aria-labelledby="history-title">
+        <h2 class="section-title" id="history-title">Application history</h2>
+        <form class="card history-tools" id="filters" role="search" onsubmit="return false">
+            <div class="field">
+                <label for="q">Search</label>
+                <input type="search" id="q" placeholder="Job title or company" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="status-filter">Status</label>
+                <select id="status-filter"></select>
+            </div>
+            <div class="field">
+                <label for="sort">Sort by</label>
+                <select id="sort">
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                </select>
+            </div>
+            <button type="button" class="btn" id="clear">Clear filters</button>
+        </form>
+        <p class="result-count" id="result-count" aria-live="polite"></p>
+        <div class="apps" id="apps"></div>
+        <div class="card empty hidden" id="no-match">
+            <p>No applications match these filters.</p>
+            <p style="margin-top:14px"><button type="button" class="btn" id="clear-2">Clear filters</button></p>
+        </div>
+    </section>
 </main>
 
 <script src="js/shell.js"></script>
-<script>
-(function () {
-    if (!window.CC) return;                       // redirecting to login
-    const { esc, api, colorFor } = CC;
-    const STEPS = ["Applied", "Under Review", "Interview", "Offered"];
-
-    // One bar per stage. A rejection replaces the last stage and marks the stage it ended at.
-    function steps(status) {
-        const rejected = status === "Rejected";
-        return `<ol class="steps" aria-label="Application progress: ${esc(status)}">${STEPS.map((step, i) => {
-            if (rejected && i === 3) return `<li class="no">Rejected</li>`;
-            const reached = !rejected && i <= STEPS.indexOf(status);
-            const cls = reached ? (step === status ? "done now" : "done") : "";
-            return `<li class="${cls}"${step === status ? ' aria-current="step"' : ""}>${step}</li>`;
-        }).join("")}</ol>`;
-    }
-
-    function card(app) {
-        const title = app.jobTitle || `Posting #${app.postId}`;
-        const company = app.companyName || "";
-        const [c1, c2] = colorFor(company || title);
-        const day = iso => new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-        return `<article class="card app">
-            <div class="app-top">
-                <div class="logo" aria-hidden="true" style="--c1:${c1};--c2:${c2};width:46px;height:46px;font-size:1.1rem">${esc((company || title)[0])}</div>
-                <div class="who">
-                    <h3><a href="job.html?id=${encodeURIComponent(app.postId)}">${esc(title)}</a></h3>
-                    <small>${company ? esc(company) + " · " : ""}Applied ${day(app.appliedAt)} · Updated ${day(app.updatedAt)}</small>
-                </div>
-                <span class="status ${app.status.toLowerCase().replace(/\s+/g, "-")}">${esc(app.status)}</span>
-            </div>
-            ${steps(app.status)}
-        </article>`;
-    }
-
-    api("/api/applications").then(apps => {
-        document.getElementById("apps").innerHTML = apps.map(card).join("");
-        document.getElementById("empty").classList.toggle("hidden", apps.length > 0);
-    }).catch(err => {
-        const el = document.getElementById("list-message");
-        el.textContent = err.status === 403 ? "Only job seekers have applications." : "Couldn't load your applications. " + err.message;
-        el.classList.remove("hidden");
-    });
-})();
-</script>
+<script src="js/analytics.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/applications.js"></script>
 </body>
 </html>

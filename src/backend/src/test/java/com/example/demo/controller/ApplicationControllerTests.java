@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
@@ -18,11 +19,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -314,5 +323,114 @@ class ApplicationControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value(newStatus.getLabel()));
         }
+    }
+
+    // ---- Analytics dashboard (#56, AT-29 #158) ----------------------------
+    // The dashboard does its counting in the browser from GET /api/applications,
+    // so these check that the list has the right data and only the user's own.
+
+    // Status changes come from the recruiter feature; here the change is made directly
+    private void setStatus(Long applicationId, ApplicationStatus newStatus) {
+        Application application = applications.findById(applicationId).orElseThrow();
+        application.updateStatus(newStatus);
+        applications.save(application);
+    }
+
+    private String applicationsJson(MockHttpSession session) throws Exception {
+        return mockMvc.perform(get("/api/applications").session(session))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    // Status label -> number of applications, the same counts the dashboard tiles show
+    private Map<String, Long> statusCounts(MockHttpSession session) throws Exception {
+        List<String> statuses = JsonPath.read(applicationsJson(session), "$[*].status");
+        return statuses.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    }
+
+    private static List<Long> ids(String json) {
+        List<Number> ids = JsonPath.read(json, "$[*].id");
+        return ids.stream().map(Number::longValue).toList();
+    }
+
+    // AT-29: Alice only gets her own applications (not Bob's), new user gets nothing
+    @Test
+    void analyticsCountOnlyTheLoggedInJobSeekersApplications() throws Exception {
+        MockHttpSession alice = jobSeekerWithResume();
+        MockHttpSession bob = jobSeekerWithResume();
+
+        List<Integer> alicePostings = new ArrayList<>();
+        for (ApplicationStatus s : List.of(ApplicationStatus.APPLIED, ApplicationStatus.INTERVIEW,
+                ApplicationStatus.INTERVIEW, ApplicationStatus.OFFERED, ApplicationStatus.REJECTED)) {
+            Integer postId = openPosting();
+            alicePostings.add(postId);
+            setStatus(appliedId(alice, postId), s);
+        }
+
+        // Bob applies to one of the same postings and to two others
+        List<Long> bobIds = new ArrayList<>();
+        bobIds.add(appliedId(bob, alicePostings.get(0)));
+        bobIds.add(appliedId(bob, openPosting()));
+        Long bobOffered = appliedId(bob, openPosting());
+        bobIds.add(bobOffered);
+        setStatus(bobOffered, ApplicationStatus.OFFERED);
+
+        String aliceJson = applicationsJson(alice);
+        List<Integer> alicePostIds = JsonPath.read(aliceJson, "$[*].postId");
+        assertThat(alicePostIds).containsExactlyInAnyOrderElementsOf(alicePostings);
+        assertThat(ids(aliceJson)).doesNotContainAnyElementsOf(bobIds);
+        assertThat(statusCounts(alice)).isEqualTo(Map.of(
+                "Applied", 1L, "Interview", 2L, "Offered", 1L, "Rejected", 1L));
+
+        assertThat(ids(applicationsJson(bob))).containsExactlyInAnyOrderElementsOf(bobIds);
+        assertThat(statusCounts(bob)).isEqualTo(Map.of("Applied", 2L, "Offered", 1L));
+
+        assertThat(statusCounts(loggedIn("Job Seeker", uniqueEmail()))).isEmpty();
+    }
+
+    @Test
+    void analyticsReflectStatusChangesOnReload() throws Exception {
+        MockHttpSession session = jobSeekerWithResume();
+        Long first = appliedId(session, openPosting());
+        appliedId(session, openPosting());
+
+        assertThat(statusCounts(session)).isEqualTo(Map.of("Applied", 2L));
+
+        setStatus(first, ApplicationStatus.UNDER_REVIEW);
+        assertThat(statusCounts(session)).isEqualTo(Map.of("Applied", 1L, "Under Review", 1L));
+
+        setStatus(first, ApplicationStatus.REJECTED);
+        assertThat(statusCounts(session)).isEqualTo(Map.of("Applied", 1L, "Rejected", 1L));
+    }
+
+    // The monthly chart groups by appliedAt, so it has to be a valid ISO date. Newest first.
+    @Test
+    void applicationsComeNewestFirstWithIsoDatesForTheMonthlyChart() throws Exception {
+        MockHttpSession session = jobSeekerWithResume();
+        Instant dec2025 = Instant.parse("2025-12-15T15:00:00Z");
+        Instant jan2026 = Instant.parse("2026-01-20T15:00:00Z");
+        Instant mar2026 = Instant.parse("2026-03-01T15:00:00Z");
+
+        Long decId = appliedId(session, openPosting());
+        Long marId = appliedId(session, openPosting());
+        Long janId = appliedId(session, openPosting());
+        jdbc.update("UPDATE application SET applied_at = ? WHERE id = ?", dec2025.atOffset(ZoneOffset.UTC), decId);
+        jdbc.update("UPDATE application SET applied_at = ? WHERE id = ?", mar2026.atOffset(ZoneOffset.UTC), marId);
+        jdbc.update("UPDATE application SET applied_at = ? WHERE id = ?", jan2026.atOffset(ZoneOffset.UTC), janId);
+
+        String json = applicationsJson(session);
+        assertThat(ids(json)).containsExactly(marId, janId, decId);
+
+        List<String> appliedAt = JsonPath.read(json, "$[*].appliedAt");
+        assertThat(appliedAt.stream().map(Instant::parse).toList()).containsExactly(mar2026, jan2026, dec2025);
+    }
+
+    // The database only accepts the 5 statuses (CHECK constraint in V6)
+    @Test
+    void databaseRejectsUnknownApplicationStatuses() throws Exception {
+        Long applicationId = appliedId(jobSeekerWithResume(), openPosting());
+
+        assertThatThrownBy(() -> jdbc.update("UPDATE application SET status = 'ON_HOLD' WHERE id = ?", applicationId))
+                .isInstanceOf(DataAccessException.class);
     }
 }

@@ -68,3 +68,20 @@ jobs:
         with:
           name: test-reports
           path: src/backend/target/surefire-reports/
+
+  # Unit tests for the browser-side dashboard logic (src/webapp/js/analytics.js, charts.js).
+  # Uses Node's built-in test runner, so there is nothing to npm install.
+  frontend:
+    name: Frontend unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run dashboard tests
+        run: node --test src/webapp/tests/analytics.test.js
