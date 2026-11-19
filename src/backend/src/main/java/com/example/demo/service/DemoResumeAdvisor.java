@@ -1,63 +1,95 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.ResumeFeedback;
-import com.example.demo.dto.ResumeFeedback.Suggestion;
+import com.example.demo.dto.ResumeOptimization;
+import com.example.demo.dto.ResumeOptimization.Line;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 // Used when no Claude API key is configured, so the feature can be shown and tested
-// without calling the API. The page labels this feedback as sample data. A few simple
-// checks on DOCX text keep it from being identical for every resume; PDFs get the
-// general sample only, since the server doesn't extract PDF text itself.
+// without calling the API. The page labels these suggestions as sample data.
 public class DemoResumeAdvisor implements ResumeAdvisor {
 
     private static final Pattern NUMBER = Pattern.compile("\\d");
-    private static final Pattern EMAIL = Pattern.compile("[^\\s@]+@[^\\s@]+\\.[^\\s@]+");
 
     @Override
     public boolean isDemo() {
         return true;
     }
 
-    @Override
-    public ResumeFeedback review(ResumeContent resume) {
-        List<Suggestion> suggestions = new ArrayList<>();
-        String summary = "This is sample feedback from demo mode, so it isn't based on a real AI review of your resume.";
+    // Weak openings and the stronger verb the demo suggests instead
+    private static final List<String[]> WEAK_OPENINGS = List.of(
+            new String[] { "responsible for ", "Led " },
+            new String[] { "in charge of ", "Managed " },
+            new String[] { "worked on ", "Built " },
+            new String[] { "helped with ", "Contributed to " },
+            new String[] { "helped ", "Supported " },
+            new String[] { "did ", "Completed " });
+    private static final Pattern BULLET_MARK = Pattern.compile("^[-*•▪●◦]\\s*");
+    private static final int MAX_RESULT_HINTS = 3;
 
-        if (!resume.isPdf() && resume.text() != null) {
-            String text = resume.text();
-            int words = text.isBlank() ? 0 : text.trim().split("\\s+").length;
-            summary += " Your resume has about " + words + " words.";
-            if (words < 150) {
-                suggestions.add(new Suggestion("Content",
-                        "Your resume is quite short. Add a line or two about what you did and achieved in each role or project."));
-            } else if (words > 900) {
-                suggestions.add(new Suggestion("Clarity",
-                        "Your resume is long. Aim for one page by cutting older or less relevant details."));
-            }
-            if (!NUMBER.matcher(text).find()) {
-                suggestions.add(new Suggestion("Impact",
-                        "Add numbers where you can, such as team size, users, or time saved, so readers can see the scale of your work."));
-            }
-            if (!EMAIL.matcher(text).find()) {
-                suggestions.add(new Suggestion("Content",
-                        "Make sure your email address is at the top so recruiters can contact you."));
-            }
+    // Simple rule-based rewrites of DOCX lines. PDFs get a short sample, since the server
+    // doesn't extract PDF text itself.
+    @Override
+    public ResumeOptimization optimize(ResumeContent resume) {
+        if (resume.isPdf() || resume.text() == null) {
+            return new ResumeOptimization(
+                    "This is a sample from demo mode. Demo mode can't read PDF text, so these lines aren't from your resume.",
+                    List.of(
+                            new Line("heading", "EXPERIENCE", "", "", ""),
+                            new Line("bullet", "Responsible for the team website",
+                                    "Led the redesign of the team website, cutting page load time by [X%]", "Impact",
+                                    "Starting with an action verb and a result shows what you achieved. Fill in the number or remove it."),
+                            new Line("bullet", "Worked on customer support tickets",
+                                    "Resolved [number] customer support tickets per week", "Impact",
+                                    "A specific number shows the scale of your work. Fill it in or remove it.")));
         }
 
-        suggestions.add(new Suggestion("Impact",
-                "Start each bullet point with an action verb (built, led, improved) and end it with the result."));
-        suggestions.add(new Suggestion("Organization",
-                "Put your most relevant experience for the jobs you're applying to first."));
-        suggestions.add(new Suggestion("Formatting",
-                "Keep fonts, dates and bullet styles consistent so the resume is easy to scan."));
+        List<Line> lines = new ArrayList<>();
+        int resultHints = 0;
+        for (String raw : resume.text().split("\n")) {
+            String text = raw.strip();
+            if (text.isEmpty()) {
+                continue;
+            }
+            boolean bullet = BULLET_MARK.matcher(text).find();
+            text = BULLET_MARK.matcher(text).replaceFirst("");
+            String kind = bullet ? "bullet" : isHeading(text) ? "heading" : "text";
 
-        return new ResumeFeedback(
-                summary,
-                List.of("You've uploaded a resume in a format employers accept.",
-                        "Getting feedback before applying is a good habit."),
-                suggestions);
+            String improved = strongerOpening(text);
+            if (improved != null) {
+                lines.add(new Line(kind, text, improved, "Impact",
+                        "Starting with a strong action verb shows what you did rather than what you were assigned."));
+            } else if (bullet && !NUMBER.matcher(text).find() && text.length() > 25 && resultHints < MAX_RESULT_HINTS) {
+                resultHints++;
+                lines.add(new Line(kind, text, trimEnd(text) + ", resulting in [measurable result]", "Impact",
+                        "Ending with the result shows why the work mattered. Fill in the placeholder or remove it."));
+            } else {
+                lines.add(new Line(kind, text, "", "", ""));
+            }
+        }
+        return new ResumeOptimization(
+                "This is sample output from demo mode, made with simple rules rather than a real AI review.",
+                lines);
+    }
+
+    private static String strongerOpening(String text) {
+        String lower = text.toLowerCase(java.util.Locale.ROOT);
+        for (String[] opening : WEAK_OPENINGS) {
+            if (lower.startsWith(opening[0]) && text.length() > opening[0].length()) {
+                return opening[1] + text.substring(opening[0].length());
+            }
+        }
+        return null;
+    }
+
+    private static boolean isHeading(String text) {
+        return text.length() <= 40 && text.chars().anyMatch(Character::isLetter)
+                && text.equals(text.toUpperCase(java.util.Locale.ROOT));
+    }
+
+    private static String trimEnd(String text) {
+        return text.replaceAll("[.;,\\s]+$", "");
     }
 }
