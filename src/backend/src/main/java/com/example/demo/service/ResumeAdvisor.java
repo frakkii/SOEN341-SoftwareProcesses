@@ -1,14 +1,15 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.ResumeFeedback;
+import com.example.demo.dto.ResumeOptimization;
 
-// Gives feedback on a resume. ClaudeResumeAdvisor asks the Claude API; DemoResumeAdvisor
-// returns sample feedback when no API key is configured (local runs, tests, CI).
+// Suggests line-by-line improvements to a resume. ClaudeResumeAdvisor asks the Claude API;
+// DemoResumeAdvisor returns sample suggestions when no API key is configured (local runs, tests, CI).
 public interface ResumeAdvisor {
 
-    ResumeFeedback review(ResumeContent resume);
+    // Line-by-line suggested rewrites, used to build an improved resume
+    ResumeOptimization optimize(ResumeContent resume);
 
-    // True when the feedback is sample data rather than a real AI review
+    // True when the suggestions are sample data rather than a real AI review
     boolean isDemo();
 
     // A resume to review: either the PDF file itself or plain text extracted from a DOCX

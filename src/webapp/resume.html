@@ -18,11 +18,38 @@
         @media (prefers-reduced-motion: reduce) { .ai-spinner { animation: none; } }
         .ai-result { margin-top: 16px; }
         .ai-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #fef3c7; color: #92400e; font-size: .78rem; font-weight: 800; margin-bottom: 10px; }
-        .ai-result h3 { font-size: 1rem; margin: 16px 0 6px; }
-        .ai-result ul { margin: 0; padding-left: 20px; }
-        .ai-result li { margin: 4px 0; }
         .ai-area { display: inline-block; min-width: 92px; margin-right: 6px; padding: 1px 8px; border-radius: 8px; background: #efedfb; color: #4c1d95; font-size: .78rem; font-weight: 800; }
         .ai-notice { margin-top: 14px; font-size: .85rem; color: var(--muted); }
+
+        /* Line-by-line optimizer */
+        .opt-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin: 14px 0 10px; }
+        .opt-count { font-weight: 700; }
+        .opt-bar .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn.small { padding: 6px 12px; font-size: .85rem; }
+        .opt-lines { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+        .opt-line { padding: 6px 14px; border-top: 1px solid var(--line); color: var(--muted); overflow-wrap: anywhere; }
+        .opt-line:first-child { border-top: 0; }
+        .opt-line.heading { font-weight: 800; color: inherit; }
+        .opt-line.bullet::before { content: "• "; }
+        .opt-line.sugg { padding: 12px 14px; color: inherit; background: #faf9ff; }
+        .opt-line.sugg.accepted { background: #ecfdf5; }
+        .opt-line.sugg.rejected { background: #f9fafb; }
+        .opt-old, .opt-new { display: block; padding: 4px 8px; border-radius: 8px; margin: 4px 0; }
+        .opt-old { background: #fef2f2; color: #7f1d1d; }
+        .opt-new { background: #ecfdf5; color: #064e3b; }
+        .opt-line.rejected .opt-new { opacity: .55; }
+        .opt-line.accepted .opt-old { text-decoration: line-through; opacity: .7; }
+        .opt-tag { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; margin-right: 6px; }
+        .opt-why { font-size: .88rem; color: var(--muted); margin: 6px 0 8px; }
+        .opt-choice { display: flex; gap: 8px; }
+        .opt-choice button[aria-pressed="true"].accept { background: #059669; color: #fff; border-color: #059669; }
+        .opt-choice button[aria-pressed="true"].reject { background: #6b7280; color: #fff; border-color: #6b7280; }
+        .opt-fig { font: inherit; font-weight: 700; color: #064e3b; background: #fff; border: 1.5px dashed #059669; border-radius: 6px; padding: 1px 6px; margin: 0 2px; max-width: 100%; }
+        .opt-fig:focus { outline: 2px solid var(--violet); outline-offset: 1px; border-style: solid; }
+        .opt-fig.filled { border-style: solid; }
+        .opt-fig.missing { border-color: #dc2626; background: #fef2f2; }
+        .opt-fig-hint { display: block; font-size: .8rem; color: #065f46; margin-top: 2px; }
+        .opt-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
     </style>
 </head>
 
@@ -68,20 +95,20 @@
         </div>
     </div>
 
-    <!-- AI resume feedback (story #10): shown once a resume is uploaded -->
-    <section class="card pad ai-card hidden" id="ai" aria-labelledby="ai-title">
+    <!-- AI line-by-line optimizer: accept or reject each suggested rewrite, then download or save -->
+    <section class="card pad ai-card hidden" id="opt" aria-labelledby="opt-title">
         <div class="ai-head">
             <div>
-                <h2 id="ai-title">AI resume feedback</h2>
-                <p class="subtitle">Get suggestions on your current resume's content, organization and clarity before you apply.</p>
+                <h2 id="opt-title">Improve my resume line by line</h2>
+                <p class="subtitle">The AI suggests a rewrite for lines that could be stronger. Accept the ones you like, then download an improved resume or save it as your new version.</p>
             </div>
-            <button type="button" class="btn primary" id="ai-btn">Get feedback</button>
+            <button type="button" class="btn primary" id="opt-btn">Suggest improvements</button>
         </div>
-        <div class="ai-loading hidden" id="ai-loading" role="status">
-            <span class="ai-spinner" aria-hidden="true"></span>Reviewing your resume. This can take up to a minute.
+        <div class="ai-loading hidden" id="opt-loading" role="status">
+            <span class="ai-spinner" aria-hidden="true"></span>Going through your resume line by line. This can take a minute or two.
         </div>
-        <div id="ai-message" class="message error hidden" role="alert"></div>
-        <div class="ai-result hidden" id="ai-result" aria-live="polite"></div>
+        <div id="opt-message" class="message hidden" role="alert"></div>
+        <div class="ai-result hidden" id="opt-result"></div>
     </section>
 </main>
 
@@ -144,45 +171,264 @@
             document.getElementById("current-details").textContent =
                 formatSize(data.fileSize) + " · uploaded " + new Date(data.uploadedAt).toLocaleString();
         }
-        // Feedback is about one resume: hide it until there is one, and clear old feedback after a new upload
-        document.getElementById("ai").classList.toggle("hidden", !hasResume);
-        resetFeedback();
+        // Suggestions are about one resume: hide them until there is one, and clear old ones after a new upload
+        document.getElementById("opt").classList.toggle("hidden", !hasResume);
+        resetOptimizer();
     }
 
-    // ---- AI resume feedback (POST /api/resume/feedback) ----
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-    function resetFeedback() {
-        document.getElementById("ai-result").classList.add("hidden");
-        document.getElementById("ai-result").innerHTML = "";
-        document.getElementById("ai-message").classList.add("hidden");
-        document.getElementById("ai-btn").textContent = "Get feedback";
+    // ---- AI line-by-line optimizer (/api/resume/optimization) ----
+    // The server keeps the AI's result; the page only sends back which suggestions were accepted
+    // and the figures typed into their placeholders (like [X%]).
+    let optLines = [];
+    const optChoice = {};          // line index -> true (accepted) / false (rejected); missing = not decided
+    const optFigures = {};         // line index -> figures typed in, in placeholder order
+    // Same rule as the server: a [placeholder] in the suggestion that isn't already in the original line
+    const PLACEHOLDER = /\[([^\[\]\r\n]{1,60})\]/g;
+
+    function resetOptimizer() {
+        optLines = [];
+        Object.keys(optChoice).forEach(k => delete optChoice[k]);
+        Object.keys(optFigures).forEach(k => delete optFigures[k]);
+        document.getElementById("opt-result").classList.add("hidden");
+        document.getElementById("opt-result").innerHTML = "";
+        document.getElementById("opt-message").classList.add("hidden");
+        document.getElementById("opt-btn").textContent = "Suggest improvements";
     }
 
-    function renderFeedback(data) {
-        const f = data.feedback || {};
-        const list = items => (items || []).map(i => "<li>" + esc(i) + "</li>").join("");
-        document.getElementById("ai-result").innerHTML =
-            (data.demo ? '<span class="ai-badge">Demo mode: sample feedback, not a real AI review</span>' : "") +
-            '<p class="muted">Feedback on ' + esc(data.fileName) + "</p>" +
-            "<p>" + esc(f.summary || "") + "</p>" +
-            "<h3>What's working</h3><ul>" + list(f.strengths) + "</ul>" +
-            "<h3>Suggestions</h3><ul>" + (f.suggestions || []).map(s =>
-                '<li><span class="ai-area">' + esc(s.area) + "</span>" + esc(s.suggestion) + "</li>").join("") + "</ul>" +
+    function optMessage(text, type) {
+        const el = document.getElementById("opt-message");
+        el.textContent = text;
+        el.className = "message " + type;
+        el.classList.toggle("hidden", !text);
+    }
+
+    const acceptedIndexes = () => optLines.filter(l => l.suggested && optChoice[l.index] === true).map(l => l.index);
+
+    // Accepted figures still empty, as [line index, figure number] pairs
+    function missingFigures() {
+        const missing = [];
+        acceptedIndexes().forEach(i => {
+            const line = optLines.find(l => l.index === i);
+            (line.figures || []).forEach((_, f) => {
+                if (!((optFigures[i] || [])[f] || "").trim()) missing.push([i, f]);
+            });
+        });
+        return missing;
+    }
+
+    // The suggested text with a box for each figure to fill in
+    function suggestionHtml(l) {
+        let html = "", last = 0, figure = 0;
+        for (const m of l.improved.matchAll(PLACEHOLDER)) {
+            if (l.original.includes(m[0])) continue;
+            const label = m[1].trim();
+            html += esc(l.improved.slice(last, m.index)) +
+                '<input type="text" class="opt-fig" maxlength="60" data-index="' + l.index + '" data-fig="' + figure + '"' +
+                ' placeholder="' + esc(label) + '" aria-label="' + esc(label) + '" size="' + Math.max(6, Math.min(label.length + 2, 30)) + '">';
+            last = m.index + m[0].length;
+            figure++;
+        }
+        return html + esc(l.improved.slice(last));
+    }
+
+    function renderOptimizer(data) {
+        optLines = data.lines || [];
+        const lines = optLines.map(l => {
+            if (!l.suggested) {
+                return '<li class="opt-line ' + esc(l.kind) + '">' + esc(l.original) + "</li>";
+            }
+            return '<li class="opt-line sugg ' + esc(l.kind) + '" data-index="' + l.index + '">' +
+                '<span class="opt-old"><span class="opt-tag">' + (l.original ? "Now" : "New line") + "</span>" +
+                    esc(l.original || "(not in your resume yet)") + "</span>" +
+                '<span class="opt-new"><span class="opt-tag">Suggested</span>' + suggestionHtml(l) +
+                    ((l.figures || []).length ? '<span class="opt-fig-hint">Type your real figure' + (l.figures.length > 1 ? "s" : "") +
+                        " in the box" + (l.figures.length > 1 ? "es" : "") + ", or reject this suggestion if you don't have one.</span>" : "") +
+                "</span>" +
+                '<p class="opt-why">' + (l.area ? '<span class="ai-area">' + esc(l.area) + "</span>" : "") + esc(l.reason) + "</p>" +
+                '<div class="opt-choice" role="group" aria-label="Suggestion for: ' + esc(l.original || l.improved) + '">' +
+                    '<button type="button" class="btn small accept" data-choice="accept" aria-pressed="false">Accept</button>' +
+                    '<button type="button" class="btn small reject" data-choice="reject" aria-pressed="false">Reject</button>' +
+                "</div></li>";
+        }).join("");
+
+        const none = data.suggestionCount === 0;
+        document.getElementById("opt-result").innerHTML =
+            (data.demo ? '<span class="ai-badge">Demo mode: sample suggestions, not a real AI review</span>' : "") +
+            '<p class="muted">Suggestions for ' + esc(data.fileName) + "</p>" +
+            "<p>" + esc(data.summary || "") + "</p>" +
+            (none ? "<p><strong>No changes suggested.</strong> The AI thinks your lines already read well.</p>" :
+            '<div class="opt-bar"><span class="opt-count" id="opt-count" aria-live="polite"></span>' +
+                '<div class="btn-row"><button type="button" class="btn small" id="opt-accept-all">Accept all</button>' +
+                '<button type="button" class="btn small" id="opt-reject-all">Reject all</button></div></div>') +
+            '<ul class="opt-lines">' + lines + "</ul>" +
+            '<div class="opt-actions">' +
+                '<button type="button" class="btn primary" id="opt-download">Download improved resume (.docx)</button>' +
+                '<button type="button" class="btn" id="opt-report">Download suggestions report (.docx)</button>' +
+                '<button type="button" class="btn" id="opt-save">Save as new resume version</button>' +
+            "</div>" +
             '<p class="ai-notice">' + esc(data.notice || "") + "</p>";
-        document.getElementById("ai-result").classList.remove("hidden");
-        document.getElementById("ai-btn").textContent = "Get new feedback";
+
+        document.getElementById("opt-result").classList.remove("hidden");
+        document.getElementById("opt-btn").textContent = "Get new suggestions";
+        if (!none) {
+            document.getElementById("opt-accept-all").addEventListener("click", () => setAll(true));
+            document.getElementById("opt-reject-all").addEventListener("click", () => setAll(false));
+        }
+        document.getElementById("opt-download").addEventListener("click", () => downloadFile("/api/resume/optimization/resume", true));
+        document.getElementById("opt-report").addEventListener("click", () => downloadFile("/api/resume/optimization/report"));
+        document.getElementById("opt-save").addEventListener("click", saveVersion);
+        updateChoices();
     }
 
-    async function getFeedback() {
-        const button = document.getElementById("ai-btn");
-        const message = document.getElementById("ai-message");
-        const loading = document.getElementById("ai-loading");
-        message.classList.add("hidden");
+    function setAll(accept) {
+        optLines.filter(l => l.suggested).forEach(l => { optChoice[l.index] = accept; });
+        updateChoices();
+    }
+
+    // Shows each suggestion's choice and the running count
+    function updateChoices() {
+        document.querySelectorAll(".opt-line.sugg").forEach(li => {
+            const choice = optChoice[li.dataset.index];
+            li.classList.toggle("accepted", choice === true);
+            li.classList.toggle("rejected", choice === false);
+            li.querySelector(".accept").setAttribute("aria-pressed", String(choice === true));
+            li.querySelector(".reject").setAttribute("aria-pressed", String(choice === false));
+        });
+        const count = document.getElementById("opt-count");
+        if (count) {
+            const total = optLines.filter(l => l.suggested).length;
+            const accepted = acceptedIndexes().length;
+            const rejected = optLines.filter(l => l.suggested && optChoice[l.index] === false).length;
+            const left = total - accepted - rejected;
+            const figures = missingFigures().length;
+            count.textContent = accepted + " accepted · " + rejected + " rejected" + (left ? " · " + left + " to review" : "") +
+                (figures ? " · " + figures + " figure" + (figures === 1 ? "" : "s") + " to fill in" : "");
+        }
+    }
+
+    document.getElementById("opt-result").addEventListener("click", event => {
+        const button = event.target.closest("button[data-choice]");
+        if (!button) return;
+        const index = button.closest(".opt-line").dataset.index;
+        const accept = button.dataset.choice === "accept";
+        // Clicking the pressed button again clears the choice
+        optChoice[index] = optChoice[index] === accept ? undefined : accept;
+        if (optChoice[index] === undefined) delete optChoice[index];
+        updateChoices();
+    });
+
+    // Typing a figure records it and accepts the suggestion if it wasn't decided yet
+    document.getElementById("opt-result").addEventListener("input", event => {
+        const input = event.target.closest(".opt-fig");
+        if (!input) return;
+        const index = input.dataset.index;
+        (optFigures[index] = optFigures[index] || [])[Number(input.dataset.fig)] = input.value;
+        input.classList.toggle("filled", input.value.trim() !== "");
+        input.classList.remove("missing");
+        if (input.value.trim() && optChoice[index] === undefined) optChoice[index] = true;
+        updateChoices();
+    });
+
+    // Before making the improved resume: every accepted suggestion needs its figures
+    function checkFigures() {
+        const missing = missingFigures();
+        document.querySelectorAll(".opt-fig.missing").forEach(el => el.classList.remove("missing"));
+        if (!missing.length) return true;
+        missing.forEach(([i, f]) => {
+            const input = document.querySelector('.opt-fig[data-index="' + i + '"][data-fig="' + f + '"]');
+            if (input) input.classList.add("missing");
+        });
+        optMessage("Fill in the " + (missing.length === 1 ? "highlighted figure" : missing.length + " highlighted figures") +
+            " with your real numbers, or reject those suggestions.", "error");
+        const first = document.querySelector(".opt-fig.missing");
+        if (first) first.focus();
+        return false;
+    }
+
+    // Sends the accepted suggestions; handles the shared error cases for all three actions
+    async function postAccepted(url) {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                accepted: acceptedIndexes(),
+                figures: Object.fromEntries(acceptedIndexes().filter(i => optFigures[i])
+                    .map(i => [i, (optLines.find(l => l.index === i).figures || []).map((_, f) => (optFigures[i][f] || "").trim())]))
+            })
+        });
+        if (res.status === 401) {
+            localStorage.removeItem("userName");
+            window.location.href = "index.html";
+            return null;
+        }
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.message || "That didn't work (" + res.status + "). Please try again.");
+        }
+        return res;
+    }
+
+    function fileNameFrom(res, fallback) {
+        const header = res.headers.get("Content-Disposition") || "";
+        const encoded = header.match(/filename\*=UTF-8''([^;]+)/i);
+        if (encoded) return decodeURIComponent(encoded[1]);
+        const plain = header.match(/filename="([^"]+)"/i);
+        return plain ? plain[1] : fallback;
+    }
+
+    async function downloadFile(url, needsFigures) {
+        optMessage("", "");
+        if (needsFigures && !checkFigures()) return;
+        try {
+            const res = await postAccepted(url);
+            if (!res) return;
+            const blob = await res.blob();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileNameFrom(res, "resume.docx");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        } catch (err) {
+            optMessage(err.message, "error");
+        }
+    }
+
+    async function saveVersion() {
+        optMessage("", "");
+        if (!checkFigures()) return;
+        const accepted = acceptedIndexes().length;
+        if (!confirm("Save the improved resume (" + accepted + " accepted change" + (accepted === 1 ? "" : "s") + ") as your current resume?\n\n" +
+                "It will be sent with your new applications. Your current resume stays in your versions.")) {
+            return;
+        }
+        const button = document.getElementById("opt-save");
+        button.disabled = true;
+        optMessage("", "");
+        try {
+            const res = await postAccepted("/api/resume/optimization/save");
+            if (!res) return;
+            const data = await res.json().catch(() => ({}));
+            await loadResume();                     // shows the new current resume and clears old suggestions
+            showMessage(data.message || "Saved as your current resume.", "success");
+            document.getElementById("message").scrollIntoView({ behavior: "smooth", block: "center" });
+        } catch (err) {
+            optMessage(err.message, "error");
+            button.disabled = false;
+        }
+    }
+
+    async function getSuggestions() {
+        const button = document.getElementById("opt-btn");
+        const loading = document.getElementById("opt-loading");
+        optMessage("", "");
         button.disabled = true;
         loading.classList.remove("hidden");
         try {
-            const res = await fetch("/api/resume/feedback", { method: "POST" });
+            const res = await fetch("/api/resume/optimization", { method: "POST" });
             const data = await res.json().catch(() => ({}));
             if (res.status === 401) {
                 localStorage.removeItem("userName");
@@ -190,20 +436,20 @@
                 return;
             }
             if (!res.ok) {
-                throw new Error(data.message || "Feedback couldn't be generated (" + res.status + "). Please try again.");
+                throw new Error(data.message || "Suggestions couldn't be generated (" + res.status + "). Please try again.");
             }
-            renderFeedback(data);
+            resetOptimizer();
+            renderOptimizer(data);
         } catch (err) {
-            document.getElementById("ai-result").classList.add("hidden");
-            message.textContent = err.message;
-            message.classList.remove("hidden");
+            document.getElementById("opt-result").classList.add("hidden");
+            optMessage(err.message, "error");
         } finally {
             loading.classList.add("hidden");
             button.disabled = false;
         }
     }
 
-    document.getElementById("ai-btn").addEventListener("click", getFeedback);
+    document.getElementById("opt-btn").addEventListener("click", getSuggestions);
 
     async function handleUpload(event) {
         event.preventDefault();
