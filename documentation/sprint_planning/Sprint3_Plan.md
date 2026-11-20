@@ -88,7 +88,7 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 | Line-by-line AI suggestions to accept or reject, figures to fill in, download the improved resume and a report as .docx, save as a new resume version (replaces the "Get feedback" card) | dchamp214 | _none_ | Done: PR #184. Tested in the app on 2026-11-19 in demo mode; a real Claude call still needs a team API key |
 | AI tests | frakkii, dchamp214 | _none_ | Done: 7 tests in PR #183 still in use (resume reading, API key setup), 20 tests in PR #184 (suggestions, accept/reject, figures, downloads, save as version) |
 | Choose the model/provider and keep the API key out of the repo | frakkii | #180 | Claude (`claude-opus-5-5`); key read from `ANTHROPIC_API_KEY`, never committed. The team still needs a key for real reviews |
-| Acceptance test AT-31 | hirurathnayaka77 | #160 | Written in PR #161; passed in demo mode on the first version (#183). Its steps still describe the "Get feedback" card, so they need updating for #184 |
+| Acceptance test AT-31 | hirurathnayaka77 | #160 | Written in PR #161. Steps rewritten for the line-by-line suggestions (#184) and passed in demo mode on 2026-11-19 |
 
 ### Supporting work
 

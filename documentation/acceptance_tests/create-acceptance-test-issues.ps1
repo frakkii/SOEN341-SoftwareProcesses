@@ -217,11 +217,11 @@ $Tests = @(
        Auto  = 'Pending: no automated test method currently exists' }
 
     # ---- #10 AI resume feedback (Sprint 3) ----
-    @{ Id = 'AT-31'; Story = 10; Title = 'Job seeker receives safe AI resume feedback'
-       Given = 'I am logged in as a job seeker with a supported readable resume, an unsupported resume file, and an unreadable or unprocessable resume file available for testing'
-       Steps = 'Open the resume feedback feature', 'Request feedback for the supported readable resume', 'Observe the page while analysis is in progress', 'Wait for the analysis to finish and review the generated feedback', 'Request feedback for the unsupported file', 'Request feedback for the unreadable or unprocessable file'
-       Then  = 'A loading indicator is shown while processing; successful feedback contains suggestions about resume content, organization, and clarity plus a clear advisory message that it should be reviewed before use; the unsupported file is rejected with a clear message; and the unreadable or unprocessable file shows a clear processing-error message without a false success result'
-       Auto  = 'Pending: no automated test method currently exists' }
+    @{ Id = 'AT-31'; Story = 10; Title = 'Job seeker improves their resume with AI suggestions'
+       Given = 'I am logged in as a job seeker whose current resume is a readable PDF or DOCX, and I also have an old Word .doc resume and a file with no readable text (a damaged file or a scanned PDF) for the error cases'
+       Steps = 'Open My CVs & Cover Letters and click Suggest improvements', 'Watch the page while the suggestions are prepared', 'Review the suggestions: each one shows the current line, the suggested rewrite and the reason', 'Accept some suggestions and reject at least one; if an accepted suggestion has a box for a figure, try to download before filling it in, then type a real figure', 'Click Download improved resume (.docx) and Download suggestions report (.docx), and open both files', 'Click Save as new resume version and confirm', 'Upload the .doc resume and click Suggest improvements', 'Upload the file with no readable text and click Suggest improvements'
+       Then  = 'A loading message is shown while the suggestions are prepared; every suggestion shows a rewrite and a reason, and the page says the suggestions are AI-generated and must be checked (in demo mode it also says they are sample suggestions); an accepted suggestion with an empty figure box cannot be downloaded or saved until it is filled in; the improved resume contains only the accepted rewrites and leaves rejected and other lines unchanged, and the report lists every suggestion and whether it was accepted; after saving, the improved resume is the current resume and the previous one is still in the versions; the .doc resume gets "The AI optimizer works with PDF and DOCX resumes" and the file with no text gets a clear error, and neither shows suggestions'
+       Auto  = 'PR #184: ResumeOptimizationControllerTests (14 tests, e.g. improvedResumeUsesOnlyAcceptedSuggestions, acceptedFiguresMustBeFilledInBeforeTheResumeIsMade, savingMakesTheImprovedResumeTheCurrentVersion, oldWordFilesAreRefused), DocxTextTest' }
 )
 
 function Get-Body($t) {
