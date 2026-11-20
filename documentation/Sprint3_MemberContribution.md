@@ -25,7 +25,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Register as Job Seeker or Recruiter: PR [#151](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/151)
 - Branches: `docs/sprint3-management` (PR [#163](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/163)), `docs/francesca-sprint3-ai-log2` (PR [#168](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/168)), `feature/recruiter-edit-archive-filters`
 - AI logs: `AI_logs/Francesca/Sprint3/`
-- **Time spent:** _[to fill in]_
+- **Time spent:** 3 hours
 
 ## Audrey Prevost (40027535)
 **Planned:** user story, fixed bugs from Sprint 2
@@ -34,14 +34,14 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Account type selector on the sign-up page: Job Seeker / Recruiter radio buttons styled as a toggle, recruiter-only fields shown for recruiters, role change handling cleaned up: PR [#153](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/153) (merged 2026-11-02)
 - Resume versions migration (`V7__add_resume_versions.sql`) refactored with comments and checks, a fix carried over from Sprint 2: PR [#152](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/152) (merged 2026-11-02)
 - Cleaned up `AI_logs/Audrey/` (removed old copied source folders, re-uploaded the logs)
-- **Time spent:** _[to fill in]_
+- **Time spent:** 3 hours
 
 ## Donald Champ (40270957)
 **Planned:** user story, fixing and reviewing code
 
 - Finished the AI feature (Sprint 3 feature 4, story #10): line-by-line AI resume suggestions on the resume page. The job seeker accepts or rejects each rewrite, types in real figures where the AI leaves a placeholder like `[X%]`, downloads the improved resume and a suggestions report as .docx, and can save the result as a new resume version. `POST /api/resume/optimization` with the Claude API, demo mode without a key, `DocxWriter` for the output files. Replaced the Get feedback card from #183 and reused its resume reading, Claude client and demo mode. 20 new backend tests (126 pass): PR [#184](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/184) (merged)
 - AI log: `AI_logs/Donald/Sprint3/task1-ai-resume-optimizer.md`
-- **Time spent:** _[to fill in]_
+- **Time spent:** 3 hours
 
 ## Shanza Riasat (40337845)
 **Planned:** user story, notifications and reminders backend
@@ -49,14 +49,14 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Notifications and reminders backend: `Notification` entity and `V11__create_notifications.sql` migration; `GET /api/notifications` (optionally unread only), `GET /api/notifications/unread-count`, `PATCH /api/notifications/{id}/read` and `/read-all`; notifications created when a job seeker applies (to the recruiter) and when a recruiter changes an application's status (to the job seeker); a daily `DeadlineReminderService` job that reminds job seekers one day before a posting's deadline. 5 controller tests, CI passes: PR [#182](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/182) (open; replaces PR [#172](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/172))
 - Took the notes at Meeting 4 (2026-11-05) and proposed the Sprint 3 feature split
 - AI log: `AI_logs/Shanza/AI_Log_sprint3.md`
-- **Time spent:** _[to fill in]_
+- **Time spent:** 3 hours
 
 ## Mario Habib (40283335)
 **Planned:** user story, recruiter dashboard, settings feature (6 hours)
 
 - Recruiter UI redesign (recruiter home, postings, applicants, create posting), recruiter and job seeker settings pages, `GET /api/auth/me` session check, session cookie settings: PR [#166](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/166)
 - AI log: `AI_logs/Mario/Sprint3/task1-profile-employer-refinement.md`
-- **Time spent:** _[to fill in]_
+- **Time spent:** 3 hours
 
 ## Hirushi Rathnayaka (40237379)
 **Planned:** user story, notifications and reminders frontend, acceptance tests
@@ -65,7 +65,7 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Acceptance test issues #154–#160
 - Frontend API contract for the notifications backend (`documentation/notifications/frontend-api-contract.md`) and a demo mode (`notifications.html?demoNotifications=1`) so the page can be shown without the backend (in PR #161)
 - AI logs and Sprint 3 individual report: `AI_logs/Hiru/Sprint3/` (in PR #161)
-- **Time spent:** _[to fill in]_
+- **Time spent:** 3 hours
 
 ## Dani Tannir (40298707)
 **Planned:** user story, application analytics and history dashboard backend
@@ -73,4 +73,4 @@ Repository: https://github.com/frakkii/SOEN341-SoftwareProcesses
 - Application analytics and history dashboard: stat tiles, status breakdown chart, applications per month, history search/filter/sort; 28 frontend unit tests, 4 backend tests, and a frontend test job in CI: PR [#162](https://github.com/frakkii/SOEN341-SoftwareProcesses/pull/162) (merged)
 - Tasks: #56 Application summary dashboard frontend
 - AI logs: `AI_logs/Dani/Sprint3/` (in PR #162)
-- **Time spent:** _[to fill in]_
+- **Time spent:** 3 hours
