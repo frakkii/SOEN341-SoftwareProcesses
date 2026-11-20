@@ -127,8 +127,9 @@
     submitBtn.disabled = true; submitBtn.textContent = "Posting...";
     try {
       // RC.api sends the session cookie and sends you back to the login page if the session ended
-      await RC.api("/api/postings/create", { method: "POST", body: payload });
-      show("ok", 'Job posted. <a class="rc-link" href="recruiterpostings.html">View your jobs</a>');
+      const result = await RC.api("/api/postings/create", { method: "POST", body: payload });
+      show("ok", `Job posted. Notifications sent to ${result.notifiedJobSeekers} job seekers. `
+        + '<a class="rc-link" href="recruiterpostings.html">View your jobs</a>');
       form.reset(); $("jobType").value = RC.prefs.get().defaultJobType; preview();
     } catch (error) {
       show("err", RC.esc(error.message));

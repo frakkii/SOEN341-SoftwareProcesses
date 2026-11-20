@@ -13,6 +13,7 @@
     APPLICATION_STATUS_UPDATED: { icon: 'chart', label: 'Application update', forRecruiter: false },
     INTERVIEW_INVITATION: { icon: 'calendar', label: 'Interview invitation', forRecruiter: false },
     DEADLINE_REMINDER: { icon: 'bell', label: 'Deadline reminder', forRecruiter: false },
+    NEW_JOB_POSTING: { icon: 'briefcase', label: 'New job posting', forRecruiter: false },
     NEW_APPLICATION: { icon: 'users', label: 'New application', forRecruiter: true }
   };
 

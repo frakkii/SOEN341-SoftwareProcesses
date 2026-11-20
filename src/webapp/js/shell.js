@@ -209,6 +209,10 @@
       if (demoEnabled) return demoStore.get();
       return api('/api/notifications');
     },
+    async getUnread() {
+      if (demoEnabled) return demoStore.get().filter(N.isUnread);
+      return api('/api/notifications?unreadOnly=true');
+    },
     async markRead(id) {
       if (demoEnabled) return demoStore.markRead(id);
       return api('/api/notifications/' + encodeURIComponent(id) + '/read', { method: 'PATCH' });
@@ -223,10 +227,72 @@
   };
 
   // The backend may return either an array or { notifications, unreadCount }.
-  // The page owns full rendering; the shell only keeps the global unread badge current.
-  notificationData.get().then(data => {
-    notificationData.updateBadge(data);
-  }).catch(() => {});
+  // Refresh while the page is open so newly created notifications reach the badge.
+  const seenNotificationIds = new Set();
+  let refreshingNotifications = false;
+  let refreshRequested = false;
+  async function refreshNotifications(announceNew = false) {
+    if (refreshingNotifications) {
+      refreshRequested = true;
+      return;
+    }
+    refreshingNotifications = true;
+    try {
+      const data = await notificationData.getUnread();
+      const visible = notificationData.visible(data);
+      notificationData.updateBadge(data);
+      visible.forEach(notification => {
+        if (notification.id == null) return;
+        const id = String(notification.id);
+        if (announceNew && !seenNotificationIds.has(id) && N.isUnread(notification)) {
+          toast(notification.title || notification.message || 'You have a new notification.');
+        }
+        seenNotificationIds.add(id);
+      });
+    } catch (error) {
+      console.warn('Could not refresh notifications.', error);
+    } finally {
+      refreshingNotifications = false;
+      if (refreshRequested) {
+        refreshRequested = false;
+        refreshNotifications(true);
+      }
+    }
+  }
+
+  refreshNotifications();
+  if (!demoEnabled) {
+    if ('EventSource' in window) {
+      const notificationStream = new EventSource('/api/notifications/stream');
+      notificationStream.addEventListener('notification', event => {
+        try {
+          const notification = JSON.parse(event.data);
+          if (!notificationData.visible([notification]).length) return;
+
+          if (notification.id != null) {
+            const id = String(notification.id);
+            if (!seenNotificationIds.has(id) && N.isUnread(notification)) {
+              toast(notification.title || notification.message || 'You have a new notification.');
+            }
+            seenNotificationIds.add(id);
+          }
+
+          refreshNotifications(true);
+          window.dispatchEvent(new CustomEvent('cc:notification', { detail: notification }));
+        } catch (error) {
+          console.error('Could not process a live notification.', error);
+        }
+      });
+      notificationStream.onerror = () => {
+        console.warn('Live notifications are reconnecting.');
+      };
+    }
+    window.setInterval(() => refreshNotifications(true), 30_000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshNotifications(true);
+    });
+    window.addEventListener('focus', () => refreshNotifications(true));
+  }
 
   document.head.appendChild(Object.assign(document.createElement('script'), { src: 'js/logout.js' }));
 

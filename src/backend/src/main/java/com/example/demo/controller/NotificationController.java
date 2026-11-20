@@ -2,8 +2,11 @@ package com.example.demo.controller;
 
 import com.example.demo.exception.ApplicationException;
 import com.example.demo.service.NotificationService;
+import com.example.demo.service.NotificationPushService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +22,11 @@ import java.util.Map;
 public class NotificationController {
 
     private final NotificationService notifications;
+    private final NotificationPushService notificationPush;
 
-    public NotificationController(NotificationService notifications) {
+    public NotificationController(NotificationService notifications, NotificationPushService notificationPush) {
         this.notifications = notifications;
+        this.notificationPush = notificationPush;
     }
 
     @GetMapping
@@ -35,6 +40,12 @@ public class NotificationController {
     public Map<String, Long> unreadCount(HttpSession session) {
         Recipient recipient = recipient(session);
         return Map.of("count", notifications.unreadCount(recipient.role(), recipient.id()));
+    }
+
+    @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream(HttpSession session) {
+        Recipient recipient = recipient(session);
+        return notificationPush.subscribe(recipient.role(), recipient.id());
     }
 
     @PatchMapping("/{id}/read")
