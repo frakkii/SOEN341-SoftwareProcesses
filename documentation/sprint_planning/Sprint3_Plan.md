@@ -71,11 +71,12 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 
 | Task | Assignee | Issue | Status |
 |---|---|---|---|
-| #63 Application deadline notification implementation | _unassigned_ | #63 | Open |
-| Notifications backend (REST API, stored notifications, daily reminder job, mark as read) | Shanza687 | _new_ | **Code not in the repo.** Commit `3f2da65` on `main` only added the AI log; no notification Java classes or migration exist |
-| Notifications page and unread indicator (frontend) | hirurathnayaka77 | _new_ | In review: PR #161 (depends on the backend above) |
-| Notification tests | _unassigned_ | _new_ | Not started |
-| Acceptance tests AT-25 to AT-28 | hirurathnayaka77 | #154–#157 | Written in PR #161 |
+| #63 Application deadline notification implementation | Shanza687 | #63 | Done in PR #182: daily reminder one day before a saved job's deadline. Can't be used in the app until job seekers can save jobs (#62) |
+| Notifications backend (REST API, stored notifications, daily reminder job, mark as read) | Shanza687 | #178 | Done: PR #182 |
+| Notifications page and unread indicator (frontend) | hirurathnayaka77 | #179 | Done: PR #161, merged through PR #186 |
+| Merge the frontend with `main`, match the notification types to the page, Notifications link on recruiter pages | frakkii | _none_ | Done: PR #186 |
+| Notification tests | Shanza687, frakkii | _none_ | Done: 5 backend tests in PR #182, 1 end-to-end test in PR #186 |
+| Acceptance tests AT-25 to AT-28 | hirurathnayaka77 | #154–#157 | Written in PR #161. Run 2026-11-19: AT-25, AT-27 and AT-28 passed; AT-26 blocked until saved jobs exist (#62) |
 
 ### 4. AI resume feedback (start in Sprint 3, finish in Sprint 4)
 
@@ -97,9 +98,10 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 
 ## Risks found while planning
 
-- **Notifications backend missing.** PR #161's notifications page calls an API that does not exist on `main`. Shanza needs to push the Java code (controller, service, entity, repository, Flyway migration and tests), or the notifications feature cannot be demoed.
+- ~~Notifications backend missing~~: pushed and merged in #182.
 - **AI feature needs an API key.** Built on `feature/ai-resume-feedback` and working in demo mode; real Claude reviews need an Anthropic API key (each review is a paid call). Decide who holds the key before the demo.
-- **PR #161 conflicts with `main`** in 7 files (acceptance test files from #163, recruiter pages and `shell.js` from #166). It needs resolving before the notifications frontend can merge.
+- ~~PR #161 conflicts with `main`~~: resolved and merged in #186, which also fixed the notification types the page was hiding; AT-25, AT-27 and AT-28 passed.
+- **Deadline reminders can't be shown in the demo.** They only go to saved jobs, and saving jobs (#62) isn't built.
 - ~~Recruiter dashboard not started~~: redesign merged in #166; edit, archive and applicant filters merged in #169; AT-30 passed.
 - ~~Dashboard not tested by hand~~: tested and merged (#162); AT-29, AT-32 and AT-33 passed.
 
@@ -109,9 +111,9 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 - [ ] Create GitHub issues for the _new_ tasks and add them to the board
 - [x] Create issues for AT-32 and AT-33 and link them to #33 (#164, #165)
 - [x] Merge #162 (dashboard)
-- [ ] Merge #161 (notifications frontend) once its conflicts are resolved
+- [x] Merge #161 (notifications frontend) once its conflicts are resolved (merged through #186)
 - [x] Merge the recruiter edit, archive and filters work (#169) and record AT-30 on #159
-- [ ] Run every Sprint 3 acceptance test and record the result on its issue (AT-29, AT-30, AT-32, AT-33 passed; AT-31 passed in demo mode; AT-25 to AT-28 still to run)
+- [x] Run every Sprint 3 acceptance test and record the result on its issue (AT-25, AT-27, AT-28, AT-29, AT-30, AT-32, AT-33 passed; AT-31 passed in demo mode; AT-26 blocked until saved jobs exist, see [RESULTS.md](../acceptance_tests/RESULTS.md))
 - [x] Run the Sprint 1 and 2 acceptance tests (AT-01 to AT-24): all passed (AT-09 and AT-10 after fixes); see [RESULTS.md](../acceptance_tests/RESULTS.md)
 - [x] Clean up the project board and create issues for untracked Sprint 3 tasks (#175 to #180)
 - [x] Upload the Sprint 3 meeting minutes to `minutes/` (Meeting 4; add any later meetings with [TEMPLATE.md](../../minutes/TEMPLATE.md))
