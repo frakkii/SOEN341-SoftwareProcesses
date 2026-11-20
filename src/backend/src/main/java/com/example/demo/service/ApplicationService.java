@@ -9,6 +9,8 @@ import com.example.demo.repository.ApplicationRepository;
 import com.example.demo.repository.EmployerUserRepository;
 import com.example.demo.repository.JobPostingRepository;
 import com.example.demo.repository.ResumeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 // logged in; this class only receives their id.
 @Service
 public class ApplicationService {
+
+    private static final Logger log = LoggerFactory.getLogger(ApplicationService.class);
 
     private final ApplicationRepository applications;
     private final ResumeRepository resumes;
@@ -61,7 +65,13 @@ public class ApplicationService {
         try {
             saved = applications.saveAndFlush(new Application(personId, postId));
         } catch (DataIntegrityViolationException e) {
-            throw alreadyApplied();
+            if (applications.existsByPersonIdAndPostId(personId, postId)) {
+                throw alreadyApplied();
+            }
+            // Any other database error is not a duplicate: say so instead of "already applied"
+            log.error("Could not save application of person {} to posting {}", personId, postId, e);
+            throw new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Your application couldn't be saved. Please try again.");
         }
         JobPosting posting = postings.findById(postId).orElseThrow();
         notifications.create(
