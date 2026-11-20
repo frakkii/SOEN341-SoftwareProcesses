@@ -27,13 +27,16 @@ public class ApplicationService {
     private final ResumeRepository resumes;
     private final JobPostingRepository postings;
     private final EmployerUserRepository employers;
+    private final NotificationService notifications;
 
     public ApplicationService(ApplicationRepository applications, ResumeRepository resumes,
-                              JobPostingRepository postings, EmployerUserRepository employers) {
+                              JobPostingRepository postings, EmployerUserRepository employers,
+                              NotificationService notifications) {
         this.applications = applications;
         this.resumes = resumes;
         this.postings = postings;
         this.employers = employers;
+        this.notifications = notifications;
     }
 
     public ApplicationResponse submitApplication(Integer personId, Integer postId) {
@@ -54,11 +57,22 @@ public class ApplicationService {
         }
 
         // The unique constraint on (person_id, post_id) also covers two requests at once
+        Application saved;
         try {
-            return describe(List.of(applications.saveAndFlush(new Application(personId, postId)))).get(0);
+            saved = applications.saveAndFlush(new Application(personId, postId));
         } catch (DataIntegrityViolationException e) {
             throw alreadyApplied();
         }
+        JobPosting posting = postings.findById(postId).orElseThrow();
+        notifications.create(
+                "Recruiter",
+                posting.getEmployerId(),
+                "New job application",
+                "A candidate applied to " + posting.getTitle() + ".",
+                NotificationService.NEW_APPLICATION,
+                "/recruiterpostings.html",
+                "NEW_APPLICATION:" + saved.getId());
+        return describe(List.of(saved)).get(0);
     }
 
     public List<ApplicationResponse> getApplications(Integer personId) {
