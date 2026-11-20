@@ -21,6 +21,7 @@
 
 
 ## prompts and responces
+because the changes were made in vs code i asked copilot ai to paste the code into an md file for the AI logs
 ### 1. Initial request
 
 **Prompt**
