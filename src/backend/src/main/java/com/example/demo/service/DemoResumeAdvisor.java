@@ -28,20 +28,24 @@ public class DemoResumeAdvisor implements ResumeAdvisor {
             new String[] { "worked on ", "Built " },
             new String[] { "helped with ", "Contributed to " },
             new String[] { "did ", "Completed " });
-    private static final Pattern BULLET_MARK = Pattern.compile("^[-*•▪●◦]\\s*");
+    private static final Pattern BULLET_MARK = PdfText.BULLET_MARK;
     private static final int MAX_RESULT_HINTS = 3;
 
-    // Simple rule-based rewrites of DOCX lines. PDFs get a short sample, since the server
-    // doesn't extract PDF text itself.
+    // Simple rule-based rewrites of the resume's lines: a DOCX's extracted text, or the text read
+    // out of a PDF. Only a PDF with no readable text (such as a scanned image) gets a fixed sample.
     @Override
     public ResumeOptimization optimize(ResumeContent resume) {
-        if (resume.isPdf() || resume.text() == null) {
+        String resumeText = resume.isPdf()
+                ? PdfText.extract(resume.pdf(), ResumeContentReader.MAX_TEXT_CHARS)
+                : resume.text();
+        if (resumeText == null || resumeText.isBlank()) {
             return new ResumeOptimization(
-                    "This is a sample from demo mode. Demo mode can't read PDF text, so these lines aren't from your resume.",
+                    "This is a sample from demo mode. Demo mode couldn't read any text in this PDF (it may be a "
+                            + "scanned image), so these lines aren't from your resume.",
                     List.of(
                             new Line("heading", "EXPERIENCE", "", "", ""),
                             new Line("bullet", "Responsible for the team website",
-                                    "Led the redesign of the team website, cutting page load time by [X%]", "Impact",
+                                    "Took ownership of the team website, cutting page load time by [X%]", "Impact",
                                     "Starting with an action verb and a result shows what you achieved. Fill in the number or remove it."),
                             new Line("bullet", "Worked on customer support tickets",
                                     "Resolved [number] customer support tickets per week", "Impact",
@@ -50,7 +54,7 @@ public class DemoResumeAdvisor implements ResumeAdvisor {
 
         List<Line> lines = new ArrayList<>();
         int resultHints = 0;
-        for (String raw : resume.text().split("\n")) {
+        for (String raw : resumeText.split("\n")) {
             String text = raw.strip();
             if (text.isEmpty()) {
                 continue;
