@@ -69,7 +69,7 @@ public class ApplicationService {
                 posting.getEmployerId(),
                 "New job application",
                 "A candidate applied to " + posting.getTitle() + ".",
-                "NEW_APPLICATION",
+                NotificationService.NEW_APPLICATION,
                 "/recruiterpostings.html",
                 "NEW_APPLICATION:" + saved.getId());
         return describe(List.of(saved)).get(0);

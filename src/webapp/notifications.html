@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerConnect - Notifications</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<main class="wrap notification-page">
+    <header class="page-title">
+        <h1>Notifications</h1>
+        <p>Stay up to date with your applications, interviews and deadlines.</p>
+        <p class="demo-banner hidden" id="demo-banner">DEMO DATA — temporary frontend preview</p>
+    </header>
+    <section class="notification-list" id="notifications" aria-live="polite">
+        <p class="card empty">Loading notifications...</p>
+    </section>
+    <p class="card empty hidden" id="notification-empty">You have no notifications yet.</p>
+    <p class="card empty hidden" id="notification-error">Notifications are temporarily unavailable. Please try again later.</p>
+</main>
+<script src="js/shell.js"></script>
+<script src="js/notifications.js"></script>
+<script>
+    const demoMode = new URLSearchParams(location.search).get('demoNotifications');
+    if (demoMode === '1' || demoMode === 'empty') {
+        document.getElementById('demo-banner').classList.remove('hidden');
+    }
+</script>
+</body>
+</html>

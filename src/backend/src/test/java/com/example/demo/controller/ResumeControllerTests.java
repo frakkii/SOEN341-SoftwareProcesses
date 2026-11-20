@@ -84,9 +84,9 @@ class ResumeControllerTests {
         if (name.endsWith(".docx")) {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             try (ZipOutputStream zip = new ZipOutputStream(bytes)) {
-                zip.putNextEntry(new ZipEntry("[Content_Types].xml"));
+                zip.putNextEntry(entry("[Content_Types].xml"));
                 zip.write("<Types/>".getBytes(StandardCharsets.UTF_8));
-                zip.putNextEntry(new ZipEntry("word/document.xml"));
+                zip.putNextEntry(entry("word/document.xml"));
                 zip.write(text.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -94,6 +94,14 @@ class ResumeControllerTests {
             return bytes.toByteArray();
         }
         return text.getBytes(StandardCharsets.UTF_8);
+    }
+
+    // A fixed time, so the same text always gives the same bytes (the tests compare stored files
+    // with contents(...) built a moment later, and zip entries otherwise record the current time)
+    private static ZipEntry entry(String name) {
+        ZipEntry entry = new ZipEntry(name);
+        entry.setTime(0);
+        return entry;
     }
 
     private static MockMultipartFile file(String name, String text) {
