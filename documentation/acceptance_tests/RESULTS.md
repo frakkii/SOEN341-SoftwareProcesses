@@ -2,7 +2,7 @@
 
 Results of running the acceptance tests in [ACCEPTANCE_TESTS.md](ACCEPTANCE_TESTS.md) by hand. Each result is also posted on its GitHub issue with the steps taken and what happened; passed tests are closed.
 
-**Summary:** 29 of 33 tests run, all 29 passed. AT-09 and AT-10 failed on the first run and passed after fixes (#181). AT-31 passed in demo mode (sample feedback, no API key). AT-25 to AT-28 (notifications) wait on the notifications backend (#172) and frontend (#161).
+**Summary:** 32 of 33 tests run, all 32 passed. AT-09 and AT-10 failed on the first run and passed after fixes (#181). AT-31 passed in demo mode (sample feedback, no API key). AT-26 (deadline reminders) can't be run by hand until job seekers can save jobs (#62); its two backend tests pass.
 
 ## Sprints 1 and 2 (run on 2026-11-16)
 
@@ -39,7 +39,10 @@ Build: `main` at `cba0205`, run locally on an in-memory H2 database with test ac
 
 | Test | Story | Result | Issue | Notes |
 |---|---|---|---|---|
-| AT-25 to AT-28: notifications | #6 | Not run | #154-#157 | Waiting on #172 (backend) and #161 (frontend) |
+| AT-25: Job seeker sees status updates and distinct interview notifications | #6 | Pass | #154 | Run 2026-11-19 on #186. Status update and interview invitation shown as separate unread cards; the other job seeker's list was checked through `GET /api/notifications` |
+| AT-26: Job seeker sees deadline reminders without duplicates | #6 | Not run (blocked) | #155 | Reminders only go to saved jobs, the app can't save jobs yet (#62), and the daily 9:00 job can't be started by hand. The page also has no expired-job marker or "no upcoming deadlines" message. Two backend tests cover one reminder per deadline and no reminder for expired jobs |
+| AT-27: Recruiter sees new-application notifications for owned postings | #6 | Pass | #156 | Run 2026-11-19 on #186. Mark as read clears the badge. Recruiters see the job seeker style top bar on this page |
+| AT-28: Notifications show empty and API-error states | #6 | Pass | #157 | Run 2026-11-19 on #186. The API error was simulated in the browser (HTTP 500) |
 | AT-29: Job seeker views accurate application analytics by status | #33 | Pass | #158 | Run 2026-11-16 on PR #162 |
 | AT-30: Recruiter edits and archives their own job posting | #8 | Pass | #159 | Run 2026-11-16 on PR #169. Another recruiter's posting returns 404, by design |
 | AT-31: Job seeker receives safe AI resume feedback | #10 | Pass (demo mode) | #160 | Run 2026-11-16 on `feature/ai-resume-feedback` without an API key: loading state, feedback with content/organization/clarity suggestions and a review notice, .doc refused, unreadable and empty DOCX show errors. A real Claude review is not yet tested |
