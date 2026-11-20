@@ -663,3 +663,92 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 
+## #191 Recruiter dashboard summary (Sprint 3)
+
+### AT-34: Recruiter sees a dashboard of their postings and applicant counts
+
+- **User story:** #191 (Recruiter dashboard summary)
+- **Related tasks:** none yet
+- **Sprint:** 3
+
+**Given** I am logged in as a recruiter with an open posting that has applications and a closed posting; another recruiter has their own posting; a third recruiter has no postings
+
+**Steps**
+1. Open Recruiter Home
+2. Review the summary tiles
+3. Review the Your jobs list
+4. Click a posting title
+5. Log in as the recruiter with no postings and open Recruiter Home
+
+**Then** The tiles count my open jobs, total applicants, jobs closing in 7 days and closed jobs; each of my postings shows its status and number of applicants and the other recruiter's posting is not listed; clicking a title opens that posting's applicant list; the recruiter with no postings sees a no-jobs message with a link to post a first job
+
+**Automated coverage:** `RecruiterControllerTests.recruiterSeesTheirPostingsWithApplicantCounts`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+## #193 Job-search activity over time (Sprint 3)
+
+### AT-35: Job seeker sees their activity over time update after applying
+
+- **User story:** #193 (Job-search activity over time)
+- **Related tasks:** #56
+- **Sprint:** 3
+
+**Given** I am logged in as a job seeker who has applied to jobs on different dates, and a second job seeker has no applications
+
+**Steps**
+1. Open My Applications
+2. Review the Applications over time chart next to the status breakdown and history
+3. Apply to another job, return to My Applications and click Refresh
+4. Log in as the job seeker with no applications and open My Applications
+
+**Then** The chart shows my applications grouped by month matching my history; after applying, the current month goes up by one; the job seeker with no applications sees a clear empty state without errors
+
+**Automated coverage:** `PR #162: analytics.test.js monthlyCounts tests, ApplicationControllerTests.applicationsComeNewestFirstWithIsoDatesForTheMonthlyChart`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+## #190 Sort job postings (Sprint 3)
+
+### AT-36: Job seeker sorts postings by newest or by deadline
+
+- **User story:** #190 (Sort job postings)
+- **Related tasks:** none yet
+- **Sprint:** 3
+
+**Given** Open postings exist with different posting dates and deadlines, and one has no deadline
+
+**Steps**
+1. Open Postings
+2. Sort by newest first
+3. Sort by closest application deadline
+4. Search or filter, then sort again
+
+**Then** Newest first lists the most recent postings first; closest deadline lists the soonest deadline first with postings without a deadline last; sorting keeps the current search and filters
+
+**Automated coverage:** `Pending: not built yet`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+
+## #189 Cover letter with an application (Sprint 3)
+
+### AT-37: Job seeker attaches a cover letter to an application
+
+- **User story:** #189 (Cover letter with an application)
+- **Related tasks:** none yet
+- **Sprint:** 3
+
+**Given** I am logged in as a job seeker with a resume, and a recruiter has an open posting
+
+**Steps**
+1. Open the posting and write a cover letter
+2. Apply
+3. As the recruiter, open the posting's applicants and the application
+4. As another job seeker, apply without a cover letter
+
+**Then** The cover letter is saved with the application and the recruiter can read it; applying without a cover letter still works
+
+**Automated coverage:** `Pending: not built yet`
+
+**Result:** _Not yet run (Pass / Fail, date, tester)_
+

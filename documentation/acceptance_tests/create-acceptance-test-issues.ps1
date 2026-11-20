@@ -26,6 +26,10 @@ $Stories = @{
     6  = @{ Sprint = 3; Title = 'Notifications and reminders';            Tasks = 63 }
     33 = @{ Sprint = 3; Title = 'Application analytics dashboard';         Tasks = 56 }
     10 = @{ Sprint = 3; Title = 'AI resume feedback';                     Tasks = 60 }
+    191 = @{ Sprint = 3; Title = 'Recruiter dashboard summary';            Tasks = @() }
+    193 = @{ Sprint = 3; Title = 'Job-search activity over time';          Tasks = 56 }
+    190 = @{ Sprint = 3; Title = 'Sort job postings';                      Tasks = @() }
+    189 = @{ Sprint = 3; Title = 'Cover letter with an application';       Tasks = @() }
 }
 
 $Tests = @(
@@ -222,6 +226,28 @@ $Tests = @(
        Steps = 'Open My CVs & Cover Letters and click Suggest improvements', 'Watch the page while the suggestions are prepared', 'Review the suggestions: each one shows the current line, the suggested rewrite and the reason', 'Accept some suggestions and reject at least one; if an accepted suggestion has a box for a figure, try to download before filling it in, then type a real figure', 'Click Download improved resume (.docx) and Download suggestions report (.docx), and open both files', 'Click Save as new resume version and confirm', 'Upload the .doc resume and click Suggest improvements', 'Upload the file with no readable text and click Suggest improvements'
        Then  = 'A loading message is shown while the suggestions are prepared; every suggestion shows a rewrite and a reason, and the page says the suggestions are AI-generated and must be checked (in demo mode it also says they are sample suggestions); an accepted suggestion with an empty figure box cannot be downloaded or saved until it is filled in; the improved resume contains only the accepted rewrites and leaves rejected and other lines unchanged, and the report lists every suggestion and whether it was accepted; after saving, the improved resume is the current resume and the previous one is still in the versions; the .doc resume gets "The AI optimizer works with PDF and DOCX resumes" and the file with no text gets a clear error, and neither shows suggestions'
        Auto  = 'PR #184: ResumeOptimizationControllerTests (14 tests, e.g. improvedResumeUsesOnlyAcceptedSuggestions, acceptedFiguresMustBeFilledInBeforeTheResumeIsMade, savingMakesTheImprovedResumeTheCurrentVersion, oldWordFilesAreRefused), DocxTextTest' }
+
+    # ---- New Sprint 3 stories (#191, #193, #190, #189) ----
+    @{ Id = 'AT-34'; Story = 191; Title = 'Recruiter sees a dashboard of their postings and applicant counts'
+       Given = 'I am logged in as a recruiter with an open posting that has applications and a closed posting; another recruiter has their own posting; a third recruiter has no postings'
+       Steps = 'Open Recruiter Home', 'Review the summary tiles', 'Review the Your jobs list', 'Click a posting title', 'Log in as the recruiter with no postings and open Recruiter Home'
+       Then  = 'The tiles count my open jobs, total applicants, jobs closing in 7 days and closed jobs; each of my postings shows its status and number of applicants and the other recruiter''s posting is not listed; clicking a title opens that posting''s applicant list; the recruiter with no postings sees a no-jobs message with a link to post a first job'
+       Auto  = 'RecruiterControllerTests.recruiterSeesTheirPostingsWithApplicantCounts' }
+    @{ Id = 'AT-35'; Story = 193; Title = 'Job seeker sees their activity over time update after applying'
+       Given = 'I am logged in as a job seeker who has applied to jobs on different dates, and a second job seeker has no applications'
+       Steps = 'Open My Applications', 'Review the Applications over time chart next to the status breakdown and history', 'Apply to another job, return to My Applications and click Refresh', 'Log in as the job seeker with no applications and open My Applications'
+       Then  = 'The chart shows my applications grouped by month matching my history; after applying, the current month goes up by one; the job seeker with no applications sees a clear empty state without errors'
+       Auto  = 'PR #162: analytics.test.js monthlyCounts tests, ApplicationControllerTests.applicationsComeNewestFirstWithIsoDatesForTheMonthlyChart' }
+    @{ Id = 'AT-36'; Story = 190; Title = 'Job seeker sorts postings by newest or by deadline'
+       Given = 'Open postings exist with different posting dates and deadlines, and one has no deadline'
+       Steps = 'Open Postings', 'Sort by newest first', 'Sort by closest application deadline', 'Search or filter, then sort again'
+       Then  = 'Newest first lists the most recent postings first; closest deadline lists the soonest deadline first with postings without a deadline last; sorting keeps the current search and filters'
+       Auto  = 'Pending: not built yet' }
+    @{ Id = 'AT-37'; Story = 189; Title = 'Job seeker attaches a cover letter to an application'
+       Given = 'I am logged in as a job seeker with a resume, and a recruiter has an open posting'
+       Steps = 'Open the posting and write a cover letter', 'Apply', 'As the recruiter, open the posting''s applicants and the application', 'As another job seeker, apply without a cover letter'
+       Then  = 'The cover letter is saved with the application and the recruiter can read it; applying without a cover letter still works'
+       Auto  = 'Pending: not built yet' }
 )
 
 function Get-Body($t) {
@@ -230,7 +256,7 @@ function Get-Body($t) {
     $steps = for ($i = 0; $i -lt $t.Steps.Count; $i++) { "$($i + 1). $($t.Steps[$i])" }
     @"
 - **User story:** #$($t.Story) ($($s.Title))
-- **Related tasks:** $(($s.Tasks | ForEach-Object { "#$_" }) -join ', ')
+- **Related tasks:** $(if ($s.Tasks) { ($s.Tasks | ForEach-Object { "#$_" }) -join ', ' } else { 'none yet' })
 - **Sprint:** $sprint
 
 **Given** $($t.Given)
@@ -250,7 +276,7 @@ $($steps -join "`n")
 $md = @('# Acceptance Tests (Sprints 1, 2 and 3)', '',
         'Each test is also a GitHub issue labeled `acceptance-test` and linked to its user story as a sub-issue.',
         'Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.', '')
-foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139, 6, 33, 10) {
+foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139, 6, 33, 10, 191, 193, 190, 189) {
     $storyTests = @($Tests | Where-Object { $_.Story -eq $n })
     foreach ($group in ($storyTests | Group-Object {
         if ($_.ContainsKey('Sprint')) { $_.Sprint } else { $Stories[$n].Sprint }
