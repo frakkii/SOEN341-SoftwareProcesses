@@ -14,7 +14,8 @@ const note = (id, type, extra = {}) => ({
 const FOR_SEEKER = [
   note(1, 'APPLICATION_STATUS_UPDATED'),
   note(2, 'INTERVIEW_INVITATION'),
-  note(3, 'DEADLINE_REMINDER', { read: true })
+  note(3, 'DEADLINE_REMINDER', { read: true }),
+  note(6, 'NEW_JOB_POSTING')
 ];
 const FOR_RECRUITER = [note(4, 'NEW_APPLICATION'), note(5, 'NEW_APPLICATION', { read: true })];
 
@@ -25,20 +26,22 @@ test('every notification type the backend sends is one the page shows', () => {
   const java = fs.readFileSync(path.join(__dirname, '..', '..', 'backend', 'src', 'main', 'java',
     'com', 'example', 'demo', 'service', 'NotificationService.java'), 'utf8');
   const backendTypes = [...java.matchAll(/public static final String (\w+) = "(\w+)";/g)].map(m => m[2]);
-  assert.ok(backendTypes.length >= 4, 'found the type constants in NotificationService.java');
+  assert.ok(backendTypes.length >= 5, 'found the type constants in NotificationService.java');
   assert.deepEqual([...backendTypes].sort(), Object.keys(N.TYPES).sort());
 });
 
 test('each type goes to exactly one role', () => {
-  assert.deepEqual(N.allowedTypes(false), ['APPLICATION_STATUS_UPDATED', 'INTERVIEW_INVITATION', 'DEADLINE_REMINDER']);
+  assert.deepEqual(N.allowedTypes(false), [
+    'APPLICATION_STATUS_UPDATED', 'INTERVIEW_INVITATION', 'DEADLINE_REMINDER', 'NEW_JOB_POSTING'
+  ]);
   assert.deepEqual(N.allowedTypes(true), ['NEW_APPLICATION']);
 });
 
 // ---- Which notifications are shown ----
 
-test('a job seeker sees status, interview and deadline notifications but not recruiter ones', () => {
+test('a job seeker sees seeker notifications but not recruiter ones', () => {
   const shown = N.visible([...FOR_SEEKER, ...FOR_RECRUITER], false);
-  assert.deepEqual(shown.map(n => n.id), [1, 2, 3]);
+  assert.deepEqual(shown.map(n => n.id), [1, 2, 3, 6]);
 });
 
 test('a recruiter sees only new application notifications', () => {
@@ -61,8 +64,8 @@ test('types are matched without caring about case, spaces or the field name', ()
 });
 
 test('accepts an array or a { notifications } envelope, and anything else is empty', () => {
-  assert.equal(N.visible(FOR_SEEKER, false).length, 3);
-  assert.equal(N.visible({ notifications: FOR_SEEKER, unreadCount: 2 }, false).length, 3);
+  assert.equal(N.visible(FOR_SEEKER, false).length, 4);
+  assert.equal(N.visible({ notifications: FOR_SEEKER, unreadCount: 3 }, false).length, 4);
   for (const bad of [null, undefined, {}, { notifications: 'x' }, 'oops']) {
     assert.deepEqual(N.visible(bad, false), [], String(bad));
   }
@@ -72,7 +75,7 @@ test('accepts an array or a { notifications } envelope, and anything else is emp
 
 test('the badge counts only unread notifications the user can see', () => {
   const all = [...FOR_SEEKER, ...FOR_RECRUITER];
-  assert.equal(N.unreadCount(all, false), 2);   // 1 and 2; 3 is read; 4 is for recruiters
+  assert.equal(N.unreadCount(all, false), 3);   // 1, 2 and 6; 3 is read; 4 is for recruiters
   assert.equal(N.unreadCount(all, true), 1);    // 4; 5 is read
   assert.equal(N.unreadCount([], false), 0);
 });
@@ -102,7 +105,7 @@ test('a card shows the title, message, icon and dates from the API', () => {
 
 test('each type has its own icon', () => {
   const icons = Object.keys(N.TYPES).map(type => N.view(note(1, type)).icon);
-  assert.deepEqual(icons, ['chart', 'calendar', 'bell', 'users']);
+  assert.deepEqual(icons, ['chart', 'calendar', 'bell', 'briefcase', 'users']);
   assert.equal(new Set(icons).size, icons.length);
 });
 

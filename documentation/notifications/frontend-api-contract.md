@@ -19,8 +19,14 @@ Each notification should include:
 ```
 
 Supported types are `APPLICATION_STATUS_UPDATED`,
-`INTERVIEW_INVITATION`, `DEADLINE_REMINDER`, and `NEW_APPLICATION`.
+`INTERVIEW_INVITATION`, `DEADLINE_REMINDER`, `NEW_JOB_POSTING`, and
+`NEW_APPLICATION`.
 The endpoint must return only the authenticated user's notifications.
+
+`GET /api/notifications/stream` opens an authenticated Server-Sent Events stream.
+New notifications are sent as `notification` events to the session's account.
+The frontend uses the stream for immediate updates and retains periodic polling
+as a fallback.
 
 The frontend uses `PATCH /api/notifications/{id}/read` when a real item is
 marked as read. Demo mode does not send this request.

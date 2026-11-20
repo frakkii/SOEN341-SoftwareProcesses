@@ -1,12 +1,16 @@
 package com.example.demo.service;
 
 import com.example.demo.exception.ApplicationException;
+import com.example.demo.model.JobPosting;
 import com.example.demo.model.Notification;
 import com.example.demo.repository.NotificationRepository;
+import com.example.demo.repository.PersonUserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.util.List;
@@ -19,11 +23,17 @@ public class NotificationService {
     public static final String INTERVIEW_INVITATION = "INTERVIEW_INVITATION";
     public static final String DEADLINE_REMINDER = "DEADLINE_REMINDER";
     public static final String NEW_APPLICATION = "NEW_APPLICATION";
+    public static final String NEW_JOB_POSTING = "NEW_JOB_POSTING";
 
     private final NotificationRepository notifications;
+    private final PersonUserRepository jobSeekers;
+    private final NotificationPushService notificationPush;
 
-    public NotificationService(NotificationRepository notifications) {
+    public NotificationService(NotificationRepository notifications, PersonUserRepository jobSeekers,
+                               NotificationPushService notificationPush) {
         this.notifications = notifications;
+        this.jobSeekers = jobSeekers;
+        this.notificationPush = notificationPush;
     }
 
     @Transactional(readOnly = true)
@@ -67,14 +77,49 @@ public class NotificationService {
         }
 
         try {
-            return notifications.saveAndFlush(new Notification(
+            Notification created = notifications.saveAndFlush(new Notification(
                     role, userId, title, message, type, link, deduplicationKey));
+            publishAfterCommit(created);
+            return created;
         } catch (DataIntegrityViolationException exception) {
             if (deduplicationKey != null) {
                 return notifications.findByDeduplicationKey(deduplicationKey).orElseThrow(() -> exception);
             }
             throw exception;
         }
+    }
+
+    @Transactional
+    public int notifyJobSeekersOfNewPosting(JobPosting posting) {
+        List<Notification> newJobNotifications = jobSeekers.findAllIds().stream()
+                .map(jobSeekerId -> new Notification(
+                        "Job Seeker",
+                        jobSeekerId,
+                        "New job posted: " + posting.getTitle(),
+                        "Applications are open until " + posting.getApplicationDeadline() + ".",
+                        NEW_JOB_POSTING,
+                        "/job.html?id=" + posting.getId(),
+                        "NEW_JOB_POSTING:" + posting.getId() + ":" + jobSeekerId))
+                .toList();
+        notifications.saveAllAndFlush(newJobNotifications);
+        newJobNotifications.forEach(this::publishAfterCommit);
+        return newJobNotifications.size();
+    }
+
+    private void publishAfterCommit(Notification notification) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            notificationPush.publish(notification.getRecipientRole(), notification.getRecipientId(),
+                    NotificationResponse.from(notification));
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                notificationPush.publish(notification.getRecipientRole(), notification.getRecipientId(),
+                        NotificationResponse.from(notification));
+            }
+        });
     }
 
     public record NotificationResponse(

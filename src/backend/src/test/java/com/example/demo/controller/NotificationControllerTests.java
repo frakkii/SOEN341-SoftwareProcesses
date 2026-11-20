@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Date;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -131,6 +133,8 @@ class NotificationControllerTests {
     void notificationEndpointsRequireLogin() throws Exception {
         mockMvc.perform(get("/api/notifications"))
                 .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/notifications/stream"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -188,6 +192,47 @@ class NotificationControllerTests {
                 .noneMatch(notification -> notification.type().equals(NotificationService.DEADLINE_REMINDER));
     }
 
+    @Test
+    void newPostingNotifiesEveryJobSeekerAndNoRecruiters() throws Exception {
+        MockHttpSession firstSeeker = loggedInJobSeeker();
+        MockHttpSession secondSeeker = loggedInJobSeeker();
+        MockHttpSession recruiter = loggedInRecruiter();
+        int seekerCount = jdbc.queryForObject("SELECT COUNT(*) FROM person_user", Integer.class);
+        MvcResult notificationStream = mockMvc.perform(get("/api/notifications/stream").session(firstSeeker))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        String posting = mockMvc.perform(post("/api/postings/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Data Analyst\",\"department\":\"Analytics\",\"salary\":\"$80k\","
+                                + "\"requiredSkills\":\"SQL\",\"description\":\"Analyze data\","
+                                + "\"applicationDeadline\":\"" + LocalDate.now().plusDays(14) + "\"}")
+                        .session(recruiter))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.notifiedJobSeekers").value(seekerCount))
+                .andReturn().getResponse().getContentAsString();
+        Integer postId = com.jayway.jsonpath.JsonPath.read(posting, "$.postId");
+
+        for (MockHttpSession seeker : new MockHttpSession[] {firstSeeker, secondSeeker}) {
+            mockMvc.perform(get("/api/notifications").session(seeker))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(1))
+                    .andExpect(jsonPath("$[0].type").value(NotificationService.NEW_JOB_POSTING))
+                    .andExpect(jsonPath("$[0].title").value("New job posted: Data Analyst"))
+                    .andExpect(jsonPath("$[0].message").value(
+                            "Applications are open until " + LocalDate.now().plusDays(14) + "."))
+                    .andExpect(jsonPath("$[0].link").value("/job.html?id=" + postId))
+                    .andExpect(jsonPath("$[0].read").value(false));
+        }
+        org.assertj.core.api.Assertions.assertThat(notificationStream.getResponse().getContentAsString())
+                    .contains("event:notification")
+                    .contains("New job posted: Data Analyst");
+
+        mockMvc.perform(get("/api/notifications").session(recruiter))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
     // Uses the types the notifications page knows; it hides any other type
     @Test
     void applyingAndStatusChangesNotifyTheRightUserWithTheTypesThePageShows() throws Exception {
@@ -239,7 +284,7 @@ class NotificationControllerTests {
         // Newest first: the interview invitation, then the status update
         mockMvc.perform(get("/api/notifications").session(seeker))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$.length()").value(3))
                 .andExpect(jsonPath("$[0].type").value(NotificationService.INTERVIEW_INVITATION))
                 .andExpect(jsonPath("$[0].message").value("You have been invited to an interview for QA Tester."))
                 .andExpect(jsonPath("$[1].type").value(NotificationService.APPLICATION_STATUS_UPDATED))

@@ -3,10 +3,12 @@ import com.example.demo.repository.EmployerUserRepository;
 import com.example.demo.repository.JobPostingRepository;
 import com.example.demo.model.EmployerUser;
 import com.example.demo.model.JobPosting;
+import com.example.demo.service.NotificationService;
 import com.example.demo.service.RecruiterService;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -19,13 +21,17 @@ public class JobPostingController {
 
 private final JobPostingRepository jobPostingRepository;
     private final RecruiterService recruiterService;
+    private final NotificationService notifications;
 
-    public JobPostingController(JobPostingRepository jobPostingRepository, RecruiterService recruiterService) {
+    public JobPostingController(JobPostingRepository jobPostingRepository, RecruiterService recruiterService,
+                                NotificationService notifications) {
         this.jobPostingRepository = jobPostingRepository;
         this.recruiterService = recruiterService;
+        this.notifications = notifications;
     }
     
     @PostMapping("/create")
+    @Transactional
     public ResponseEntity<?> createPosting(@RequestBody JobPostingRequest request, HttpSession session) {
         Integer userId = (Integer) session.getAttribute(AuthController.SESSION_USER_ID);
         String role = (String) session.getAttribute(AuthController.SESSION_ROLE);
@@ -64,7 +70,12 @@ private final JobPostingRepository jobPostingRepository;
         );
 
         JobPosting saved = jobPostingRepository.save(posting);
-        return ResponseEntity.ok(Map.of("message", "Job listing created", "userId", userId, "postId", saved.getId()));
+        int notifiedJobSeekers = notifications.notifyJobSeekersOfNewPosting(saved);
+        return ResponseEntity.ok(Map.of(
+                "message", "Job listing created",
+                "userId", userId,
+                "postId", saved.getId(),
+                "notifiedJobSeekers", notifiedJobSeekers));
     }
 
      @GetMapping

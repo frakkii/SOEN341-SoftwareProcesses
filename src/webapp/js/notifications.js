@@ -57,7 +57,21 @@
     }
   });
 
-  (demoEmpty ? Promise.resolve([]) : notificationData.get()).then(show).catch(() => {
+  function loadNotifications() {
+    return notificationData.get().then(data => {
+      notificationData.updateBadge(data);
+      show(data);
+      return data;
+    });
+  }
+
+  window.addEventListener('cc:notification', () => {
+    loadNotifications().catch(() => {
+      error.classList.remove('hidden');
+    });
+  });
+
+  (demoEmpty ? Promise.resolve([]).then(show) : loadNotifications()).catch(() => {
     list.innerHTML = '';
     list.classList.add('hidden');
     error.classList.remove('hidden');
