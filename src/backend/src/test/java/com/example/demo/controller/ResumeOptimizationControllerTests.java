@@ -134,7 +134,7 @@ class ResumeOptimizationControllerTests {
                 .andExpect(jsonPath("$.lines[3].kind").value("bullet"))
                 // the bullet symbol is removed; the page and the DOCX add their own
                 .andExpect(jsonPath("$.lines[3].original").value("Responsible for the campus website"))
-                .andExpect(jsonPath("$.lines[3].improved").value("Led the campus website"))
+                .andExpect(jsonPath("$.lines[3].improved").value("Took ownership of the campus website"))
                 .andExpect(jsonPath("$.lines[3].suggested").value(true))
                 .andExpect(jsonPath("$.lines[3].reason").isNotEmpty())
                 .andExpect(jsonPath("$.lines[3].figures.length()").value(0))
@@ -204,7 +204,7 @@ class ResumeOptimizationControllerTests {
                 .andExpect(header().string("Content-Disposition", containsString("Jane%20CV-improved.docx")));
 
         String text = docxText(download);
-        assertThat(text).contains("JANE DOE", "jane@example.com", "Led the campus website");
+        assertThat(text).contains("JANE DOE", "jane@example.com", "Took ownership of the campus website");
         assertThat(text).doesNotContain("Responsible for");
         // line 4 was not accepted, so it stays as written
         assertThat(text).contains("Worked on the library app with 3 classmates");
@@ -230,7 +230,7 @@ class ResumeOptimizationControllerTests {
 
         String text = docxText(report);
         assertThat(text).contains("1 of 3 suggestions accepted.");
-        assertThat(text).contains("Original: Responsible for the campus website", "Suggested: Led the campus website");
+        assertThat(text).contains("Original: Responsible for the campus website", "Suggested: Took ownership of the campus website");
         assertThat(text).contains("Not accepted", "Accepted", "Why: ");
         assertThat(text).contains("Demo mode");
     }
@@ -254,7 +254,7 @@ class ResumeOptimizationControllerTests {
         byte[] saved = mockMvc.perform(get("/api/resume/file").session(session))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsByteArray();
-        assertThat(DocxText.extract(saved)).contains("Led the campus website", "Built the library app");
+        assertThat(DocxText.extract(saved)).contains("Took ownership of the campus website", "Built the library app");
 
         // the saved file is a normal DOCX resume, so it can be optimized again
         optimize(session).andExpect(status().isOk()).andExpect(jsonPath("$.fileName").value("Jane CV-improved.docx"));

@@ -7,44 +7,22 @@
   const error = document.getElementById('notification-error');
   const demoEmpty = new URLSearchParams(location.search).get('demoNotifications') === 'empty';
 
-  const typeInfo = {
-    APPLICATION_STATUS_UPDATED: ['chart', 'Application update'],
-    INTERVIEW_INVITATION: ['calendar', 'Interview invitation'],
-    DEADLINE_REMINDER: ['bell', 'Deadline reminder'],
-    NEW_APPLICATION: ['users', 'New application']
-  };
-
   function normalize(data) {
     return notificationData.visible(data);
   }
 
-  function notificationView(n) {
-    const type = String(n.type || n.notificationType || '').toUpperCase();
-    const [symbol, fallbackTitle] = typeInfo[type] || ['bell', 'Notification'];
-    const title = n.title || n.jobTitle || 'CareerConnect notification';
-    const message = n.message || n.body || fallbackTitle;
-    const deadline = n.deadline || n.applicationDeadline;
-    const date = n.createdAt || n.createdDate || n.timestamp;
-    return {
-      id: n.id,
-      unread: n.read !== true && n.isRead !== true,
-      symbol,
-      title,
-      message,
-      deadline: deadline ? fmtDate(deadline) : '',
-      date: date ? fmtDate(date) : ''
-    };
-  }
-
+  // What a card shows comes from js/notificationLogic.js (unit tested); dates are formatted here
   function render(raw) {
-    const n = notificationView(raw);
+    const n = CCNotifications.view(raw);
+    const deadline = n.deadline ? fmtDate(n.deadline) : '';
+    const date = n.date ? fmtDate(n.date) : '';
     return `<article class="card notification${n.unread ? ' unread' : ''}" data-notification-id="${esc(n.id ?? '')}">
-      <span class="notification-icon">${icon(n.symbol)}</span>
+      <span class="notification-icon">${icon(n.icon)}</span>
       <div class="notification-copy">
         <div class="notification-heading"><h2>${notificationData.demo ? 'DEMO · ' : ''}${esc(n.title)}</h2>${n.unread ? '<span class="unread-dot" aria-label="Unread"></span>' : ''}</div>
         <p>${esc(n.message)}</p>
-        ${n.deadline ? `<small>${icon('calendar')} Deadline: ${esc(n.deadline)}</small>` : ''}
-        ${n.date ? `<time datetime="${esc(raw.createdAt || raw.createdDate || raw.timestamp)}">${esc(n.date)}</time>` : ''}
+        ${deadline ? `<small>${icon('calendar')} Deadline: ${esc(deadline)}</small>` : ''}
+        ${date ? `<time datetime="${esc(n.date)}">${esc(date)}</time>` : ''}
         ${n.unread ? '<button type="button" class="mark-read" data-mark-read>Mark as read</button>' : ''}
       </div>
     </article>`;
