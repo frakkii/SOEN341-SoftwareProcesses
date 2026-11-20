@@ -9,6 +9,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Date;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -97,7 +99,7 @@ class NotificationControllerTests {
         MockHttpSession session = loggedInJobSeeker();
         Integer userId = (Integer) session.getAttribute(AuthController.SESSION_USER_ID);
         notifications.create("Job Seeker", userId, "Interview update", "Your application changed.",
-                "APPLICATION_STATUS", "/applications.html", null);
+                NotificationService.APPLICATION_STATUS_UPDATED, "/applications.html", null);
 
         String listResponse = mockMvc.perform(get("/api/notifications").session(session))
                 .andExpect(status().isOk())
@@ -136,7 +138,7 @@ class NotificationControllerTests {
         MockHttpSession ownerSession = loggedInJobSeeker();
         Integer ownerId = (Integer) ownerSession.getAttribute(AuthController.SESSION_USER_ID);
         Long notificationId = notifications.create("Job Seeker", ownerId, "Private", "Private message.",
-                "APPLICATION_STATUS", null, null).getId();
+                NotificationService.APPLICATION_STATUS_UPDATED, null, null).getId();
         MockHttpSession anotherSession = loggedInJobSeeker();
 
         mockMvc.perform(patch("/api/notifications/{id}/read", notificationId).session(anotherSession))
@@ -156,7 +158,7 @@ class NotificationControllerTests {
 
         var result = notifications.list("Job Seeker", personId, false);
         org.assertj.core.api.Assertions.assertThat(result)
-                .filteredOn(notification -> notification.type().equals("JOB_DEADLINE"))
+                .filteredOn(notification -> notification.type().equals(NotificationService.DEADLINE_REMINDER))
                 .hasSize(1);
     }
 
@@ -176,13 +178,71 @@ class NotificationControllerTests {
 
         var ownerNotifications = notifications.list("Job Seeker", ownerId, false);
         org.assertj.core.api.Assertions.assertThat(ownerNotifications)
-                .filteredOn(notification -> notification.type().equals("JOB_DEADLINE"))
+                .filteredOn(notification -> notification.type().equals(NotificationService.DEADLINE_REMINDER))
                 .hasSize(1)
                 .allSatisfy(notification ->
                         org.assertj.core.api.Assertions.assertThat(notification.message())
                                 .contains("Saved posting")
                                 .contains(LocalDate.now().plusDays(1).toString()));
         org.assertj.core.api.Assertions.assertThat(notifications.list("Job Seeker", anotherUserId, false))
-                .noneMatch(notification -> notification.type().equals("JOB_DEADLINE"));
+                .noneMatch(notification -> notification.type().equals(NotificationService.DEADLINE_REMINDER));
+    }
+
+    // Uses the types the notifications page knows; it hides any other type
+    @Test
+    void applyingAndStatusChangesNotifyTheRightUserWithTheTypesThePageShows() throws Exception {
+        MockHttpSession recruiter = loggedInRecruiter();
+        MockHttpSession otherRecruiter = loggedInRecruiter();
+        MockHttpSession seeker = loggedInJobSeeker();
+
+        String posting = mockMvc.perform(post("/api/postings/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"QA Tester\",\"department\":\"Engineering\",\"salary\":\"$60k\","
+                                + "\"requiredSkills\":\"Selenium\",\"description\":\"Test things\","
+                                + "\"location\":\"Montreal, QC\","
+                                + "\"applicationDeadline\":\"" + LocalDate.now().plusDays(14) + "\"}")
+                        .session(recruiter))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Integer postId = com.jayway.jsonpath.JsonPath.read(posting, "$.postId");
+
+        mockMvc.perform(multipart("/api/resume")
+                        .file(new MockMultipartFile("resume", "cv.pdf", "application/pdf",
+                                ResumeControllerTests.contents("cv.pdf", "my resume")))
+                        .session(seeker))
+                .andExpect(status().isCreated());
+        String application = mockMvc.perform(post("/api/applications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"postId\":" + postId + "}")
+                        .session(seeker))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Number applicationId = com.jayway.jsonpath.JsonPath.read(application, "$.application.id");
+
+        mockMvc.perform(get("/api/notifications").session(recruiter))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].type").value(NotificationService.NEW_APPLICATION))
+                .andExpect(jsonPath("$[0].message").value("A candidate applied to QA Tester."));
+        mockMvc.perform(get("/api/notifications").session(otherRecruiter))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        for (String next : new String[] {"UNDER_REVIEW", "INTERVIEW"}) {
+            mockMvc.perform(patch("/api/recruiter/applications/" + applicationId + "/status")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"status\":\"" + next + "\"}")
+                            .session(recruiter))
+                    .andExpect(status().isOk());
+        }
+
+        // Newest first: the interview invitation, then the status update
+        mockMvc.perform(get("/api/notifications").session(seeker))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].type").value(NotificationService.INTERVIEW_INVITATION))
+                .andExpect(jsonPath("$[0].message").value("You have been invited to an interview for QA Tester."))
+                .andExpect(jsonPath("$[1].type").value(NotificationService.APPLICATION_STATUS_UPDATED))
+                .andExpect(jsonPath("$[1].message").value("Your application for QA Tester is now Under Review."));
     }
 }

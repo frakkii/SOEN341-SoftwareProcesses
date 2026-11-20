@@ -14,6 +14,12 @@ import java.util.List;
 @Service
 public class NotificationService {
 
+    // Notification types; the notifications page (notifications.js, shell.js) shows only these
+    public static final String APPLICATION_STATUS_UPDATED = "APPLICATION_STATUS_UPDATED";
+    public static final String INTERVIEW_INVITATION = "INTERVIEW_INVITATION";
+    public static final String DEADLINE_REMINDER = "DEADLINE_REMINDER";
+    public static final String NEW_APPLICATION = "NEW_APPLICATION";
+
     private final NotificationRepository notifications;
 
     public NotificationService(NotificationRepository notifications) {

@@ -29,7 +29,7 @@ public class DeadlineReminderService {
                         candidate.getPersonId(),
                         "Saved job deadline approaching",
                         candidate.getTitle() + " closes on " + candidate.getApplicationDeadline() + ".",
-                        "JOB_DEADLINE",
+                        NotificationService.DEADLINE_REMINDER,
                         "/job.html?id=" + candidate.getPostId(),
                         "JOB_DEADLINE:1D:" + candidate.getPersonId() + ":" + candidate.getPostId()
                                 + ":" + candidate.getApplicationDeadline()));
