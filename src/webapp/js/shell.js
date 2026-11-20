@@ -197,16 +197,13 @@
     if (a) { e.preventDefault(); setOpen(false); toast((a.dataset.soon || 'This') + ' is coming soon.'); }
   });
 
+  // Which types each role sees and what counts as unread: js/notificationLogic.js (unit tested)
+  const N = window.CCNotifications;
   const notificationData = {
     demo: demoEnabled,
     role,
     visible(data) {
-      const notifications = Array.isArray(data) ? data : (data.notifications || []);
-      const allowed = isRecruiter ? ['NEW_APPLICATION'] :
-        ['APPLICATION_STATUS_UPDATED', 'INTERVIEW_INVITATION', 'DEADLINE_REMINDER'];
-      return notifications.filter(notification => allowed.includes(
-        String(notification.type || notification.notificationType || '').toUpperCase()
-      ));
+      return N.visible(data, isRecruiter);
     },
     async get() {
       if (demoEnabled) return demoStore.get();
@@ -217,13 +214,11 @@
       return api('/api/notifications/' + encodeURIComponent(id) + '/read', { method: 'PATCH' });
     },
     updateBadge(data) {
-      const notifications = this.visible(data);
-      const unread = Array.isArray(data) ? notifications.filter(n => n.read !== true && n.isRead !== true).length
-        : notifications.filter(n => n.read !== true && n.isRead !== true).length;
+      const unread = N.unreadCount(data, isRecruiter);
       const badge = document.getElementById('notification-count');
       if (!badge) return;
       badge.classList.toggle('hidden', unread === 0);
-      if (unread > 0) badge.textContent = unread > 99 ? '99+' : String(unread);
+      if (unread > 0) badge.textContent = N.badgeText(unread);
     }
   };
 
