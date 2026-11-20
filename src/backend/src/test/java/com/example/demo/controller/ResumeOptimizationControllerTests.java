@@ -279,7 +279,7 @@ class ResumeOptimizationControllerTests {
     }
 
     @Test
-    void pdfGetsClearlyLabeledSampleInDemoMode() throws Exception {
+    void unreadablePdfGetsClearlyLabeledSampleInDemoMode() throws Exception {
         MockHttpSession session = loggedIn("Job Seeker");
         upload(session, "cv.pdf", "%PDF-1.4 sample".getBytes(StandardCharsets.US_ASCII));
 

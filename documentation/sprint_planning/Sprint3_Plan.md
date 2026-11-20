@@ -86,7 +86,8 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 |---|---|---|---|
 | #60 AI resume analysis and feedback integration: Claude API (Anthropic Java SDK), PDF and DOCX resume reading, demo mode without an API key, first version as a "Get feedback" card | frakkii | #60 | Done: PR #183 |
 | Line-by-line AI suggestions to accept or reject, figures to fill in, download the improved resume and a report as .docx, save as a new resume version (replaces the "Get feedback" card) | dchamp214 | _none_ | Done: PR #184. Tested in the app on 2026-11-19 in demo mode; a real Claude call still needs a team API key |
-| AI tests | frakkii, dchamp214 | _none_ | Done: 7 tests in PR #183 still in use (resume reading, API key setup), 20 tests in PR #184 (suggestions, accept/reject, figures, downloads, save as version) |
+| Demo-mode fixes found while testing: "Helped fix bugs…" was rewritten as "Supported fix bugs…" (not English) and now keeps its wording with a result hint; "Responsible for…" became "Led…" (claims leading a team) and now becomes "Took ownership of…"; improving an improved resume no longer names it `-improved-improved.docx`. The Claude API path was reviewed and needed no change | frakkii | _none_ | Done: PR #200 |
+| AI tests | frakkii, dchamp214 | _none_ | Done: 7 tests in PR #183 still in use (resume reading, API key setup), 20 tests in PR #184 (suggestions, accept/reject, figures, downloads, save as version), 4 tests in PR #200 (demo rewrites, file names) |
 | Choose the model/provider and keep the API key out of the repo | frakkii | #180 | Claude (`claude-opus-5-5`); key read from `ANTHROPIC_API_KEY`, never committed. The team still needs a key for real reviews |
 | Acceptance test AT-31 | hirurathnayaka77 | #160 | Written in PR #161. Steps rewritten for the line-by-line suggestions (#184) and passed in demo mode on 2026-11-19 |
 
@@ -97,19 +98,20 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 | CI runs on every branch push, cancels outdated runs, shows a test summary | frakkii | `docs/sprint3-management` |
 | Fixed two tests that failed only in CI: a test-order bug (saved jobs left behind by the notification tests) and a resume test that compared .docx bytes with a timestamp inside | frakkii | PR #186 |
 | A failed apply said "You have already applied to this job." for any database error; it now says so only for a real duplicate (2 tests) | frakkii | PR #192 |
+| `mvn test` printed a `[Fatal Error]` line and a stack trace from two passing tests that cause errors on purpose; the output is now clean, and one of those tests now also checks the error is logged | frakkii | PR #199 |
 | Sprint 3 plan, contribution log | frakkii | `docs/sprint3-management` |
 | Register as Job Seeker or Recruiter | frakkii | PR #151 (open) |
 
 ## Unit tests
 
-Every Sprint 3 feature has unit tests, and CI runs all of them on every push and pull request. On 2026-11-19 `main` has **186 unit tests, all passing: 134 backend (JUnit) and 52 frontend (Node's test runner)**.
+Every Sprint 3 feature has unit tests, and CI runs all of them on every push and pull request. On 2026-11-19 `main` has **190 unit tests, all passing: 138 backend (JUnit) and 52 frontend (Node's test runner)**.
 
 | Feature | Backend tests | Frontend tests |
 |---|---|---|
 | Recruiter posting management | `RecruiterControllerTests` (23, of which 9 from #169) | `applicantFilters.test.js` (11) |
 | Application analytics dashboard | 4 in `ApplicationControllerTests` (#162) | `analytics.test.js` (28) |
 | Notifications and reminders | `NotificationControllerTests` (6) | `notificationLogic.test.js` (13) |
-| AI resume suggestions | `ResumeOptimizationControllerTests` (14), `ResumeOptimizationServiceTest` (2), `DocxWriterTest` (4), `DocxTextTest` (5), `AiConfigTest` (2) | _none_ |
+| AI resume suggestions | `ResumeOptimizationControllerTests` (14), `ResumeOptimizationServiceTest` (2), `DemoResumeAdvisorTest` (3), `DocxWriterTest` (5), `DocxTextTest` (5), `AiConfigTest` (2) | _none_ |
 | Apply error message (#192) | `ApplicationServiceTest` (2) | _none_ |
 
 The other backend tests cover Sprint 1 and 2 (accounts, resumes, profile, job search, applications).
@@ -119,10 +121,34 @@ How to run them:
 - Frontend, from the repo root (needs Node): `node --test src/webapp/tests/`
 - In CI: the run's **Summary** page on GitHub (Actions → CI) lists every backend test class; the **Frontend unit tests** job log ends with the totals
 
+## Acceptance tests
+
+Each acceptance test was run by hand in the app, on a local in-memory H2 database with test accounts, and its result is posted on its GitHub issue with the steps taken (passed tests are closed). Full notes: [RESULTS.md](../acceptance_tests/RESULTS.md); steps: [ACCEPTANCE_TESTS.md](../acceptance_tests/ACCEPTANCE_TESTS.md).
+
+**Overall: 32 of 33 run, all 32 passed.** AT-26 is the only one not run: it is blocked until job seekers can save jobs (#62).
+
+### Sprint 3 stories
+
+| Test | Story | Result | Run on | Issue |
+|---|---|---|---|---|
+| AT-25: Job seeker sees status updates and distinct interview notifications | #6 Notifications | Pass | 2026-11-19, #186 | #154 |
+| AT-26: Job seeker sees deadline reminders without duplicates | #6 Notifications | Not run (blocked): reminders only go to saved jobs, and saving jobs (#62) isn't built; its two backend tests pass | | #155 |
+| AT-27: Recruiter sees new-application notifications for owned postings | #6 Notifications | Pass | 2026-11-19, #186 | #156 |
+| AT-28: Notifications show empty and API-error states | #6 Notifications | Pass | 2026-11-19, #186 | #157 |
+| AT-29: Job seeker views accurate application analytics by status | #33 Dashboard | Pass | 2026-11-16, #162 | #158 |
+| AT-30: Recruiter edits and archives their own job posting | #8 Postings | Pass | 2026-11-16, #169 | #159 |
+| AT-31: Job seeker improves their resume with AI suggestions | #10 AI resume | Pass (demo mode, no API key) | 2026-11-19, `main` at `5b0821a` | #160 |
+| AT-32: Job seeker searches, filters and sorts their application history | #33 Dashboard | Pass | 2026-11-16, #162 | #164 |
+| AT-33: Job seeker sees applications submitted over time | #33 Dashboard | Pass | 2026-11-16, #162 | #165 |
+
+### Sprint 1 and 2 stories
+
+AT-01 to AT-24 had never been run, so they were run on 2026-11-16 on `main` at `cba0205`: **all 24 passed**. AT-09 (recruiters could open the job seeker profile page) and AT-10 (no job type filter) failed on the first run and passed after the fixes in #181.
+
 ## Risks found while planning
 
 - ~~Notifications backend missing~~: pushed and merged in #182.
-- **AI feature needs an API key.** Built on `feature/ai-resume-feedback` and working in demo mode; real Claude reviews need an Anthropic API key (each review is a paid call). Decide who holds the key before the demo.
+- **AI feature needs an API key.** Merged (#183, #184, #200) and working in demo mode, which AT-31 tested; real Claude reviews need an Anthropic API key in `ANTHROPIC_API_KEY` (each review is a paid call). Decide who holds the key before the demo.
 - ~~PR #161 conflicts with `main`~~: resolved and merged in #186, which also fixed the notification types the page was hiding; AT-25, AT-27 and AT-28 passed.
 - **Deadline reminders can't be shown in the demo.** They only go to saved jobs, and saving jobs (#62) isn't built.
 - ~~Recruiter dashboard not started~~: redesign merged in #166; edit, archive and applicant filters merged in #169; AT-30 passed.
