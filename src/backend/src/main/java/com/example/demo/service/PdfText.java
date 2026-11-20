@@ -36,23 +36,24 @@ public final class PdfText {
         return text.length() > maxChars ? text.substring(0, maxChars) : text;
     }
 
-    // A line that only wraps because of the page width continues in lowercase, so it is joined
-    // to the line before it; a new bullet or a capitalised line starts a new resume line
+    // A bullet too long for the page width continues on the next line in lowercase, so that line
+    // is joined to the bullet. Only bullets are joined: a lowercase line after a name or heading
+    // (such as an email address) is a resume line of its own.
     static String joinWrappedLines(String raw) {
         List<String> lines = new ArrayList<>();
+        boolean inBullet = false;
         for (String piece : raw.split("\\R")) {
             String line = piece.strip();
             if (line.isEmpty()) {
                 continue;
             }
-            boolean continues = !lines.isEmpty()
-                    && !BULLET_MARK.matcher(line).find()
-                    && Character.isLowerCase(line.codePointAt(0));
-            if (continues) {
+            boolean bullet = BULLET_MARK.matcher(line).find();
+            if (!bullet && inBullet && Character.isLowerCase(line.codePointAt(0))) {
                 lines.set(lines.size() - 1, lines.get(lines.size() - 1) + " " + line);
-            } else {
-                lines.add(line);
+                continue;
             }
+            lines.add(line);
+            inBullet = bullet;
         }
         return String.join("\n", lines);
     }

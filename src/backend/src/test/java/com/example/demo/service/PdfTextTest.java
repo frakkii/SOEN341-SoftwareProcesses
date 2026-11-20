@@ -54,6 +54,14 @@ class PdfTextTest {
     }
 
     @Test
+    void onlyBulletsAreJoinedWithTheLineAfter() {
+        // An email under the name starts in lowercase but is its own line
+        String raw = "Sam Rivera\nsam.rivera@example.com | Montreal, QC\nEXPERIENCE\n- Built the app\nused by students\n";
+        assertThat(PdfText.joinWrappedLines(raw)).isEqualTo(
+                "Sam Rivera\nsam.rivera@example.com | Montreal, QC\nEXPERIENCE\n- Built the app used by students");
+    }
+
+    @Test
     void notAPdfOrNoTextGivesNull() throws Exception {
         assertThat(PdfText.extract("%PDF-1.4 sample".getBytes(StandardCharsets.US_ASCII), 10_000)).isNull();
         assertThat(PdfText.extract(pdf(), 10_000)).isNull();   // a page with no text, like a scanned image
