@@ -23,7 +23,9 @@ $Stories = @{
     8  = @{ Sprint = 2; Title = 'Create and manage job postings';         Tasks = 48, 49, 50, 51 }
     9  = @{ Sprint = 2; Title = 'View applicants for each posting';       Tasks = 61 }
     139 = @{ Sprint = 2; Title = 'Log out of my account';                 Tasks = 140, 141 }
-    33 = @{ Sprint = 3; Title = 'Application analytics dashboard';        Tasks = 56 }
+    6  = @{ Sprint = 3; Title = 'Notifications and reminders';            Tasks = 63 }
+    33 = @{ Sprint = 3; Title = 'Application analytics dashboard';         Tasks = 56 }
+    10 = @{ Sprint = 3; Title = 'AI resume feedback';                     Tasks = 60 }
 }
 
 $Tests = @(
@@ -167,7 +169,34 @@ $Tests = @(
        Then  = 'Each time I am taken to the login page and my recruiter pages need a new login'
        Auto  = 'AuthControllerTests.logoutEndsTheSession, logoutWithoutASessionStillSucceeds' }
 
+    # ---- #6 Notifications and reminders (Sprint 3) ----
+    @{ Id = 'AT-25'; Story = 6; Title = 'Job seeker sees status updates and distinct interview notifications'
+       Given = 'I am logged in as a job seeker with an application owned by me'
+       Steps = 'As the recruiter, change my application to a non-interview status', 'As the recruiter, advance my application to Interview', 'Open Notifications as the job seeker', 'Review the status-update and interview notifications', 'Log in as a different job seeker and open Notifications'
+       Then  = 'The intended job seeker sees the job title and new status in the status-update notification, sees a distinct interview-invitation notification for the interview event, each unread notification has an unread indicator, and the other job seeker cannot see either notification'
+       Auto  = 'Pending: no automated test method currently exists' }
+    @{ Id = 'AT-26'; Story = 6; Title = 'Job seeker sees deadline reminders without duplicates'
+       Given = 'I am logged in as a job seeker with one saved job whose deadline is tomorrow, one saved job whose deadline has expired, and no other saved jobs with upcoming deadlines'
+       Steps = 'Open Notifications', 'Review the reminder for the saved job due tomorrow', 'Refresh Notifications or request reminders again', 'Review the expired saved job', 'Review the empty upcoming-deadlines state after the tomorrow deadline is no longer upcoming'
+       Then  = 'The upcoming reminder shows the job title, formatted deadline, and actionable message; requesting reminders again does not create a duplicate for the same deadline and reminder interval; the expired job is clearly indicated and does not receive an active upcoming reminder; and the no-upcoming-deadlines message is shown when applicable'
+       Auto  = 'Pending: no automated test method currently exists' }
+    @{ Id = 'AT-27'; Story = 6; Title = 'Recruiter sees new-application notifications for owned postings'
+       Given = 'Recruiter A owns posting A, Recruiter B owns posting B, and a job seeker applies to posting A'
+       Steps = 'Log in as Recruiter A and open Notifications', 'Review the new-application notification', 'Log in as Recruiter B and open Notifications'
+       Then  = 'Recruiter A sees a notification identifying posting A and the new applicant activity; Recruiter B does not see that notification; and the notification is marked for the posting owner only'
+       Auto  = 'Pending: no automated test method currently exists' }
+    @{ Id = 'AT-28'; Story = 6; Title = 'Notifications show empty and API-error states'
+       Given = 'The authenticated user has no notifications, and the notifications API can be made to return an error'
+       Steps = 'Open Notifications with an authenticated account that has no notifications', 'Verify the empty state', 'Make the notifications API unavailable or return an error', 'Reload Notifications'
+       Then  = 'The empty state gives a clear no-notifications message and renders no notification cards; when the API fails, a clear unavailable/error message is shown instead of a false successful result'
+       Auto  = 'Pending: no automated test method currently exists' }
+
     # ---- #33 Application analytics dashboard (Sprint 3) ----
+    @{ Id = 'AT-29'; Story = 33; Title = 'Job seeker views isolated application analytics and empty state'
+       Given = 'Job seeker Alice has applications in Applied, Interview, Offered, and Rejected statuses, and job seeker Bob has separate applications'
+       Steps = 'Log in as Alice and open the application analytics dashboard', 'Review the total application count', 'Review the count shown for Applied, Interview, Offered, and Rejected', 'Compare the dashboard counts with Alice''s application records', 'Log in as a new job seeker with no applications and open the dashboard'
+       Then  = 'Alice sees the correct total and per-status counts for Alice''s current applications only, Bob''s applications are excluded, and a clear no-applications empty state is shown for the new job seeker'
+       Auto  = 'Pending: no automated test method currently exists' }
     @{ Id = 'AT-32'; Story = 33; Title = 'Job seeker searches, filters and sorts their application history'
        Given = 'I am logged in as a job seeker with at least three applications at different companies, in different statuses, applied on different days'
        Steps = 'Open My Applications', 'Type part of one company name in Search', 'Clear the search and choose Interview in the Status filter', 'Choose a status none of my applications has', 'Click Clear filters, then switch Sort by between Newest first and Oldest first'
@@ -178,15 +207,31 @@ $Tests = @(
        Steps = 'Open My Applications', 'Look at the Applications over time chart with the 12 months range', 'Switch the range to 6 months, then to All time', 'Open View as table under the chart', 'Apply to another job, return to My Applications and click Refresh'
        Then  = 'The chart has one bar per month in date order, shows 2 for this month and 1 for the earlier month, and shows months without applications as 0; changing the range changes how many months are shown; the table lists the same counts as the chart; and after applying again this month shows 3'
        Auto  = 'PR #162: analytics.test.js monthlyCounts tests, ApplicationControllerTests.applicationsComeNewestFirstWithIsoDatesForTheMonthlyChart' }
+
+    # ---- #8 Job posting management (Sprint 3) ----
+    @{ Id = 'AT-30'; Story = 8; Title = 'Recruiter edits and archives an owned posting'
+       Sprint = 3
+       Given = 'Recruiter A owns an active posting and Recruiter B owns a separate active posting'
+       Steps = 'Log in as Recruiter A and open My Postings', 'Edit posting A''s details and save', 'Reopen posting A and verify the updated details', 'Archive or deactivate posting A', 'Open job search as a job seeker', 'Log in as Recruiter A and try to edit posting B'
+       Then  = 'Posting A retains its updated details, is archived or deactivated, and is no longer shown as an active job to job seekers; Recruiter A cannot edit posting B and receives a clear authorization error'
+       Auto  = 'Pending: no automated test method currently exists' }
+
+    # ---- #10 AI resume feedback (Sprint 3) ----
+    @{ Id = 'AT-31'; Story = 10; Title = 'Job seeker receives safe AI resume feedback'
+       Given = 'I am logged in as a job seeker with a supported readable resume, an unsupported resume file, and an unreadable or unprocessable resume file available for testing'
+       Steps = 'Open the resume feedback feature', 'Request feedback for the supported readable resume', 'Observe the page while analysis is in progress', 'Wait for the analysis to finish and review the generated feedback', 'Request feedback for the unsupported file', 'Request feedback for the unreadable or unprocessable file'
+       Then  = 'A loading indicator is shown while processing; successful feedback contains suggestions about resume content, organization, and clarity plus a clear advisory message that it should be reviewed before use; the unsupported file is rejected with a clear message; and the unreadable or unprocessable file shows a clear processing-error message without a false success result'
+       Auto  = 'Pending: no automated test method currently exists' }
 )
 
 function Get-Body($t) {
     $s = $Stories[$t.Story]
+    $sprint = if ($t.ContainsKey('Sprint')) { $t.Sprint } else { $s.Sprint }
     $steps = for ($i = 0; $i -lt $t.Steps.Count; $i++) { "$($i + 1). $($t.Steps[$i])" }
     @"
 - **User story:** #$($t.Story) ($($s.Title))
 - **Related tasks:** $(($s.Tasks | ForEach-Object { "#$_" }) -join ', ')
-- **Sprint:** $($s.Sprint)
+- **Sprint:** $sprint
 
 **Given** $($t.Given)
 
@@ -205,10 +250,15 @@ $($steps -join "`n")
 $md = @('# Acceptance Tests (Sprints 1, 2 and 3)', '',
         'Each test is also a GitHub issue labeled `acceptance-test` and linked to its user story as a sub-issue.',
         'Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.', '')
-foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139, 33) {
-    $md += "## #$n $($Stories[$n].Title) (Sprint $($Stories[$n].Sprint))", ''
-    foreach ($t in $Tests | Where-Object { $_.Story -eq $n }) {
-        $md += "### $($t.Id): $($t.Title)", '', (Get-Body $t), ''
+foreach ($n in 1, 2, 32, 69, 3, 4, 5, 8, 9, 139, 6, 33, 10) {
+    $storyTests = @($Tests | Where-Object { $_.Story -eq $n })
+    foreach ($group in ($storyTests | Group-Object {
+        if ($_.ContainsKey('Sprint')) { $_.Sprint } else { $Stories[$n].Sprint }
+    })) {
+        $md += "## #$n $($Stories[$n].Title) (Sprint $($group.Name))", ''
+        foreach ($t in $group.Group) {
+            $md += "### $($t.Id): $($t.Title)", '', (Get-Body $t), ''
+        }
     }
 }
 $md -join "`n" | Out-File -Encoding utf8 (Join-Path $PSScriptRoot 'ACCEPTANCE_TESTS.md')

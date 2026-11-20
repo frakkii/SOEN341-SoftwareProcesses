@@ -23,6 +23,8 @@ body.rc h1,body.rc h2,body.rc h3{font-family:inherit;letter-spacing:0;color:var(
 .rc-links a{display:flex;align-items:center;padding:0 14px;height:100%;color:#c3c9ce;text-decoration:none;font-weight:600;font-size:14px;border-bottom:3px solid transparent;box-sizing:border-box}
 .rc-links a:hover{color:#fff;background:#ffffff14}
 .rc-links a.active{color:#fff;border-bottom-color:#71b7fb}
+.rc-badge{margin-left:6px;min-width:18px;height:18px;padding:0 5px;display:inline-grid;place-items:center;border-radius:999px;background:#e5484d;color:#fff;font-size:11px;font-weight:700}
+.rc-badge[hidden]{display:none}
 .rc-right{display:flex;align-items:center;gap:12px}
 .rc-cta{background:#0a66c2;color:#fff!important;border-radius:999px;padding:6px 16px;font-weight:600;text-decoration:none;font-size:14px}
 .rc-cta:hover{background:#004182}

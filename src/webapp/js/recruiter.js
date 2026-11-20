@@ -49,6 +49,7 @@
     <nav class="rc-links" aria-label="Primary">
       <a href="recruiterhome.html"${cur('recruiterhome.html')}>Home</a>
       <a href="recruiterpostings.html"${cur('recruiterpostings.html', 'recruiterapplicants.html', 'createposting.html')}>Jobs</a>
+      <a href="notifications.html">Notifications<b class="rc-badge" id="notification-count" hidden aria-label="Unread notifications"></b></a>
       <a href="#" data-soon="Messages">Messages</a>
       <a href="recruitersettings.html"${cur('recruitersettings.html')}>Settings</a>
     </nav>
@@ -85,6 +86,18 @@
       document.getElementById('profile-badge').textContent = (data.name || 'R').charAt(0).toUpperCase();
       return data;
     });
+
+  // Unread count next to Notifications; the page still works if this request fails
+  ready.then(() => fetch('/api/notifications/unread-count', { credentials: 'same-origin' }))
+    .then(res => res.ok ? res.json() : null)
+    .then(data => {
+      const count = data && data.count;
+      const badge = document.getElementById('notification-count');
+      if (!count) return;
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.hidden = false;
+    })
+    .catch(() => {});
 
   window.RC = { api, esc, toast, prefs, ready };
 })();
