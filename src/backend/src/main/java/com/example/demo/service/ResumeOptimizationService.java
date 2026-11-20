@@ -287,6 +287,10 @@ public class ResumeOptimizationService {
         if (dot > 0) {
             base = base.substring(0, dot);
         }
+        // Improving an already improved resume keeps one suffix: "CV-improved", not "CV-improved-improved"
+        while (base.endsWith(suffix) && base.length() > suffix.length()) {
+            base = base.substring(0, base.length() - suffix.length());
+        }
         if (base.isBlank()) {
             base = "resume";
         }

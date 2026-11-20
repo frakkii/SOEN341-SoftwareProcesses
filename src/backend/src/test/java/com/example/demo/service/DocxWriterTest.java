@@ -56,4 +56,13 @@ class DocxWriterTest {
         assertThat(ResumeOptimizationService.outputName(".docx", "-improved")).isEqualTo(".docx-improved.docx");
         assertThat(ResumeOptimizationService.outputName("x".repeat(255) + ".docx", "-suggestions")).hasSize(255);
     }
+
+    @Test
+    void improvingAnImprovedResumeDoesNotStackSuffixes() {
+        assertThat(ResumeOptimizationService.outputName("Jane CV-improved.docx", "-improved")).isEqualTo("Jane CV-improved.docx");
+        assertThat(ResumeOptimizationService.outputName("Jane CV-improved-improved.docx", "-improved")).isEqualTo("Jane CV-improved.docx");
+        assertThat(ResumeOptimizationService.outputName("Jane CV-improved.docx", "-suggestions")).isEqualTo("Jane CV-improved-suggestions.docx");
+        // A name that is only the suffix keeps it rather than becoming empty
+        assertThat(ResumeOptimizationService.outputName("-improved.docx", "-improved")).isEqualTo("-improved-improved.docx");
+    }
 }

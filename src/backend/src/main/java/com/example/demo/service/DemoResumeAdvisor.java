@@ -19,12 +19,14 @@ public class DemoResumeAdvisor implements ResumeAdvisor {
     }
 
     // Weak openings and the stronger verb the demo suggests instead
+    // Each replacement must read correctly before whatever followed the opening and claim no more
+    // than it did. "Helped <verb> ..." has no such replacement ("Supported fix bugs"), so it gets
+    // the result hint instead; "Responsible for" became "Led", which claims leading a team.
     private static final List<String[]> WEAK_OPENINGS = List.of(
-            new String[] { "responsible for ", "Led " },
+            new String[] { "responsible for ", "Took ownership of " },
             new String[] { "in charge of ", "Managed " },
             new String[] { "worked on ", "Built " },
             new String[] { "helped with ", "Contributed to " },
-            new String[] { "helped ", "Supported " },
             new String[] { "did ", "Completed " });
     private static final Pattern BULLET_MARK = Pattern.compile("^[-*•▪●◦]\\s*");
     private static final int MAX_RESULT_HINTS = 3;
