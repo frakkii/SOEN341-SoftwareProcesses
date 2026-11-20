@@ -31,6 +31,8 @@ class JobPostingControllerTests {
 
     @BeforeEach
     void insertPostings() {
+        // Saved jobs reference postings without ON DELETE CASCADE (NotificationControllerTests adds some)
+        jdbc.update("DELETE FROM fav_postings");
         jdbc.update("DELETE FROM job_postings");
         jdbc.update("DELETE FROM employer_user");
         int employerId = NEXT_ID.getAndIncrement();
