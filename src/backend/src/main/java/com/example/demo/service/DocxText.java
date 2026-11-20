@@ -3,8 +3,11 @@ package com.example.demo.service;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,6 +23,23 @@ public final class DocxText {
     private static final String WORD_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     // Resumes are tiny; this stops a crafted file from expanding to gigabytes ("zip bomb")
     private static final long MAX_XML_BYTES = 20L * 1024 * 1024;
+
+    // Warnings are ignored; errors stop parsing by throwing, without printing anything
+    private static final ErrorHandler QUIET_ERRORS = new ErrorHandler() {
+        @Override
+        public void warning(SAXParseException e) {
+        }
+
+        @Override
+        public void error(SAXParseException e) throws SAXParseException {
+            throw e;
+        }
+
+        @Override
+        public void fatalError(SAXParseException e) throws SAXParseException {
+            throw e;
+        }
+    };
 
     private DocxText() {
     }
@@ -51,7 +71,11 @@ public final class DocxText {
             factory.setXIncludeAware(false);
             factory.setExpandEntityReferences(false);
 
-            NodeList paragraphs = factory.newDocumentBuilder()
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            // The default handler prints every parse error to the console ("[Fatal Error] ...");
+            // an unreadable file is already reported through the exception below
+            builder.setErrorHandler(QUIET_ERRORS);
+            NodeList paragraphs = builder
                     .parse(new ByteArrayInputStream(xml))
                     .getElementsByTagNameNS(WORD_NS, "p");
             StringBuilder text = new StringBuilder();
