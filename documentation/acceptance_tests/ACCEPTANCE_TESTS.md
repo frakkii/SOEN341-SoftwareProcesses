@@ -639,25 +639,27 @@ Regenerate this file with `.\create-acceptance-test-issues.ps1 -Markdown`.
 
 ## #10 AI resume feedback (Sprint 3)
 
-### AT-31: Job seeker receives safe AI resume feedback
+### AT-31: Job seeker improves their resume with AI suggestions
 
 - **User story:** #10 (AI resume feedback)
 - **Related tasks:** #60
 - **Sprint:** 3
 
-**Given** I am logged in as a job seeker with a supported readable resume, an unsupported resume file, and an unreadable or unprocessable resume file available for testing
+**Given** I am logged in as a job seeker whose current resume is a readable PDF or DOCX, and I also have an old Word .doc resume and a file with no readable text (a damaged file or a scanned PDF) for the error cases
 
 **Steps**
-1. Open the resume feedback feature
-2. Request feedback for the supported readable resume
-3. Observe the page while analysis is in progress
-4. Wait for the analysis to finish and review the generated feedback
-5. Request feedback for the unsupported file
-6. Request feedback for the unreadable or unprocessable file
+1. Open My CVs & Cover Letters and click Suggest improvements
+2. Watch the page while the suggestions are prepared
+3. Review the suggestions: each one shows the current line, the suggested rewrite and the reason
+4. Accept some suggestions and reject at least one; if an accepted suggestion has a box for a figure, try to download before filling it in, then type a real figure
+5. Click Download improved resume (.docx) and Download suggestions report (.docx), and open both files
+6. Click Save as new resume version and confirm
+7. Upload the .doc resume and click Suggest improvements
+8. Upload the file with no readable text and click Suggest improvements
 
-**Then** A loading indicator is shown while processing; successful feedback contains suggestions about resume content, organization, and clarity plus a clear advisory message that it should be reviewed before use; the unsupported file is rejected with a clear message; and the unreadable or unprocessable file shows a clear processing-error message without a false success result
+**Then** A loading message is shown while the suggestions are prepared; every suggestion shows a rewrite and a reason, and the page says the suggestions are AI-generated and must be checked (in demo mode it also says they are sample suggestions); an accepted suggestion with an empty figure box cannot be downloaded or saved until it is filled in; the improved resume contains only the accepted rewrites and leaves rejected and other lines unchanged, and the report lists every suggestion and whether it was accepted; after saving, the improved resume is the current resume and the previous one is still in the versions; the .doc resume gets "The AI optimizer works with PDF and DOCX resumes" and the file with no text gets a clear error, and neither shows suggestions
 
-**Automated coverage:** `Pending: no automated test method currently exists`
+**Automated coverage:** `PR #184: ResumeOptimizationControllerTests (14 tests, e.g. improvedResumeUsesOnlyAcceptedSuggestions, acceptedFiguresMustBeFilledInBeforeTheResumeIsMade, savingMakesTheImprovedResumeTheCurrentVersion, oldWordFilesAreRefused), DocxTextTest`
 
 **Result:** _Not yet run (Pass / Fail, date, tester)_
 

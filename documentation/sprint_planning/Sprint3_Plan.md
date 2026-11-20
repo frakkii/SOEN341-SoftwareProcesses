@@ -88,7 +88,7 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 | Line-by-line AI suggestions to accept or reject, figures to fill in, download the improved resume and a report as .docx, save as a new resume version (replaces the "Get feedback" card) | dchamp214 | _none_ | Done: PR #184. Tested in the app on 2026-11-19 in demo mode; a real Claude call still needs a team API key |
 | AI tests | frakkii, dchamp214 | _none_ | Done: 7 tests in PR #183 still in use (resume reading, API key setup), 20 tests in PR #184 (suggestions, accept/reject, figures, downloads, save as version) |
 | Choose the model/provider and keep the API key out of the repo | frakkii | #180 | Claude (`claude-opus-5-5`); key read from `ANTHROPIC_API_KEY`, never committed. The team still needs a key for real reviews |
-| Acceptance test AT-31 | hirurathnayaka77 | #160 | Written in PR #161; passed in demo mode on the first version (#183). Its steps still describe the "Get feedback" card, so they need updating for #184 |
+| Acceptance test AT-31 | hirurathnayaka77 | #160 | Written in PR #161; passed in demo mode on the first version (#183). Steps rewritten for the line-by-line suggestions (#184) on 2026-11-19; needs a rerun |
 
 ### Supporting work
 
@@ -136,7 +136,7 @@ How to run them:
 - [x] Merge #162 (dashboard)
 - [x] Merge #161 (notifications frontend) once its conflicts are resolved (merged through #186)
 - [x] Merge the recruiter edit, archive and filters work (#169) and record AT-30 on #159
-- [x] Run every Sprint 3 acceptance test and record the result on its issue (AT-25, AT-27, AT-28, AT-29, AT-30, AT-32, AT-33 passed; AT-31 passed in demo mode; AT-26 blocked until saved jobs exist, see [RESULTS.md](../acceptance_tests/RESULTS.md))
+- [x] Run every Sprint 3 acceptance test and record the result on its issue (AT-25, AT-27, AT-28, AT-29, AT-30, AT-32, AT-33 passed; AT-31 passed in demo mode on the first AI card and needs a rerun with its new steps; AT-26 blocked until saved jobs exist, see [RESULTS.md](../acceptance_tests/RESULTS.md))
 - [x] Run the Sprint 1 and 2 acceptance tests (AT-01 to AT-24): all passed (AT-09 and AT-10 after fixes); see [RESULTS.md](../acceptance_tests/RESULTS.md)
 - [x] Clean up the project board and create issues for untracked Sprint 3 tasks (#175 to #180)
 - [x] Upload the Sprint 3 meeting minutes to `minutes/` (Meeting 4; add any later meetings with [TEMPLATE.md](../../minutes/TEMPLATE.md))

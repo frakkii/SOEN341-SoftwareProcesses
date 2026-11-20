@@ -2,7 +2,7 @@
 
 Results of running the acceptance tests in [ACCEPTANCE_TESTS.md](ACCEPTANCE_TESTS.md) by hand. Each result is also posted on its GitHub issue with the steps taken and what happened; passed tests are closed.
 
-**Summary:** 32 of 33 tests run, all 32 passed. AT-09 and AT-10 failed on the first run and passed after fixes (#181). AT-31 passed in demo mode (sample feedback, no API key). AT-26 (deadline reminders) can't be run by hand until job seekers can save jobs (#62); its two backend tests pass.
+**Summary:** 31 of 33 tests have a current result, and all 31 passed. AT-09 and AT-10 failed on the first run and passed after fixes (#181). AT-31 passed in demo mode on the first AI card (#183), and its steps were rewritten for the line-by-line suggestions (#184), so it needs a rerun. AT-26 (deadline reminders) can't be run by hand until job seekers can save jobs (#62); its two backend tests pass.
 
 ## Sprints 1 and 2 (run on 2026-11-16)
 
@@ -45,6 +45,6 @@ Build: `main` at `cba0205`, run locally on an in-memory H2 database with test ac
 | AT-28: Notifications show empty and API-error states | #6 | Pass | #157 | Run 2026-11-19 on #186. The API error was simulated in the browser (HTTP 500) |
 | AT-29: Job seeker views accurate application analytics by status | #33 | Pass | #158 | Run 2026-11-16 on PR #162 |
 | AT-30: Recruiter edits and archives their own job posting | #8 | Pass | #159 | Run 2026-11-16 on PR #169. Another recruiter's posting returns 404, by design |
-| AT-31: Job seeker receives safe AI resume feedback | #10 | Pass (demo mode) | #160 | Run 2026-11-16 on `feature/ai-resume-feedback` without an API key: loading state, feedback with content/organization/clarity suggestions and a review notice, .doc refused, unreadable and empty DOCX show errors. A real Claude review is not yet tested |
+| AT-31: Job seeker improves their resume with AI suggestions | #10 | Needs rerun | #160 | Steps rewritten on 2026-11-19 for the line-by-line suggestions (#184). The earlier result was for the first version: passed in demo mode on 2026-11-16 on `feature/ai-resume-feedback` without an API key: loading state, feedback with content/organization/clarity suggestions and a review notice, .doc refused, unreadable and empty DOCX show errors. A real Claude review is not yet tested |
 | AT-32: Job seeker searches, filters and sorts their application history | #33 | Pass | #164 | Run 2026-11-16 on PR #162 |
 | AT-33: Job seeker sees applications submitted over time | #33 | Pass | #165 | Run 2026-11-16 on PR #162. Earlier-month data covered by unit tests |
