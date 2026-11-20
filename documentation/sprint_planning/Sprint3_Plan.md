@@ -59,7 +59,7 @@ Sprint 2 delivered creating, closing and reopening postings and the applicant li
 |---|---|---|---|
 | #56 Application summary dashboard frontend (stat tiles, status breakdown, applications per month, history search/filter/sort) | datannir-bit, frakkii | #56 | Done: PR #162 (merged after testing by frakkii, chart fix `ec81b77`) |
 | Dashboard unit tests (28 Node tests for the dashboard logic, 4 backend tests) | datannir-bit | _in #56_ | Done: PR #162 |
-| Frontend unit test job in CI | datannir-bit | _in #56_ | In review: PR #162 |
+| Frontend unit test job in CI | datannir-bit | _in #56_ | Done: PR #162 |
 | Acceptance test AT-29 (counts by status, only my applications, empty state) | hirurathnayaka77 | #158 | Written in PR #161 |
 | Acceptance tests AT-32 (history search/filter/sort) and AT-33 (applications over time) | frakkii | #164, #165 | Written in PR #163 |
 
@@ -75,7 +75,7 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 | Notifications backend (REST API, stored notifications, daily reminder job, mark as read) | Shanza687 | #178 | Done: PR #182 |
 | Notifications page and unread indicator (frontend) | hirurathnayaka77 | #179 | Done: PR #161, merged through PR #186 |
 | Merge the frontend with `main`, match the notification types to the page, Notifications link on recruiter pages | frakkii | _none_ | Done: PR #186 |
-| Notification tests | Shanza687, frakkii | _none_ | Done: 5 backend tests in PR #182, 1 end-to-end test in PR #186 |
+| Notification tests | Shanza687, frakkii | _none_ | Done: 5 backend tests in PR #182, 1 end-to-end backend test in PR #186, 13 frontend tests in PR #196 (including a check that every type the backend sends is one the page shows) |
 | Acceptance tests AT-25 to AT-28 | hirurathnayaka77 | #154–#157 | Written in PR #161. Run 2026-11-19: AT-25, AT-27 and AT-28 passed; AT-26 blocked until saved jobs exist (#62) |
 
 ### 4. AI resume feedback (start in Sprint 3, finish in Sprint 4)
@@ -84,17 +84,40 @@ The dashboard reads `GET /api/applications` (already returns status, `appliedAt`
 
 | Task | Assignee | Issue | Status |
 |---|---|---|---|
-| #60 AI resume analysis and feedback integration: `POST /api/resume/feedback` with the Claude API (Anthropic Java SDK), PDF and DOCX resumes, "Get feedback" on the resume page, demo mode without an API key, 15 tests | frakkii | #60 | Done on `feature/ai-resume-feedback` (demo mode tested; a real Claude call still needs a team API key) |
+| #60 AI resume analysis and feedback integration: Claude API (Anthropic Java SDK), PDF and DOCX resume reading, demo mode without an API key, first version as a "Get feedback" card | frakkii | #60 | Done: PR #183 |
+| Line-by-line AI suggestions to accept or reject, figures to fill in, download the improved resume and a report as .docx, save as a new resume version (replaces the "Get feedback" card) | dchamp214 | _none_ | Done: PR #184. Tested in the app on 2026-11-19 in demo mode; a real Claude call still needs a team API key |
+| AI tests | frakkii, dchamp214 | _none_ | Done: 7 tests in PR #183 still in use (resume reading, API key setup), 20 tests in PR #184 (suggestions, accept/reject, figures, downloads, save as version) |
 | Choose the model/provider and keep the API key out of the repo | frakkii | #180 | Claude (`claude-opus-5-5`); key read from `ANTHROPIC_API_KEY`, never committed. The team still needs a key for real reviews |
-| Acceptance test AT-31 | hirurathnayaka77 | #160 | Written in PR #161 |
+| Acceptance test AT-31 | hirurathnayaka77 | #160 | Written in PR #161; passed in demo mode on the first version (#183). Its steps still describe the "Get feedback" card, so they need updating for #184 |
 
 ### Supporting work
 
 | Work | Owner | Delivered in |
 |---|---|---|
 | CI runs on every branch push, cancels outdated runs, shows a test summary | frakkii | `docs/sprint3-management` |
+| Fixed two tests that failed only in CI: a test-order bug (saved jobs left behind by the notification tests) and a resume test that compared .docx bytes with a timestamp inside | frakkii | PR #186 |
+| A failed apply said "You have already applied to this job." for any database error; it now says so only for a real duplicate (2 tests) | frakkii | PR #192 |
 | Sprint 3 plan, contribution log | frakkii | `docs/sprint3-management` |
 | Register as Job Seeker or Recruiter | frakkii | PR #151 (open) |
+
+## Unit tests
+
+Every Sprint 3 feature has unit tests, and CI runs all of them on every push and pull request. On 2026-11-19 `main` has **186 unit tests, all passing: 134 backend (JUnit) and 52 frontend (Node's test runner)**.
+
+| Feature | Backend tests | Frontend tests |
+|---|---|---|
+| Recruiter posting management | `RecruiterControllerTests` (23, of which 9 from #169) | `applicantFilters.test.js` (11) |
+| Application analytics dashboard | 4 in `ApplicationControllerTests` (#162) | `analytics.test.js` (28) |
+| Notifications and reminders | `NotificationControllerTests` (6) | `notificationLogic.test.js` (13) |
+| AI resume suggestions | `ResumeOptimizationControllerTests` (14), `ResumeOptimizationServiceTest` (2), `DocxWriterTest` (4), `DocxTextTest` (5), `AiConfigTest` (2) | _none_ |
+| Apply error message (#192) | `ApplicationServiceTest` (2) | _none_ |
+
+The other backend tests cover Sprint 1 and 2 (accounts, resumes, profile, job search, applications).
+
+How to run them:
+- Backend, from `src/backend`: `mvn test`
+- Frontend, from the repo root (needs Node): `node --test src/webapp/tests/`
+- In CI: the run's **Summary** page on GitHub (Actions → CI) lists every backend test class; the **Frontend unit tests** job log ends with the totals
 
 ## Risks found while planning
 
